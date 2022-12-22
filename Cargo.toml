@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "nvidia-deepstream-sys",
+    "nvidia-deepstream",
+]
