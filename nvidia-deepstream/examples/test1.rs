@@ -1,8 +1,14 @@
-use std::ptr;
+use std::ffi::CString;
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
+use std::ptr;
 
 static CONFIG_YML: &str = "/opt/nvidia/deepstream/deepstream-6.1/sources/apps/sample_apps/deepstream-test1/dstest1_config.yml";
+static PGIE_CONFIG_YML: &str = "/opt/nvidia/deepstream/deepstream-6.1/sources/apps/sample_apps/deepstream-test1/dstest1_pgie_config.yml";
+
+static MAX_DISPLAY_LEN: i32 = 64;
+static PGIE_CLASS_ID_VEHICLE: i32 = 0;
+static PGIE_CLASS_ID_PERSON: i32 = 2;
 
 fn main() {
     gstreamer::init().unwrap();
@@ -39,29 +45,31 @@ fn main() {
         .name("nv-onscreendisplay")
         .build()
         .unwrap();
-    let transform = gstreamer::ElementFactory::make("nvegltransform")
+    /*let transform = gstreamer::ElementFactory::make("nvegltransform")
         .name("nvvideo-transform")
         .build()
-        .unwrap();
+        .unwrap();*/
     let sink = gstreamer::ElementFactory::make("nveglglessink")
         .name("nvvideo-renderer")
         .build()
         .unwrap();
 
     unsafe {
+        let config_yml = CString::new(CONFIG_YML).unwrap();
+
         nvidia_deepstream_sys::nvds_parse_file_source(
             source.as_ptr() as *mut nvidia_deepstream_sys::GstElement,
-            CONFIG_YML.as_ptr() as *mut nvidia_deepstream_sys::gchar,
-            "source".as_ptr() as *const ::std::os::raw::c_char,
+            config_yml.as_ptr() as *mut nvidia_deepstream_sys::gchar,
+            CString::new("source").unwrap().as_ptr() as *const ::std::os::raw::c_char,
         );
 
         nvidia_deepstream_sys::nvds_parse_streammux(
             streammux.as_ptr() as *mut nvidia_deepstream_sys::GstElement,
-            CONFIG_YML.as_ptr() as *mut nvidia_deepstream_sys::gchar,
-            "streammux".as_ptr() as *const ::std::os::raw::c_char,
+            config_yml.as_ptr() as *mut nvidia_deepstream_sys::gchar,
+            CString::new("streammux").unwrap().as_ptr() as *const ::std::os::raw::c_char,
         );
     }
-    pgie.set_property("config-file-path", "dstest1_pgie_config.yml");
+    pgie.set_property("config-file-path", PGIE_CONFIG_YML);
 
     pipeline
         .add_many(&[
@@ -72,26 +80,70 @@ fn main() {
             &pgie,
             &nvvidconv,
             &nvosd,
-            &transform,
+            //&transform,
             &sink,
         ])
         .unwrap();
 
-    gstreamer::Element::link_many(&[&streammux, &pgie, &nvvidconv, &nvosd, &transform, &sink])
+    gstreamer::Element::link_many(&[&streammux, &pgie, &nvvidconv, &nvosd/*, &transform*/, &sink])
         .unwrap();
 
     let osd_sink_pad = nvosd.static_pad("sink").unwrap();
     osd_sink_pad.add_probe(PadProbeType::BUFFER, |pad, info| {
         if let PadProbeData::Buffer(buf) = &info.data.as_ref().unwrap() {
             unsafe {
-                let batch_meta = &*nvidia_deepstream_sys::gst_buffer_get_nvds_batch_meta(
-                    buf.as_mut_ptr() as *mut nvidia_deepstream_sys::GstBuffer
+                let mut vehicle_count: u32 = 0;
+                let mut person_count: u32 = 0;
+                let mut num_rects: u32 = 0;
+                let batch_meta = &mut *nvidia_deepstream_sys::gst_buffer_get_nvds_batch_meta(
+                    buf.as_mut_ptr() as *mut nvidia_deepstream_sys::GstBuffer,
                 );
 
                 let mut l_frame_p = batch_meta.frame_meta_list;
                 while l_frame_p != ptr::null_mut() {
                     let mut l_frame = &*l_frame_p;
-                    let frame_meta = &*(l_frame.data as *const nvidia_deepstream_sys::NvDsFrameMeta);
+                    let frame_meta =
+                        &mut *(l_frame.data as *mut nvidia_deepstream_sys::NvDsFrameMeta);
+                    let mut l_obj_p = frame_meta.obj_meta_list;
+                    while l_obj_p != ptr::null_mut() {
+                        let mut l_obj = &*l_obj_p;
+                        let obj_meta =
+                            &mut *(l_obj.data as *mut nvidia_deepstream_sys::NvDsObjectMeta);
+                        if obj_meta.class_id == PGIE_CLASS_ID_VEHICLE {
+                            vehicle_count += 1;
+                            num_rects += 1;
+                        }
+                        if obj_meta.class_id == PGIE_CLASS_ID_PERSON {
+                            person_count += 1;
+                            num_rects += 1;
+                        }
+
+                        let display_meta = &mut *(nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(batch_meta as _));
+                        display_meta.num_labels = 1;
+
+                        /* Now set the offsets where the string should appear */
+                        display_meta.text_params[0].x_offset = 10;
+                        display_meta.text_params[0].y_offset = 12;
+
+                        /* Font , font-color and font-size */
+                        display_meta.text_params[0].font_params.font_name = CString::new("Serif").unwrap().as_ptr() as _;
+                        display_meta.text_params[0].font_params.font_size = 10;
+                        display_meta.text_params[0].font_params.font_color.red = 1.0;
+                        display_meta.text_params[0].font_params.font_color.green = 1.0;
+                        display_meta.text_params[0].font_params.font_color.blue = 1.0;
+                        display_meta.text_params[0].font_params.font_color.alpha = 1.0;
+
+                        /* Text background color */
+                        display_meta.text_params[0].set_bg_clr = 1;
+                        display_meta.text_params[0].text_bg_clr.red = 0.0;
+                        display_meta.text_params[0].text_bg_clr.green = 0.0;
+                        display_meta.text_params[0].text_bg_clr.blue = 0.0;
+                        display_meta.text_params[0].text_bg_clr.alpha = 1.0;
+
+                        nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta as _, display_meta as _);
+                        
+                        l_obj_p = l_obj.next;
+                    }
                     l_frame_p = l_frame.next;
                 }
             }
