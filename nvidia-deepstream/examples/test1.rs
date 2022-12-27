@@ -3,8 +3,8 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use std::ptr;
 
-static CONFIG_YML: &str = "/opt/nvidia/deepstream/deepstream-6.1/sources/apps/sample_apps/deepstream-test1/dstest1_config.yml";
-static PGIE_CONFIG_YML: &str = "/opt/nvidia/deepstream/deepstream-6.1/sources/apps/sample_apps/deepstream-test1/dstest1_pgie_config.yml";
+static CONFIG_YML: &str = "dstest1_config.yml";
+static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
 
 static MAX_DISPLAY_LEN: i32 = 64;
 static PGIE_CLASS_ID_VEHICLE: i32 = 0;
@@ -68,6 +68,12 @@ fn main() {
             config_yml.as_ptr() as *mut nvidia_deepstream_sys::gchar,
             CString::new("streammux").unwrap().as_ptr() as *const ::std::os::raw::c_char,
         );
+
+        println!("location: {}", source.property::<String>("location"));
+        println!("batch-size: {}", streammux.property::<u32>("batch-size"));
+        println!("width: {}", streammux.property::<u32>("width"));
+        println!("height: {}", streammux.property::<u32>("height"));
+        println!("batched-push-timeout: {}", streammux.property::<i32>("batched-push-timeout"));
     }
     pgie.set_property("config-file-path", PGIE_CONFIG_YML);
 
@@ -85,6 +91,12 @@ fn main() {
         ])
         .unwrap();
 
+    let sinkpad = streammux.request_pad_simple("sink_0").unwrap();
+    let srcpad = decoder.static_pad("src").unwrap();
+    srcpad.link(&sinkpad).unwrap();
+
+    gstreamer::Element::link_many(&[&source, &h264parser, &decoder])
+        .unwrap();
     gstreamer::Element::link_many(&[&streammux, &pgie, &nvvidconv, &nvosd/*, &transform*/, &sink])
         .unwrap();
 
@@ -141,7 +153,7 @@ fn main() {
                         display_meta.text_params[0].text_bg_clr.alpha = 1.0;
 
                         nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta as _, display_meta as _);
-                        
+
                         l_obj_p = l_obj.next;
                     }
                     l_frame_p = l_frame.next;
@@ -172,6 +184,4 @@ fn main() {
     }
 
     pipeline.set_state(gstreamer::State::Null).unwrap();
-
-    bus.remove_watch().unwrap();
 }
