@@ -2,6 +2,7 @@ use std::ffi::CString;
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use std::ptr;
+use nvidia_deepstream::element::ElementNvdsExt;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
@@ -54,27 +55,8 @@ fn main() {
         .build()
         .unwrap();
 
-    unsafe {
-        let config_yml = CString::new(CONFIG_YML).unwrap();
-
-        nvidia_deepstream_sys::nvds_parse_file_source(
-            source.as_ptr() as *mut nvidia_deepstream_sys::GstElement,
-            config_yml.as_ptr() as *mut nvidia_deepstream_sys::gchar,
-            CString::new("source").unwrap().as_ptr() as *const ::std::os::raw::c_char,
-        );
-
-        nvidia_deepstream_sys::nvds_parse_streammux(
-            streammux.as_ptr() as *mut nvidia_deepstream_sys::GstElement,
-            config_yml.as_ptr() as *mut nvidia_deepstream_sys::gchar,
-            CString::new("streammux").unwrap().as_ptr() as *const ::std::os::raw::c_char,
-        );
-
-        println!("location: {}", source.property::<String>("location"));
-        println!("batch-size: {}", streammux.property::<u32>("batch-size"));
-        println!("width: {}", streammux.property::<u32>("width"));
-        println!("height: {}", streammux.property::<u32>("height"));
-        println!("batched-push-timeout: {}", streammux.property::<i32>("batched-push-timeout"));
-    }
+    source.nvds_parse_file_source(CONFIG_YML, "source").unwrap();
+    streammux.nvds_parse_streammux(CONFIG_YML, "streammux").unwrap();
     pgie.set_property("config-file-path", PGIE_CONFIG_YML);
 
     pipeline
