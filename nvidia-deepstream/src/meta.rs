@@ -256,7 +256,67 @@ impl FrameMeta<'_> {
 
 pub struct ObjectMeta<'a>(&'a nvidia_deepstream_sys::NvDsObjectMeta);
 
+impl ObjectMeta<'_> {
+    pub fn base_meta(&self) -> BaseMeta {
+        BaseMeta(&self.0.base_meta)
+    }
+
+    pub fn parent(&self) -> Option<ObjectMeta> {
+        if self.0.parent != std::ptr::null_mut() {
+            unsafe { Some(ObjectMeta(&*self.0.parent)) }
+        } else {
+            None
+        }
+    }
+
+    pub fn unique_component_id(&self) -> i32 {
+        self.0.unique_component_id
+    }
+
+    pub fn class_id(&self) -> i32 {
+        self.0.class_id
+    }
+
+    pub fn object_id(&self) -> u64 {
+        self.0.object_id
+    }
+
+    //pub fn detector_bbox_info(&self) -> NvDsComp_BboxInfo,
+    //pub fn tracker_bbox_info(&self) -> NvDsComp_BboxInfo,
+
+    pub fn confidence(&self) -> f32 {
+        self.0.confidence
+    }
+
+    pub fn tracker_confidence(&self) -> f32 {
+        self.0.tracker_confidence
+    }
+
+    //pub fn rect_params(&self) -> NvOSD_RectParams,
+    //pub fn mask_params(&self) -> NvOSD_MaskParams,
+    //pub fn text_params(&self) -> NvOSD_TextParams,
+    //pub fn obj_label(&self) -> [gchar; 128usize],
+    //pub fn classifier_meta_list(&self) -> *mut NvDsClassifierMetaList,
+    //pub fn obj_user_meta_list(&self) -> *mut NvDsUserMetaList,
+
+    pub fn misc_obj_info(&self) -> [i64; 4usize] {
+        self.0.misc_obj_info
+    }
+}
+
 pub struct DisplayMeta<'a>(&'a nvidia_deepstream_sys::NvDsDisplayMeta);
 
+impl DisplayMeta<'_> {
+    pub fn base_meta(&self) -> BaseMeta {
+        BaseMeta(&self.0.base_meta)
+    }
+}
+
 pub struct UserMeta<'a>(&'a nvidia_deepstream_sys::NvDsUserMeta);
+
+impl UserMeta<'_> {
+    pub fn base_meta(&self) -> BaseMeta {
+        BaseMeta(&self.0.base_meta)
+    }
+}
 
