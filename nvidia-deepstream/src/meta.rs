@@ -281,8 +281,13 @@ impl ObjectMeta<'_> {
         self.0.object_id
     }
 
-    //pub fn detector_bbox_info(&self) -> NvDsComp_BboxInfo,
-    //pub fn tracker_bbox_info(&self) -> NvDsComp_BboxInfo,
+    pub fn detector_bbox_info(&self) -> &crate::bounding_box::Info {
+        unsafe { std::mem::transmute(&self.0.detector_bbox_info) }
+    }
+
+    pub fn tracker_bbox_info(&self) -> &crate::bounding_box::Info {
+        unsafe { std::mem::transmute(&self.0.tracker_bbox_info) }
+    }
 
     pub fn confidence(&self) -> f32 {
         self.0.confidence
@@ -296,11 +301,25 @@ impl ObjectMeta<'_> {
     //pub fn mask_params(&self) -> NvOSD_MaskParams,
     //pub fn text_params(&self) -> NvOSD_TextParams,
     //pub fn obj_label(&self) -> [gchar; 128usize],
-    //pub fn classifier_meta_list(&self) -> *mut NvDsClassifierMetaList,
-    //pub fn obj_user_meta_list(&self) -> *mut NvDsUserMetaList,
+
+    pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {
+        MetaList::<ClassifierMeta>::new(NonNull::new(self.0.classifier_meta_list).unwrap())
+    }
+
+    pub fn obj_user_meta_list(&self) -> MetaList<UserMeta> {
+        MetaList::<UserMeta>::new(NonNull::new(self.0.obj_user_meta_list).unwrap())
+    }
 
     pub fn misc_obj_info(&self) -> [i64; 4usize] {
         self.0.misc_obj_info
+    }
+}
+
+pub struct ClassifierMeta<'a>(&'a nvidia_deepstream_sys::NvDsClassifierMeta);
+
+impl ClassifierMeta<'_> {
+    pub fn base_meta(&self) -> BaseMeta {
+        BaseMeta(&self.0.base_meta)
     }
 }
 
