@@ -1,6 +1,5 @@
-use std::marker::PhantomData;
 use gstreamer::glib;
-use std::path::Iter;
+use std::marker::PhantomData;
 use std::ptr::NonNull;
 
 #[repr(i32)]
@@ -33,7 +32,7 @@ pub enum MetaType {
 
 pub struct MetaListIterator<'a, T> {
     current: Option<NonNull<nvidia_deepstream_sys::GList>>,
-    phantom: PhantomData<&'a T>
+    phantom: PhantomData<&'a T>,
 }
 
 impl<'a, T> Iterator for MetaListIterator<'a, T> {
@@ -46,23 +45,29 @@ impl<'a, T> Iterator for MetaListIterator<'a, T> {
                 let item = &*(&cur.as_ref().data as *const glib::ffi::gpointer as *const T);
                 Some(item)
             },
-            None => None
+            None => None,
         }
     }
 }
 
 pub struct MetaList<'a, T> {
     list: NonNull<nvidia_deepstream_sys::GList>,
-    phantom: PhantomData<&'a T>
+    phantom: PhantomData<&'a T>,
 }
 
 impl<'a, T> MetaList<'a, T> {
     pub fn new(list: NonNull<nvidia_deepstream_sys::GList>) -> MetaList<'a, T> {
-        MetaList { list, phantom: PhantomData }
+        MetaList {
+            list,
+            phantom: PhantomData,
+        }
     }
 
     fn iter(&self) -> MetaListIterator<T> {
-        MetaListIterator::<T> { current: Some(self.list), phantom: PhantomData }
+        MetaListIterator::<T> {
+            current: Some(self.list),
+            phantom: PhantomData,
+        }
     }
 }
 
@@ -92,11 +97,11 @@ impl MetaPool<'_> {
     }
 
     pub fn empty_list(&self) -> MetaList<Meta> {
-        unsafe { MetaList::<Meta>::new(NonNull::new(self.0.empty_list).unwrap()) }
+         MetaList::<Meta>::new(NonNull::new(self.0.empty_list).unwrap())
     }
 
     pub fn full_list(&self) -> MetaList<Meta> {
-        unsafe { MetaList::<Meta>::new(NonNull::new(self.0.full_list).unwrap()) }
+        MetaList::<Meta>::new(NonNull::new(self.0.full_list).unwrap())
     }
 }
 
@@ -126,15 +131,15 @@ pub struct BatchMeta<'a>(&'a nvidia_deepstream_sys::NvDsBatchMeta);
 
 impl BatchMeta<'_> {
     pub fn base_meta(&self) -> BaseMeta {
-        unsafe { BaseMeta(&self.0.base_meta) }
+        BaseMeta(&self.0.base_meta)
     }
 
     pub fn max_frames_in_batch(&self) -> u32 {
-        unsafe { self.0.max_frames_in_batch }
+        self.0.max_frames_in_batch
     }
 
     pub fn num_frames_in_batch(&self) -> u32 {
-        unsafe { self.0.num_frames_in_batch }
+        self.0.num_frames_in_batch
     }
 
     pub fn frame_meta_pool(&self) -> MetaPool {
@@ -161,7 +166,97 @@ impl BatchMeta<'_> {
         unsafe { MetaPool(&*self.0.label_info_meta_pool) }
     }
 
-    /*pub fn frame_meta_list(&self) -> MetaPool {
-        unsafe { MetaPool(&*self.0.frame_meta_list) }
-    }*/
+    pub fn frame_meta_list(&self) -> MetaList<FrameMeta> {
+        MetaList::<FrameMeta>::new(NonNull::new(self.0.frame_meta_list).unwrap())
+    }
 }
+
+pub struct FrameMeta<'a>(&'a nvidia_deepstream_sys::NvDsFrameMeta);
+
+impl FrameMeta<'_> {
+    pub fn base_meta(&self) -> BaseMeta {
+        BaseMeta(&self.0.base_meta)
+    }
+
+    pub fn pad_index(&self) -> u32 {
+        self.0.pad_index
+    }
+
+    pub fn batch_id(&self) -> u32 {
+        self.0.batch_id
+    }
+
+    pub fn frame_num(&self) -> i32 {
+        self.0.frame_num
+    }
+
+    pub fn buf_pts(&self) -> u64 {
+        self.0.buf_pts
+    }
+
+    pub fn ntp_timestamp(&self) -> u64 {
+        self.0.ntp_timestamp
+    }
+    pub fn source_id(&self) -> u32 {
+        self.0.source_id
+    }
+
+    pub fn num_surfaces_per_frame(&self) -> i32 {
+        self.0.num_surfaces_per_frame
+    }
+
+    pub fn source_frame_width(&self) -> u32 {
+        self.0.source_frame_width
+    }
+
+    pub fn source_frame_height(&self) -> u32 {
+        self.0.source_frame_height
+    }
+
+    pub fn surface_type(&self) -> u32 {
+        self.0.surface_type
+    }
+
+    pub fn surface_index(&self) -> u32 {
+        self.0.surface_index
+    }
+
+    pub fn num_obj_meta(&self) -> u32 {
+        self.0.num_obj_meta
+    }
+
+    pub fn infer_done(&self) -> bool {
+        self.0.bInferDone != 0
+    }
+
+    pub fn obj_meta_list(&self) -> MetaList<ObjectMeta> {
+        MetaList::<ObjectMeta>::new(NonNull::new(self.0.obj_meta_list).unwrap())
+    }
+
+    pub fn display_meta_list(&self) -> MetaList<DisplayMeta> {
+        MetaList::<DisplayMeta>::new(NonNull::new(self.0.display_meta_list).unwrap())
+    }
+
+    pub fn frame_user_meta_list(&self) -> MetaList<UserMeta> {
+        MetaList::<UserMeta>::new(NonNull::new(self.0.frame_user_meta_list).unwrap())
+    }
+
+    pub fn misc_frame_info(&self) -> [i64; 4usize] {
+        self.0.misc_frame_info
+    }
+
+    pub fn pipeline_width(&self) -> u32 {
+        self.0.pipeline_width
+    }
+
+    pub fn pipeline_height(&self) -> u32 {
+        self.0.pipeline_height
+    }
+}
+
+pub struct ObjectMeta<'a>(&'a nvidia_deepstream_sys::NvDsObjectMeta);
+
+pub struct DisplayMeta<'a>(&'a nvidia_deepstream_sys::NvDsDisplayMeta);
+
+pub struct UserMeta<'a>(&'a nvidia_deepstream_sys::NvDsUserMeta);
+
