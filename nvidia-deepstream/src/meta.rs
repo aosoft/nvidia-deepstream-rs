@@ -1,3 +1,8 @@
+use std::marker::PhantomData;
+use gstreamer::glib;
+use std::path::Iter;
+use std::ptr::NonNull;
+
 #[repr(i32)]
 pub enum MetaType {
     InvalidMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_INVALID_META as _,
@@ -26,66 +31,137 @@ pub enum MetaType {
     StartUserMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_START_USER_META as _,
 }
 
-pub struct BaseMeta<'a> {
-    data: &'a nvidia_deepstream_sys::NvDsBaseMeta,
+pub struct MetaListIterator<'a, T> {
+    current: Option<NonNull<nvidia_deepstream_sys::GList>>,
+    phantom: PhantomData<&'a T>
 }
 
-impl BaseMeta<'_> {
-    pub fn meta_type(&self) -> MetaType {
-        unsafe { std::mem::transmute((*(self.data)).meta_type) }
-    }
+impl<'a, T> Iterator for MetaListIterator<'a, T> {
+    type Item = &'a T;
 
-    pub unsafe fn user_context(&self) -> *mut () {
-        (*(self.data)).uContext as _
-    }
-}
-
-pub struct BatchMeta {
-    owned: bool,
-    data: *mut nvidia_deepstream_sys::NvDsBatchMeta,
-}
-
-impl Drop for BatchMeta {
-    fn drop(&mut self) {
-        if self.owned {
-            unsafe {
-                nvidia_deepstream_sys::nvds_destroy_batch_meta(self.data);
-            }
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.current {
+            Some(cur) => unsafe {
+                self.current = NonNull::new(cur.as_ref().next);
+                let item = &*(&cur.as_ref().data as *const glib::ffi::gpointer as *const T);
+                Some(item)
+            },
+            None => None
         }
     }
 }
 
-impl BatchMeta {
-    pub fn new(max_batch_size: u32) -> Option<BatchMeta> {
+pub struct MetaList<'a, T> {
+    list: NonNull<nvidia_deepstream_sys::GList>,
+    phantom: PhantomData<&'a T>
+}
+
+impl<'a, T> MetaList<'a, T> {
+    pub fn new(list: NonNull<nvidia_deepstream_sys::GList>) -> MetaList<'a, T> {
+        MetaList { list, phantom: PhantomData }
+    }
+
+    fn iter(&self) -> MetaListIterator<T> {
+        MetaListIterator::<T> { current: Some(self.list), phantom: PhantomData }
+    }
+}
+
+pub struct Meta(NonNull<nvidia_deepstream_sys::NvDsMeta>);
+
+pub struct MetaPool<'a>(&'a nvidia_deepstream_sys::NvDsMetaPool);
+
+impl MetaPool<'_> {
+    pub fn meta_type(&self) -> MetaType {
+        unsafe { std::mem::transmute(self.0.meta_type) }
+    }
+
+    pub fn max_elements_in_pool(&self) -> u32 {
+        self.0.max_elements_in_pool
+    }
+
+    pub fn element_size(&self) -> u32 {
+        self.0.element_size
+    }
+
+    pub fn num_empty_elements(&self) -> u32 {
+        self.0.num_empty_elements
+    }
+
+    pub fn num_full_elements(&self) -> u32 {
+        self.0.num_full_elements
+    }
+
+    pub fn empty_list(&self) -> MetaList<Meta> {
+        unsafe { MetaList::<Meta>::new(NonNull::new(self.0.empty_list).unwrap()) }
+    }
+
+    pub fn full_list(&self) -> MetaList<Meta> {
+        unsafe { MetaList::<Meta>::new(NonNull::new(self.0.full_list).unwrap()) }
+    }
+}
+
+pub struct BaseMeta<'a>(&'a nvidia_deepstream_sys::NvDsBaseMeta);
+
+impl BaseMeta<'_> {
+    pub fn batch_meta(&self) -> Option<BatchMeta> {
         unsafe {
-            let p = nvidia_deepstream_sys::nvds_create_batch_meta(max_batch_size);
-            if p != std::ptr::null_mut() {
-                Some(BatchMeta {
-                    owned: true,
-                    data: p,
-                })
+            if self.0.batch_meta != std::ptr::null_mut() {
+                Some(BatchMeta(&*self.0.batch_meta))
             } else {
                 None
             }
         }
     }
 
+    pub fn meta_type(&self) -> MetaType {
+        unsafe { std::mem::transmute(self.0.meta_type) }
+    }
+
+    pub unsafe fn user_context(&self) -> *mut () {
+        self.0.uContext as _
+    }
+}
+
+pub struct BatchMeta<'a>(&'a nvidia_deepstream_sys::NvDsBatchMeta);
+
+impl BatchMeta<'_> {
     pub fn base_meta(&self) -> BaseMeta {
-        unsafe {
-            BaseMeta { data: &(*self.data).base_meta }
-        }
+        unsafe { BaseMeta(&self.0.base_meta) }
     }
 
     pub fn max_frames_in_batch(&self) -> u32 {
-        unsafe {
-            (*self.data).max_frames_in_batch
-        }
+        unsafe { self.0.max_frames_in_batch }
     }
 
     pub fn num_frames_in_batch(&self) -> u32 {
-        unsafe {
-            (*self.data).num_frames_in_batch
-        }
+        unsafe { self.0.num_frames_in_batch }
     }
 
+    pub fn frame_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.frame_meta_pool) }
+    }
+
+    pub fn obj_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.obj_meta_pool) }
+    }
+
+    pub fn classifier_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.classifier_meta_pool) }
+    }
+
+    pub fn display_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.display_meta_pool) }
+    }
+
+    pub fn user_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.user_meta_pool) }
+    }
+
+    pub fn label_info_meta_pool(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.label_info_meta_pool) }
+    }
+
+    /*pub fn frame_meta_list(&self) -> MetaPool {
+        unsafe { MetaPool(&*self.0.frame_meta_list) }
+    }*/
 }
