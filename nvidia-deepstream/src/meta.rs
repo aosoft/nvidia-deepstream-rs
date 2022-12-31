@@ -364,6 +364,66 @@ impl ClassifierMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
+
+    pub fn num_labels(&self) -> u32 {
+        self.as_native_type_ref().num_labels
+    }
+
+    pub fn unique_component_id(&self) -> i32 {
+        self.as_native_type_ref().unique_component_id
+    }
+
+    pub fn label_info_list(&self) -> MetaList<LabelInfo> {
+        MetaList::<LabelInfo>::new(NonNull::new(self.as_native_type_ref().label_info_list).unwrap())
+    }
+
+    pub fn classifier_type(&self) -> &str {
+        unsafe {
+            CStr::from_ptr(self.as_native_type_ref().classifier_type)
+                .to_str()
+                .unwrap_or_default()
+        }
+    }
+}
+
+crate::wrapper_impl!(LabelInfo, nvidia_deepstream_sys::NvDsLabelInfo);
+
+impl LabelInfo {
+    pub fn base_meta(&self) -> &BaseMeta {
+        BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn num_classes(&self) -> u32 {
+        self.as_native_type_ref().num_classes
+    }
+
+    pub fn result_label(&self) -> &str {
+        unsafe {
+            if self.as_native_type_ref().pResult_label != std::ptr::null_mut() {
+                CStr::from_ptr(self.as_native_type_ref().pResult_label)
+                    .to_str()
+                    .unwrap_or_default()
+            } else {
+                CStr::from_ptr(&self.as_native_type_ref().result_label as _)
+                    .to_str()
+                    .unwrap_or_default()
+            }
+        }
+    }
+
+    pub fn result_class_id(&self) -> u32 {
+        self.as_native_type_ref().result_class_id
+
+    }
+
+    pub fn label_id(&self) -> u32 {
+        self.as_native_type_ref().label_id
+
+    }
+
+    pub fn result_prob(&self) -> f32 {
+        self.as_native_type_ref().result_prob
+    }
 }
 
 crate::wrapper_impl!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMeta);
@@ -372,6 +432,10 @@ impl DisplayMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
+
+    pub fn misc_osd_data(&self) -> &[i64] {
+        &self.as_native_type_ref().misc_osd_data
+    }
 }
 
 crate::wrapper_impl!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
@@ -379,5 +443,9 @@ crate::wrapper_impl!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
 impl UserMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn user_meta_data(&self) -> *mut () {
+        self.as_native_type_ref().user_meta_data as _
     }
 }
