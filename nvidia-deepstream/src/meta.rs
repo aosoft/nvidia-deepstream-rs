@@ -465,63 +465,98 @@ impl DisplayMeta {
         self.as_native_type_ref().num_rects
     }
 
-    pub fn get_rect_params(&self, index: u32) -> Option<&crate::osd::RectParams> {
-        if index < self.as_native_type_ref().num_rects
-            && index < self.as_native_type_ref().rect_params.len() as u32
+    pub fn get_rect_params(&self, index: usize) -> Option<&crate::osd::RectParams> {
+        if index < self.as_native_type_ref().num_rects as usize
+            && index < self.as_native_type_ref().rect_params.len()
         {
             Some(crate::osd::RectParams::from_native_type_ref(
-                &self.as_native_type_ref().rect_params[index as usize],
+                &self.as_native_type_ref().rect_params[index],
             ))
         } else {
             None
         }
     }
 
-    pub fn get_text_params(&self, index: u32) -> Option<&crate::osd::TextParams> {
-        if index < self.as_native_type_ref().num_labels
-            && index < self.as_native_type_ref().text_params.len() as u32
+    pub fn set_rect_params(&mut self, start: usize, params: &[crate::osd::RectParams]) {
+        let len = std::cmp::min(self.as_native_type_ref().rect_params.len() - start, params.len());
+        for i in 0..len {
+            self.as_native_type_mut().rect_params[start + i] = *params[i].as_native_type_ref();
+        }
+    }
+
+    pub fn get_text_params(&self, index: usize) -> Option<&crate::osd::TextParams> {
+        if index < self.as_native_type_ref().num_labels as usize
+            && index < self.as_native_type_ref().text_params.len()
         {
             Some(crate::osd::TextParams::from_native_type_ref(
-                &self.as_native_type_ref().text_params[index as usize],
+                &self.as_native_type_ref().text_params[index],
             ))
         } else {
             None
         }
     }
 
-    pub fn get_line_params(&self, index: u32) -> Option<&crate::osd::LineParams> {
-        if index < self.as_native_type_ref().num_lines
-            && index < self.as_native_type_ref().line_params.len() as u32
+    pub fn set_text_params(&mut self, start: usize, params: &[crate::osd::TextParams]) {
+        let len = std::cmp::min(self.as_native_type_ref().text_params.len() - start, params.len());
+        for i in 0..len {
+            self.as_native_type_mut().text_params[start + i] = *params[i].as_native_type_ref();
+        }
+    }
+
+    pub fn get_line_params(&self, index: usize) -> Option<&crate::osd::LineParams> {
+        if index < self.as_native_type_ref().num_lines as usize
+            && index < self.as_native_type_ref().line_params.len()
         {
             Some(crate::osd::LineParams::from_native_type_ref(
-                &self.as_native_type_ref().line_params[index as usize],
+                &self.as_native_type_ref().line_params[index],
             ))
         } else {
             None
         }
     }
 
-    pub fn get_arrow_params(&self, index: u32) -> Option<&crate::osd::ArrowParams> {
-        if index < self.as_native_type_ref().num_arrows
-            && index < self.as_native_type_ref().arrow_params.len() as u32
+    pub fn set_line_params(&mut self, start: usize, params: &[crate::osd::LineParams]) {
+        let len = std::cmp::min(self.as_native_type_ref().line_params.len() - start, params.len());
+        for i in 0..len {
+            self.as_native_type_mut().line_params[start + i] = *params[i].as_native_type_ref();
+        }
+    }
+
+    pub fn get_arrow_params(&self, index: usize) -> Option<&crate::osd::ArrowParams> {
+        if index < self.as_native_type_ref().num_arrows as usize
+            && index < self.as_native_type_ref().arrow_params.len()
         {
             Some(crate::osd::ArrowParams::from_native_type_ref(
-                &self.as_native_type_ref().arrow_params[index as usize],
+                &self.as_native_type_ref().arrow_params[index],
             ))
         } else {
             None
         }
     }
 
-    pub fn get_circle_params(&self, index: u32) -> Option<&crate::osd::CircleParams> {
-        if index < self.as_native_type_ref().num_circles
-            && index < self.as_native_type_ref().circle_params.len() as u32
+    pub fn set_arrow_params(&mut self, start: usize, params: &[crate::osd::ArrowParams]) {
+        let len = std::cmp::min(self.as_native_type_ref().arrow_params.len() - start, params.len());
+        for i in 0..len {
+            self.as_native_type_mut().arrow_params[start + i] = *params[i].as_native_type_ref();
+        }
+    }
+
+    pub fn get_circle_params(&self, index: usize) -> Option<&crate::osd::CircleParams> {
+        if index < self.as_native_type_ref().num_circles as usize
+            && index < self.as_native_type_ref().circle_params.len()
         {
             Some(crate::osd::CircleParams::from_native_type_ref(
-                &self.as_native_type_ref().circle_params[index as usize],
+                &self.as_native_type_ref().circle_params[index],
             ))
         } else {
             None
+        }
+    }
+
+    pub fn set_circle_params(&mut self, start: usize, params: &[crate::osd::CircleParams]) {
+        let len = std::cmp::min(self.as_native_type_ref().circle_params.len() - start, params.len());
+        for i in 0..len {
+            self.as_native_type_mut().circle_params[start + i] = *params[i].as_native_type_ref();
         }
     }
 
