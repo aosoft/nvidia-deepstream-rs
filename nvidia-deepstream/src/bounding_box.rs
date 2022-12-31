@@ -1,8 +1,10 @@
-pub struct Coords(nvidia_deepstream_sys::NvBbox_Coords);
+use crate::Wrapper;
+
+crate::wrapper_impl!(Coords, nvidia_deepstream_sys::NvBbox_Coords);
 
 impl Coords {
     pub fn new(left: f32, top: f32, width: f32, height: f32) -> Coords {
-        Coords(nvidia_deepstream_sys::NvBbox_Coords {
+        Coords::from_native_type(nvidia_deepstream_sys::NvBbox_Coords {
             left,
             top,
             width,
@@ -27,10 +29,10 @@ impl Coords {
     }
 }
 
-pub struct Info(nvidia_deepstream_sys::NvDsComp_BboxInfo);
+crate::wrapper_impl!(Info, nvidia_deepstream_sys::NvDsComp_BboxInfo);
 
 impl Info {
     pub fn org_bbox_coords(&self) -> &Coords {
-        crate::to_wrapper_ref(&self.0.org_bbox_coords)
+        Coords::from_native_type_ref(&self.0.org_bbox_coords)
     }
 }

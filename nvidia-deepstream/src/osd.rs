@@ -1,4 +1,5 @@
-use crate::to_wrapper_ref;
+use crate::Wrapper;
+use gstreamer::glib;
 use std::ffi::CStr;
 
 #[repr(u32)]
@@ -15,240 +16,251 @@ pub enum ArrowHeadDirection {
     Both = nvidia_deepstream_sys::NvOSD_Arrow_Head_Direction_BOTH_HEAD as _,
 }
 
-pub struct ColorParams(nvidia_deepstream_sys::NvOSD_ColorParams);
+crate::wrapper_impl!(ColorParams, nvidia_deepstream_sys::NvOSD_ColorParams);
 
 impl ColorParams {
     pub fn red(&self) -> f64 {
-        self.0.red
+        self.as_native_type_ref().red
     }
 
     pub fn green(&self) -> f64 {
-        self.0.green
+        self.as_native_type_ref().green
     }
 
     pub fn blue(&self) -> f64 {
-        self.0.blue
+        self.as_native_type_ref().blue
     }
 
     pub fn alpha(&self) -> f64 {
-        self.0.alpha
+        self.as_native_type_ref().alpha
     }
 }
 
-pub struct FontParams(nvidia_deepstream_sys::NvOSD_FontParams);
+crate::wrapper_impl!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
 
 impl FontParams {
     pub fn font_name(&self) -> &str {
         unsafe {
-            CStr::from_ptr(self.0.font_name)
+            CStr::from_ptr(self.as_native_type_ref().font_name)
                 .to_str()
                 .unwrap_or_default()
         }
     }
 
     pub fn font_size(&self) -> u32 {
-        self.0.font_size
+        self.as_native_type_ref().font_size
     }
 
     pub fn font_color(&self) -> &ColorParams {
-        crate::to_wrapper_ref(&self.0.font_color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().font_color)
     }
 }
 
-pub struct TextParams(nvidia_deepstream_sys::NvOSD_TextParams);
+crate::wrapper_impl!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
 
 impl TextParams {
     pub fn display_text(&self) -> &str {
         unsafe {
-            CStr::from_ptr(self.0.display_text)
+            CStr::from_ptr(self.as_native_type_ref().display_text)
                 .to_str()
                 .unwrap_or_default()
         }
     }
 
     pub fn x_offset(&self) -> u32 {
-        self.0.x_offset
+        self.as_native_type_ref().x_offset
     }
 
     pub fn y_offset(&self) -> u32 {
-        self.0.y_offset
+        self.as_native_type_ref().y_offset
     }
 
     pub fn font_params(&self) -> &FontParams {
-        crate::to_wrapper_ref(&self.0.font_params)
+        FontParams::from_native_type_ref(&self.as_native_type_ref().font_params)
     }
 
     pub fn set_bg_clr(&self) -> i32 {
-        self.0.set_bg_clr
+        self.as_native_type_ref().set_bg_clr
     }
 
     pub fn text_bg_clr(&self) -> &ColorParams {
-        crate::to_wrapper_ref(&self.0.text_bg_clr)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().text_bg_clr)
     }
 }
 
-pub struct ColorInfo(nvidia_deepstream_sys::NvOSD_Color_info);
+crate::wrapper_impl!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
 
 impl ColorInfo {
     pub fn id(&self) -> i32 {
-        self.0.id
+        self.as_native_type_ref().id
     }
 
     pub fn color(&self) -> &ColorParams {
-        crate::to_wrapper_ref(&self.0.color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().color)
     }
 }
 
-pub struct RectParams(nvidia_deepstream_sys::_NvOSD_RectParams);
+crate::wrapper_impl!(RectParams, nvidia_deepstream_sys::_NvOSD_RectParams);
 
 impl RectParams {
     pub fn left(&self) -> f32 {
-        self.0.left
+        self.as_native_type_ref().left
     }
 
     pub fn top(&self) -> f32 {
-        self.0.top
+        self.as_native_type_ref().top
     }
 
     pub fn width(&self) -> f32 {
-        self.0.width
+        self.as_native_type_ref().width
     }
 
     pub fn height(&self) -> f32 {
-        self.0.height
+        self.as_native_type_ref().height
     }
 
     pub fn border_width(&self) -> u32 {
-        self.0.border_width
+        self.as_native_type_ref().border_width
     }
 
     pub fn border_color(&self) -> &ColorParams {
-        to_wrapper_ref(&self.0.border_color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().border_color)
     }
 
     pub fn bg_color(&self) -> Option<&ColorParams> {
-        if self.0.has_bg_color != 0 {
-            Some(to_wrapper_ref(&self.0.bg_color))
+        if self.as_native_type_ref().has_bg_color != 0 {
+            Some(ColorParams::from_native_type_ref(
+                &self.as_native_type_ref().bg_color,
+            ))
         } else {
             None
         }
     }
 
     pub fn color_id(&self) -> Option<i32> {
-        if self.0.has_color_info != 0 {
-            Some(self.0.color_id)
+        if self.as_native_type_ref().has_color_info != 0 {
+            Some(self.as_native_type_ref().color_id)
         } else {
             None
         }
     }
 }
 
-pub struct MaskParams(nvidia_deepstream_sys::NvOSD_MaskParams);
+crate::wrapper_impl!(MaskParams, nvidia_deepstream_sys::NvOSD_MaskParams);
 
 impl MaskParams {
     pub fn data(&self) -> &[f32] {
-        if self.0.data != std::ptr::null_mut() && self.0.size > 0 {
-            unsafe { std::slice::from_raw_parts(self.0.data, self.0.size as _) }
+        if self.as_native_type_ref().data != std::ptr::null_mut()
+            && self.as_native_type_ref().size > 0
+        {
+            unsafe {
+                std::slice::from_raw_parts(
+                    self.as_native_type_ref().data,
+                    self.as_native_type_ref().size as _,
+                )
+            }
         } else {
             &[]
         }
     }
 
     pub fn threshold(&self) -> f32 {
-        self.0.threshold
+        self.as_native_type_ref().threshold
     }
 
     pub fn width(&self) -> u32 {
-        self.0.width
+        self.as_native_type_ref().width
     }
 
     pub fn height(&self) -> u32 {
-        self.0.height
+        self.as_native_type_ref().height
     }
 }
 
-pub struct LineParams(nvidia_deepstream_sys::NvOSD_LineParams);
+crate::wrapper_impl!(LineParams, nvidia_deepstream_sys::NvOSD_LineParams);
 
 impl LineParams {
     pub fn x1(&self) -> u32 {
-        self.0.x1
+        self.as_native_type_ref().x1
     }
 
     pub fn y1(&self) -> u32 {
-        self.0.y1
+        self.as_native_type_ref().y1
     }
 
     pub fn x2(&self) -> u32 {
-        self.0.x2
+        self.as_native_type_ref().x2
     }
 
     pub fn y2(&self) -> u32 {
-        self.0.y2
+        self.as_native_type_ref().y2
     }
 
     pub fn line_width(&self) -> u32 {
-        self.0.line_width
+        self.as_native_type_ref().line_width
     }
 
     pub fn line_color(&self) -> &ColorParams {
-        to_wrapper_ref(&self.0.line_color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().line_color)
     }
 }
 
-pub struct ArrowParams(nvidia_deepstream_sys::NvOSD_ArrowParams);
+crate::wrapper_impl!(ArrowParams, nvidia_deepstream_sys::NvOSD_ArrowParams);
 
 impl ArrowParams {
     pub fn x1(&self) -> u32 {
-        self.0.x1
+        self.as_native_type_ref().x1
     }
 
     pub fn y1(&self) -> u32 {
-        self.0.y1
+        self.as_native_type_ref().y1
     }
 
     pub fn x2(&self) -> u32 {
-        self.0.x2
+        self.as_native_type_ref().x2
     }
 
     pub fn y2(&self) -> u32 {
-        self.0.y2
+        self.as_native_type_ref().y2
     }
 
     pub fn arrow_width(&self) -> u32 {
-        self.0.arrow_width
+        self.as_native_type_ref().arrow_width
     }
 
     pub fn arrow_head(&self) -> ArrowHeadDirection {
-        unsafe { std::mem::transmute(self.0.arrow_head) }
+        unsafe { std::mem::transmute(self.as_native_type_ref().arrow_head) }
     }
 
     pub fn arrow_color(&self) -> &ColorParams {
-        to_wrapper_ref(&self.0.arrow_color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().arrow_color)
     }
 }
 
-pub struct CircleParams(nvidia_deepstream_sys::NvOSD_CircleParams);
+crate::wrapper_impl!(CircleParams, nvidia_deepstream_sys::NvOSD_CircleParams);
 
 impl CircleParams {
     pub fn xc(&self) -> u32 {
-        self.0.xc
+        self.as_native_type_ref().xc
     }
 
     pub fn yc(&self) -> u32 {
-        self.0.yc
+        self.as_native_type_ref().yc
     }
 
     pub fn radius(&self) -> u32 {
-        self.0.radius
+        self.as_native_type_ref().radius
     }
 
     pub fn circle_color(&self) -> &ColorParams {
-        to_wrapper_ref(&self.0.circle_color)
+        ColorParams::from_native_type_ref(&self.as_native_type_ref().circle_color)
     }
 
     pub fn bg_color(&self) -> Option<&ColorParams> {
-        if self.0.has_bg_color != 0 {
-            Some(to_wrapper_ref(&self.0.bg_color))
+        if self.as_native_type_ref().has_bg_color != 0 {
+            Some(ColorParams::from_native_type_ref(
+                &self.as_native_type_ref().bg_color,
+            ))
         } else {
             None
         }
