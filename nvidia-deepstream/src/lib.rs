@@ -24,19 +24,29 @@ macro_rules! wrapper_impl {
             type NativeType = $N;
 
             #[inline]
-            fn from_native_type(n: Self::NativeType) -> Self { Self(n) }
+            fn from_native_type(n: Self::NativeType) -> Self {
+                Self(n)
+            }
 
             #[inline]
-            fn from_native_type_ref(n: &Self::NativeType) -> &Self { unsafe { std::mem::transmute(n) } }
+            fn from_native_type_ref(n: &Self::NativeType) -> &Self {
+                unsafe { std::mem::transmute(n) }
+            }
 
             #[inline]
-            fn as_native_type_ref(&self) -> &Self::NativeType { &self.0 }
+            fn as_native_type_ref(&self) -> &Self::NativeType {
+                &self.0
+            }
 
             #[inline]
-            fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self { unsafe { std::mem::transmute(n) } }
+            fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self {
+                unsafe { std::mem::transmute(n) }
+            }
 
             #[inline]
-            fn as_native_type_mut(&mut self) -> &mut Self::NativeType { &mut self.0 }
+            fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
+                &mut self.0
+            }
         }
-    }
+    };
 }

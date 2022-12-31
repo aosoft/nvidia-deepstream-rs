@@ -1,10 +1,10 @@
-use std::ffi::CString;
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
-use std::ptr;
 use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
 use nvidia_deepstream::WrapperExt;
+use std::ffi::CString;
+use std::ptr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
@@ -49,16 +49,18 @@ fn main() {
         .build()
         .unwrap();
     /*let transform = gstreamer::ElementFactory::make("nvegltransform")
-        .name("nvvideo-transform")
-        .build()
-        .unwrap();*/
+    .name("nvvideo-transform")
+    .build()
+    .unwrap();*/
     let sink = gstreamer::ElementFactory::make("nveglglessink")
         .name("nvvideo-renderer")
         .build()
         .unwrap();
 
     source.nvds_parse_file_source(CONFIG_YML, "source").unwrap();
-    streammux.nvds_parse_streammux(CONFIG_YML, "streammux").unwrap();
+    streammux
+        .nvds_parse_streammux(CONFIG_YML, "streammux")
+        .unwrap();
     pgie.set_property("config-file-path", PGIE_CONFIG_YML);
 
     pipeline
@@ -79,10 +81,12 @@ fn main() {
     let srcpad = decoder.static_pad("src").unwrap();
     srcpad.link(&sinkpad).unwrap();
 
-    gstreamer::Element::link_many(&[&source, &h264parser, &decoder])
-        .unwrap();
-    gstreamer::Element::link_many(&[&streammux, &pgie, &nvvidconv, &nvosd/*, &transform*/, &sink])
-        .unwrap();
+    gstreamer::Element::link_many(&[&source, &h264parser, &decoder]).unwrap();
+    gstreamer::Element::link_many(&[
+        &streammux, &pgie, &nvvidconv, &nvosd, /*, &transform*/
+        &sink,
+    ])
+    .unwrap();
 
     let osd_sink_pad = nvosd.static_pad("sink").unwrap();
     osd_sink_pad.add_probe(PadProbeType::BUFFER, |pad, info| {

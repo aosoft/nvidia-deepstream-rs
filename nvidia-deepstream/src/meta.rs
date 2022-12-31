@@ -107,14 +107,14 @@ impl MetaPool {
     pub fn empty_list(&self) -> Option<MetaList<Meta>> {
         match NonNull::new(self.as_native_type_ref().empty_list) {
             Some(x) => Some(MetaList::<Meta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
     pub fn full_list(&self) -> Option<MetaList<Meta>> {
         match NonNull::new(self.as_native_type_ref().full_list) {
             Some(x) => Some(MetaList::<Meta>::new(x)),
-            None => None
+            None => None,
         }
     }
 }
@@ -248,21 +248,21 @@ impl FrameMeta {
     pub fn obj_meta_list(&self) -> Option<MetaList<ObjectMeta>> {
         match NonNull::new(self.as_native_type_ref().obj_meta_list) {
             Some(x) => Some(MetaList::<ObjectMeta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
     pub fn display_meta_list(&self) -> Option<MetaList<DisplayMeta>> {
         match NonNull::new(self.as_native_type_ref().display_meta_list) {
             Some(x) => Some(MetaList::<DisplayMeta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
     pub fn frame_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
         match NonNull::new(self.as_native_type_ref().frame_user_meta_list) {
             Some(x) => Some(MetaList::<UserMeta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
@@ -353,14 +353,14 @@ impl ObjectMeta {
     pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
         match NonNull::new(self.as_native_type_ref().classifier_meta_list) {
             Some(x) => Some(MetaList::<ClassifierMeta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
     pub fn obj_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
         match NonNull::new(self.as_native_type_ref().obj_user_meta_list) {
             Some(x) => Some(MetaList::<UserMeta>::new(x)),
-            None => None
+            None => None,
         }
     }
 
@@ -387,7 +387,7 @@ impl ClassifierMeta {
     pub fn label_info_list(&self) -> Option<MetaList<LabelInfo>> {
         match NonNull::new(self.as_native_type_ref().label_info_list) {
             Some(x) => Some(MetaList::<LabelInfo>::new(x)),
-            None => None
+            None => None,
         }
     }
 
@@ -427,12 +427,10 @@ impl LabelInfo {
 
     pub fn result_class_id(&self) -> u32 {
         self.as_native_type_ref().result_class_id
-
     }
 
     pub fn label_id(&self) -> u32 {
         self.as_native_type_ref().label_id
-
     }
 
     pub fn result_prob(&self) -> f32 {
@@ -445,6 +443,86 @@ crate::wrapper_impl!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMeta);
 impl DisplayMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn num_rects(&self) -> u32 {
+        self.as_native_type_ref().num_rects
+    }
+
+    pub fn num_labels(&self) -> u32 {
+        self.as_native_type_ref().num_labels
+    }
+
+    pub fn num_lines(&self) -> u32 {
+        self.as_native_type_ref().num_lines
+    }
+
+    pub fn num_arrows(&self) -> u32 {
+        self.as_native_type_ref().num_arrows
+    }
+
+    pub fn num_circles(&self) -> u32 {
+        self.as_native_type_ref().num_rects
+    }
+
+    pub fn get_rect_params(&self, index: u32) -> Option<&crate::osd::RectParams> {
+        if index < self.as_native_type_ref().num_rects
+            && index < self.as_native_type_ref().rect_params.len() as u32
+        {
+            Some(crate::osd::RectParams::from_native_type_ref(
+                &self.as_native_type_ref().rect_params[index as usize],
+            ))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_text_params(&self, index: u32) -> Option<&crate::osd::TextParams> {
+        if index < self.as_native_type_ref().num_labels
+            && index < self.as_native_type_ref().text_params.len() as u32
+        {
+            Some(crate::osd::TextParams::from_native_type_ref(
+                &self.as_native_type_ref().text_params[index as usize],
+            ))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_line_params(&self, index: u32) -> Option<&crate::osd::LineParams> {
+        if index < self.as_native_type_ref().num_lines
+            && index < self.as_native_type_ref().line_params.len() as u32
+        {
+            Some(crate::osd::LineParams::from_native_type_ref(
+                &self.as_native_type_ref().line_params[index as usize],
+            ))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_arrow_params(&self, index: u32) -> Option<&crate::osd::ArrowParams> {
+        if index < self.as_native_type_ref().num_arrows
+            && index < self.as_native_type_ref().arrow_params.len() as u32
+        {
+            Some(crate::osd::ArrowParams::from_native_type_ref(
+                &self.as_native_type_ref().arrow_params[index as usize],
+            ))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_circle_params(&self, index: u32) -> Option<&crate::osd::CircleParams> {
+        if index < self.as_native_type_ref().num_circles
+            && index < self.as_native_type_ref().circle_params.len() as u32
+        {
+            Some(crate::osd::CircleParams::from_native_type_ref(
+                &self.as_native_type_ref().circle_params[index as usize],
+            ))
+        } else {
+            None
+        }
     }
 
     pub fn misc_osd_data(&self) -> &[i64] {
