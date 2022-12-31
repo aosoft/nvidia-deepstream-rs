@@ -1,4 +1,4 @@
-use crate::Wrapper;
+use crate::WrapperExt;
 use gstreamer::glib;
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -34,13 +34,13 @@ pub enum MetaType {
 
 pub struct MetaListIterator<'a, T>
 where
-    T: Wrapper,
+    T: WrapperExt,
 {
     current: Option<NonNull<nvidia_deepstream_sys::GList>>,
     phantom: PhantomData<&'a T>,
 }
 
-impl<'a, T: Wrapper> Iterator for MetaListIterator<'a, T> {
+impl<'a, T: WrapperExt> Iterator for MetaListIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -57,13 +57,13 @@ impl<'a, T: Wrapper> Iterator for MetaListIterator<'a, T> {
 
 pub struct MetaList<'a, T>
 where
-    T: Wrapper,
+    T: WrapperExt,
 {
     list: NonNull<nvidia_deepstream_sys::GList>,
     phantom: PhantomData<&'a T>,
 }
 
-impl<'a, T: Wrapper> MetaList<'a, T> {
+impl<'a, T: WrapperExt> MetaList<'a, T> {
     pub fn new(list: NonNull<nvidia_deepstream_sys::GList>) -> MetaList<'a, T> {
         MetaList {
             list,

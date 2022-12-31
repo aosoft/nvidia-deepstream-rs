@@ -1,4 +1,4 @@
-use crate::Wrapper;
+use crate::WrapperExt;
 
 crate::wrapper_impl!(Coords, nvidia_deepstream_sys::NvBbox_Coords);
 

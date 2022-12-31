@@ -1,4 +1,4 @@
-use crate::Wrapper;
+use crate::WrapperExt;
 use gstreamer::glib;
 use std::ffi::CStr;
 

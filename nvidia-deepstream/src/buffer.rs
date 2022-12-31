@@ -1,5 +1,5 @@
 use crate::meta::BatchMeta;
-use crate::Wrapper;
+use crate::WrapperExt;
 
 pub trait BufferNvdsExt: 'static {
     fn get_nvds_batch_meta(&self) -> Option<&BatchMeta>;

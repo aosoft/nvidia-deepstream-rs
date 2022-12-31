@@ -4,7 +4,7 @@ use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use std::ptr;
 use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
-use nvidia_deepstream::Wrapper;
+use nvidia_deepstream::WrapperExt;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
