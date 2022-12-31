@@ -245,8 +245,11 @@ impl FrameMeta {
         self.as_native_type_ref().bInferDone != 0
     }
 
-    pub fn obj_meta_list(&self) -> MetaList<ObjectMeta> {
-        MetaList::<ObjectMeta>::new(NonNull::new(self.as_native_type_ref().obj_meta_list).unwrap())
+    pub fn obj_meta_list(&self) -> Option<MetaList<ObjectMeta>> {
+        match NonNull::new(self.as_native_type_ref().obj_meta_list) {
+            Some(x) => Some(MetaList::<ObjectMeta>::new(x)),
+            None => None
+        }
     }
 
     pub fn display_meta_list(&self) -> Option<MetaList<DisplayMeta>> {
