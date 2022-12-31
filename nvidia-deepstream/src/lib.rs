@@ -3,7 +3,7 @@ pub mod element;
 pub mod meta;
 pub mod osd;
 
-pub(crate) trait Wrapper {
+pub trait Wrapper {
     type NativeType;
 
     fn from_native_type(n: Self::NativeType) -> Self;

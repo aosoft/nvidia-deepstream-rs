@@ -1,8 +1,8 @@
-use std::ffi::CStr;
+use crate::Wrapper;
 use gstreamer::glib;
+use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
-use crate::Wrapper;
 
 #[repr(i32)]
 pub enum MetaType {
@@ -32,19 +32,24 @@ pub enum MetaType {
     StartUserMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_START_USER_META as _,
 }
 
-pub struct MetaListIterator<'a, T> {
+pub struct MetaListIterator<'a, T>
+where
+    T: Wrapper,
+{
     current: Option<NonNull<nvidia_deepstream_sys::GList>>,
     phantom: PhantomData<&'a T>,
 }
 
-impl<'a, T> Iterator for MetaListIterator<'a, T> {
+impl<'a, T: Wrapper> Iterator for MetaListIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.current {
             Some(cur) => unsafe {
                 self.current = NonNull::new(cur.as_ref().next);
-                let item = &*(&cur.as_ref().data as *const glib::ffi::gpointer as *const T);
+                let item = T::from_native_type_ref(
+                    &*(&cur.as_ref().data as *const glib::ffi::gpointer as *const T::NativeType),
+                );
                 Some(item)
             },
             None => None,
@@ -52,12 +57,15 @@ impl<'a, T> Iterator for MetaListIterator<'a, T> {
     }
 }
 
-pub struct MetaList<'a, T> {
+pub struct MetaList<'a, T>
+where
+    T: Wrapper,
+{
     list: NonNull<nvidia_deepstream_sys::GList>,
     phantom: PhantomData<&'a T>,
 }
 
-impl<'a, T> MetaList<'a, T> {
+impl<'a, T: Wrapper> MetaList<'a, T> {
     pub fn new(list: NonNull<nvidia_deepstream_sys::GList>) -> MetaList<'a, T> {
         MetaList {
             list,
@@ -99,7 +107,7 @@ impl MetaPool {
     }
 
     pub fn empty_list(&self) -> MetaList<Meta> {
-         MetaList::<Meta>::new(NonNull::new(self.as_native_type_ref().empty_list).unwrap())
+        MetaList::<Meta>::new(NonNull::new(self.as_native_type_ref().empty_list).unwrap())
     }
 
     pub fn full_list(&self) -> MetaList<Meta> {
@@ -113,7 +121,9 @@ impl BaseMeta {
     pub fn batch_meta(&self) -> Option<&BatchMeta> {
         unsafe {
             if self.as_native_type_ref().batch_meta != std::ptr::null_mut() {
-                Some(BatchMeta::from_native_type_ref(&*self.as_native_type_ref().batch_meta))
+                Some(BatchMeta::from_native_type_ref(
+                    &*self.as_native_type_ref().batch_meta,
+                ))
             } else {
                 None
             }
@@ -236,11 +246,15 @@ impl FrameMeta {
     }
 
     pub fn display_meta_list(&self) -> MetaList<DisplayMeta> {
-        MetaList::<DisplayMeta>::new(NonNull::new(self.as_native_type_ref().display_meta_list).unwrap())
+        MetaList::<DisplayMeta>::new(
+            NonNull::new(self.as_native_type_ref().display_meta_list).unwrap(),
+        )
     }
 
     pub fn frame_user_meta_list(&self) -> MetaList<UserMeta> {
-        MetaList::<UserMeta>::new(NonNull::new(self.as_native_type_ref().frame_user_meta_list).unwrap())
+        MetaList::<UserMeta>::new(
+            NonNull::new(self.as_native_type_ref().frame_user_meta_list).unwrap(),
+        )
     }
 
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
@@ -265,7 +279,11 @@ impl ObjectMeta {
 
     pub fn parent(&self) -> Option<&ObjectMeta> {
         if self.as_native_type_ref().parent != std::ptr::null_mut() {
-            unsafe { Some(ObjectMeta::from_native_type_ref(&*self.as_native_type_ref().parent)) }
+            unsafe {
+                Some(ObjectMeta::from_native_type_ref(
+                    &*self.as_native_type_ref().parent,
+                ))
+            }
         } else {
             None
         }
@@ -284,11 +302,15 @@ impl ObjectMeta {
     }
 
     pub fn detector_bbox_info(&self) -> &crate::bounding_box::Info {
-        crate::bounding_box::Info::from_native_type_ref(&self.as_native_type_ref().detector_bbox_info)
+        crate::bounding_box::Info::from_native_type_ref(
+            &self.as_native_type_ref().detector_bbox_info,
+        )
     }
 
     pub fn tracker_bbox_info(&self) -> &crate::bounding_box::Info {
-        crate::bounding_box::Info::from_native_type_ref(&self.as_native_type_ref().tracker_bbox_info)
+        crate::bounding_box::Info::from_native_type_ref(
+            &self.as_native_type_ref().tracker_bbox_info,
+        )
     }
 
     pub fn confidence(&self) -> f32 {
@@ -312,15 +334,23 @@ impl ObjectMeta {
     }
 
     pub fn obj_label(&self) -> &str {
-        unsafe { CStr::from_ptr(&self.as_native_type_ref().obj_label as _).to_str().unwrap_or_default() }
+        unsafe {
+            CStr::from_ptr(&self.as_native_type_ref().obj_label as _)
+                .to_str()
+                .unwrap_or_default()
+        }
     }
 
     pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {
-        MetaList::<ClassifierMeta>::new(NonNull::new(self.as_native_type_ref().classifier_meta_list).unwrap())
+        MetaList::<ClassifierMeta>::new(
+            NonNull::new(self.as_native_type_ref().classifier_meta_list).unwrap(),
+        )
     }
 
     pub fn obj_user_meta_list(&self) -> MetaList<UserMeta> {
-        MetaList::<UserMeta>::new(NonNull::new(self.as_native_type_ref().obj_user_meta_list).unwrap())
+        MetaList::<UserMeta>::new(
+            NonNull::new(self.as_native_type_ref().obj_user_meta_list).unwrap(),
+        )
     }
 
     pub fn misc_obj_info(&self) -> [i64; 4usize] {
@@ -351,4 +381,3 @@ impl UserMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 }
-
