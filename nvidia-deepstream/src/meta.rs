@@ -47,9 +47,7 @@ impl<'a, T: Wrapper> Iterator for MetaListIterator<'a, T> {
         match self.current {
             Some(cur) => unsafe {
                 self.current = NonNull::new(cur.as_ref().next);
-                let item = T::from_native_type_ref(
-                    &*(&cur.as_ref().data as *const glib::ffi::gpointer as *const T::NativeType),
-                );
+                let item = T::from_native_type_ref(&*(cur.as_ref().data as *const T::NativeType));
                 Some(item)
             },
             None => None,
@@ -73,7 +71,7 @@ impl<'a, T: Wrapper> MetaList<'a, T> {
         }
     }
 
-    fn iter(&self) -> MetaListIterator<T> {
+    pub fn iter(&self) -> MetaListIterator<T> {
         MetaListIterator::<T> {
             current: Some(self.list),
             phantom: PhantomData,
@@ -106,12 +104,18 @@ impl MetaPool {
         self.as_native_type_ref().num_full_elements
     }
 
-    pub fn empty_list(&self) -> MetaList<Meta> {
-        MetaList::<Meta>::new(NonNull::new(self.as_native_type_ref().empty_list).unwrap())
+    pub fn empty_list(&self) -> Option<MetaList<Meta>> {
+        match NonNull::new(self.as_native_type_ref().empty_list) {
+            Some(x) => Some(MetaList::<Meta>::new(x)),
+            None => None
+        }
     }
 
-    pub fn full_list(&self) -> MetaList<Meta> {
-        MetaList::<Meta>::new(NonNull::new(self.as_native_type_ref().full_list).unwrap())
+    pub fn full_list(&self) -> Option<MetaList<Meta>> {
+        match NonNull::new(self.as_native_type_ref().full_list) {
+            Some(x) => Some(MetaList::<Meta>::new(x)),
+            None => None
+        }
     }
 }
 
@@ -245,16 +249,18 @@ impl FrameMeta {
         MetaList::<ObjectMeta>::new(NonNull::new(self.as_native_type_ref().obj_meta_list).unwrap())
     }
 
-    pub fn display_meta_list(&self) -> MetaList<DisplayMeta> {
-        MetaList::<DisplayMeta>::new(
-            NonNull::new(self.as_native_type_ref().display_meta_list).unwrap(),
-        )
+    pub fn display_meta_list(&self) -> Option<MetaList<DisplayMeta>> {
+        match NonNull::new(self.as_native_type_ref().display_meta_list) {
+            Some(x) => Some(MetaList::<DisplayMeta>::new(x)),
+            None => None
+        }
     }
 
-    pub fn frame_user_meta_list(&self) -> MetaList<UserMeta> {
-        MetaList::<UserMeta>::new(
-            NonNull::new(self.as_native_type_ref().frame_user_meta_list).unwrap(),
-        )
+    pub fn frame_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
+        match NonNull::new(self.as_native_type_ref().frame_user_meta_list) {
+            Some(x) => Some(MetaList::<UserMeta>::new(x)),
+            None => None
+        }
     }
 
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
@@ -341,16 +347,18 @@ impl ObjectMeta {
         }
     }
 
-    pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {
-        MetaList::<ClassifierMeta>::new(
-            NonNull::new(self.as_native_type_ref().classifier_meta_list).unwrap(),
-        )
+    pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
+        match NonNull::new(self.as_native_type_ref().classifier_meta_list) {
+            Some(x) => Some(MetaList::<ClassifierMeta>::new(x)),
+            None => None
+        }
     }
 
-    pub fn obj_user_meta_list(&self) -> MetaList<UserMeta> {
-        MetaList::<UserMeta>::new(
-            NonNull::new(self.as_native_type_ref().obj_user_meta_list).unwrap(),
-        )
+    pub fn obj_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
+        match NonNull::new(self.as_native_type_ref().obj_user_meta_list) {
+            Some(x) => Some(MetaList::<UserMeta>::new(x)),
+            None => None
+        }
     }
 
     pub fn misc_obj_info(&self) -> [i64; 4usize] {
@@ -373,8 +381,11 @@ impl ClassifierMeta {
         self.as_native_type_ref().unique_component_id
     }
 
-    pub fn label_info_list(&self) -> MetaList<LabelInfo> {
-        MetaList::<LabelInfo>::new(NonNull::new(self.as_native_type_ref().label_info_list).unwrap())
+    pub fn label_info_list(&self) -> Option<MetaList<LabelInfo>> {
+        match NonNull::new(self.as_native_type_ref().label_info_list) {
+            Some(x) => Some(MetaList::<LabelInfo>::new(x)),
+            None => None
+        }
     }
 
     pub fn classifier_type(&self) -> &str {

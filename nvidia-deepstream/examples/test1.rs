@@ -2,7 +2,9 @@ use std::ffi::CString;
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use std::ptr;
+use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
+use nvidia_deepstream::Wrapper;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
@@ -89,57 +91,46 @@ fn main() {
                 let mut vehicle_count: u32 = 0;
                 let mut person_count: u32 = 0;
                 let mut num_rects: u32 = 0;
-                let batch_meta = &mut *nvidia_deepstream_sys::gst_buffer_get_nvds_batch_meta(
-                    buf.as_mut_ptr() as *mut nvidia_deepstream_sys::GstBuffer,
-                );
+                if let Some(batch_meta) = buf.get_nvds_batch_meta() {
+                    for frame_meta in batch_meta.frame_meta_list().iter() {
+                        for obj_meta in frame_meta.obj_meta_list().iter() {
+                            if obj_meta.class_id() == PGIE_CLASS_ID_VEHICLE {
+                                vehicle_count += 1;
+                                num_rects += 1;
+                            }
+                            if obj_meta.class_id() == PGIE_CLASS_ID_PERSON {
+                                person_count += 1;
+                                num_rects += 1;
+                            }
 
-                let mut l_frame_p = batch_meta.frame_meta_list;
-                while l_frame_p != ptr::null_mut() {
-                    let mut l_frame = &*l_frame_p;
-                    let frame_meta =
-                        &mut *(l_frame.data as *mut nvidia_deepstream_sys::NvDsFrameMeta);
-                    let mut l_obj_p = frame_meta.obj_meta_list;
-                    while l_obj_p != ptr::null_mut() {
-                        let mut l_obj = &*l_obj_p;
-                        let obj_meta =
-                            &mut *(l_obj.data as *mut nvidia_deepstream_sys::NvDsObjectMeta);
-                        if obj_meta.class_id == PGIE_CLASS_ID_VEHICLE {
-                            vehicle_count += 1;
-                            num_rects += 1;
+                            let display_meta = &mut *(nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(batch_meta.as_native_type_ref() as *const _ as _));
+                            display_meta.num_labels = 1;
+
+                            /* Now set the offsets where the string should appear */
+                            display_meta.text_params[0].x_offset = 10;
+                            display_meta.text_params[0].y_offset = 12;
+
+                            /* Font , font-color and font-size */
+                            display_meta.text_params[0].font_params.font_name = CString::new("Serif").unwrap().as_ptr() as _;
+                            display_meta.text_params[0].font_params.font_size = 10;
+                            display_meta.text_params[0].font_params.font_color.red = 1.0;
+                            display_meta.text_params[0].font_params.font_color.green = 1.0;
+                            display_meta.text_params[0].font_params.font_color.blue = 1.0;
+                            display_meta.text_params[0].font_params.font_color.alpha = 1.0;
+
+                            /* Text background color */
+                            display_meta.text_params[0].set_bg_clr = 1;
+                            display_meta.text_params[0].text_bg_clr.red = 0.0;
+                            display_meta.text_params[0].text_bg_clr.green = 0.0;
+                            display_meta.text_params[0].text_bg_clr.blue = 0.0;
+                            display_meta.text_params[0].text_bg_clr.alpha = 1.0;
+
+                            nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta.as_native_type_ref() as *const _ as _, display_meta as _);
                         }
-                        if obj_meta.class_id == PGIE_CLASS_ID_PERSON {
-                            person_count += 1;
-                            num_rects += 1;
-                        }
-
-                        let display_meta = &mut *(nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(batch_meta as _));
-                        display_meta.num_labels = 1;
-
-                        /* Now set the offsets where the string should appear */
-                        display_meta.text_params[0].x_offset = 10;
-                        display_meta.text_params[0].y_offset = 12;
-
-                        /* Font , font-color and font-size */
-                        display_meta.text_params[0].font_params.font_name = CString::new("Serif").unwrap().as_ptr() as _;
-                        display_meta.text_params[0].font_params.font_size = 10;
-                        display_meta.text_params[0].font_params.font_color.red = 1.0;
-                        display_meta.text_params[0].font_params.font_color.green = 1.0;
-                        display_meta.text_params[0].font_params.font_color.blue = 1.0;
-                        display_meta.text_params[0].font_params.font_color.alpha = 1.0;
-
-                        /* Text background color */
-                        display_meta.text_params[0].set_bg_clr = 1;
-                        display_meta.text_params[0].text_bg_clr.red = 0.0;
-                        display_meta.text_params[0].text_bg_clr.green = 0.0;
-                        display_meta.text_params[0].text_bg_clr.blue = 0.0;
-                        display_meta.text_params[0].text_bg_clr.alpha = 1.0;
-
-                        nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta as _, display_meta as _);
-
-                        l_obj_p = l_obj.next;
                     }
-                    l_frame_p = l_frame.next;
                 }
+                println!("Number of objects = {} Vehicle Count = {} Person Count = {}",
+                         num_rects, vehicle_count, person_count);
             }
         }
         PadProbeReturn::Ok

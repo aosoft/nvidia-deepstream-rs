@@ -1,4 +1,5 @@
 pub mod bounding_box;
+pub mod buffer;
 pub mod element;
 pub mod meta;
 pub mod osd;
