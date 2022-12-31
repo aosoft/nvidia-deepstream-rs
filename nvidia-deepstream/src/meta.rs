@@ -1,6 +1,8 @@
+use std::ffi::CStr;
 use gstreamer::glib;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
+use crate::to_wrapper_ref;
 
 #[repr(i32)]
 pub enum MetaType {
@@ -282,11 +284,11 @@ impl ObjectMeta<'_> {
     }
 
     pub fn detector_bbox_info(&self) -> &crate::bounding_box::Info {
-        unsafe { std::mem::transmute(&self.0.detector_bbox_info) }
+       crate::to_wrapper_ref(&self.0.detector_bbox_info)
     }
 
     pub fn tracker_bbox_info(&self) -> &crate::bounding_box::Info {
-        unsafe { std::mem::transmute(&self.0.tracker_bbox_info) }
+        crate::to_wrapper_ref(&self.0.tracker_bbox_info)
     }
 
     pub fn confidence(&self) -> f32 {
@@ -297,10 +299,21 @@ impl ObjectMeta<'_> {
         self.0.tracker_confidence
     }
 
-    //pub fn rect_params(&self) -> NvOSD_RectParams,
-    //pub fn mask_params(&self) -> NvOSD_MaskParams,
-    //pub fn text_params(&self) -> NvOSD_TextParams,
-    //pub fn obj_label(&self) -> [gchar; 128usize],
+    pub fn rect_params(&self) -> &crate::osd::RectParams {
+        to_wrapper_ref(&self.0.rect_params)
+    }
+
+    pub fn mask_params(&self) -> &crate::osd::MaskParams {
+        to_wrapper_ref(&self.0.mask_params)
+    }
+
+    pub fn text_params(&self) -> &crate::osd::TextParams {
+        to_wrapper_ref(&self.0.text_params)
+    }
+
+    pub fn obj_label(&self) -> &str {
+        unsafe { CStr::from_ptr(&self.0.obj_label as _).to_str().unwrap_or_default() }
+    }
 
     pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {
         MetaList::<ClassifierMeta>::new(NonNull::new(self.0.classifier_meta_list).unwrap())
