@@ -185,6 +185,17 @@ impl BatchMeta {
     pub fn frame_meta_list(&self) -> MetaList<FrameMeta> {
         MetaList::<FrameMeta>::new(NonNull::new(self.as_native_type_ref().frame_meta_list).unwrap())
     }
+
+    pub fn acquire_display_meta_from_pool(&self) -> Option<&mut DisplayMeta> {
+        unsafe {
+            let meta = nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(self.as_native_type_ref() as *const _ as _);
+            if meta != std::ptr::null_mut() {
+                unsafe { Some(DisplayMeta::from_native_type_mut(&mut *meta)) }
+            } else {
+                None
+            }
+        }
+    }
 }
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);

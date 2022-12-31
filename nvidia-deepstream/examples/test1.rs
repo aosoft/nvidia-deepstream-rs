@@ -108,14 +108,15 @@ fn main() {
                                     num_rects += 1;
                                 }
 
-                                let display_meta = &mut *(nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(batch_meta.as_native_type_ref() as *const _ as _));
+                                let display_meta = batch_meta.acquire_display_meta_from_pool();
+                                /*
                                 display_meta.num_labels = 1;
 
-                                /* Now set the offsets where the string should appear */
+                                // Now set the offsets where the string should appear
                                 display_meta.text_params[0].x_offset = 10;
                                 display_meta.text_params[0].y_offset = 12;
 
-                                /* Font , font-color and font-size */
+                                // Font , font-color and font-size
                                 display_meta.text_params[0].font_params.font_name = CString::new("Serif").unwrap().as_ptr() as _;
                                 display_meta.text_params[0].font_params.font_size = 10;
                                 display_meta.text_params[0].font_params.font_color.red = 1.0;
@@ -123,7 +124,7 @@ fn main() {
                                 display_meta.text_params[0].font_params.font_color.blue = 1.0;
                                 display_meta.text_params[0].font_params.font_color.alpha = 1.0;
 
-                                /* Text background color */
+                                // Text background color
                                 display_meta.text_params[0].set_bg_clr = 1;
                                 display_meta.text_params[0].text_bg_clr.red = 0.0;
                                 display_meta.text_params[0].text_bg_clr.green = 0.0;
@@ -131,6 +132,7 @@ fn main() {
                                 display_meta.text_params[0].text_bg_clr.alpha = 1.0;
 
                                 nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta.as_native_type_ref() as *const _ as _, display_meta as _);
+                                */
                             }
                         }
                     }
