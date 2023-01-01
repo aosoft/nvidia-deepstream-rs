@@ -110,7 +110,7 @@ fn main() {
                                 }
 
                                 if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
-                                    display_meta.set_text_params(0,&[TextParamsBuilder::new()
+                                    display_meta.set_text_params(&[TextParamsBuilder::new()
                                         .x_offset(10)
                                         .y_offset(12)
                                         .font_params(FontParamsBuilder::new()

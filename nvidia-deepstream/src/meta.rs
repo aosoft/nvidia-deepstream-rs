@@ -498,15 +498,15 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_rect_params(&mut self, start: usize, params: &[crate::osd::RectParams]) {
+    pub fn set_rect_params(&mut self, params: &[crate::osd::RectParams]) {
         let len = std::cmp::min(
-            self.as_native_type_ref().rect_params.len() - start,
+            self.as_native_type_ref().rect_params.len(),
             params.len(),
         );
 
-        self.as_native_type_mut().num_rects = (start + len) as _;
+        self.as_native_type_mut().num_rects = len as _;
         for i in 0..len {
-            self.as_native_type_mut().rect_params[start + i] = *params[i].as_native_type_ref();
+            self.as_native_type_mut().rect_params[i] = *params[i].as_native_type_ref();
         }
     }
 
@@ -522,15 +522,15 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_text_params(&mut self, start: usize, params: &[crate::osd::TextParams]) {
+    pub fn set_text_params(&mut self, params: &[crate::osd::TextParams]) {
         let len = std::cmp::min(
-            self.as_native_type_ref().text_params.len() - start,
+            self.as_native_type_ref().text_params.len(),
             params.len(),
         );
 
-        self.as_native_type_mut().num_labels = (start + len) as _;
+        self.as_native_type_mut().num_labels = len as _;
         for i in 0..len {
-            self.as_native_type_mut().text_params[start + i] = *params[i].as_native_type_ref();
+            self.as_native_type_mut().text_params[i] = *params[i].as_native_type_ref();
         }
     }
 
@@ -546,15 +546,15 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_line_params(&mut self, start: usize, params: &[crate::osd::LineParams]) {
+    pub fn set_line_params(&mut self, params: &[crate::osd::LineParams]) {
         let len = std::cmp::min(
-            self.as_native_type_ref().line_params.len() - start,
+            self.as_native_type_ref().line_params.len(),
             params.len(),
         );
 
-        self.as_native_type_mut().num_lines = (start + len) as _;
+        self.as_native_type_mut().num_lines = len as _;
         for i in 0..len {
-            self.as_native_type_mut().line_params[start + i] = *params[i].as_native_type_ref();
+            self.as_native_type_mut().line_params[i] = *params[i].as_native_type_ref();
         }
     }
 
@@ -570,15 +570,15 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_arrow_params(&mut self, start: usize, params: &[crate::osd::ArrowParams]) {
+    pub fn set_arrow_params(&mut self, params: &[crate::osd::ArrowParams]) {
         let len = std::cmp::min(
-            self.as_native_type_ref().arrow_params.len() - start,
+            self.as_native_type_ref().arrow_params.len(),
             params.len(),
         );
 
-        self.as_native_type_mut().num_arrows = (start + len) as _;
+        self.as_native_type_mut().num_arrows = len as _;
         for i in 0..len {
-            self.as_native_type_mut().arrow_params[start + i] = *params[i].as_native_type_ref();
+            self.as_native_type_mut().arrow_params[i] = *params[i].as_native_type_ref();
         }
     }
 
@@ -594,15 +594,15 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_circle_params(&mut self, start: usize, params: &[crate::osd::CircleParams]) {
+    pub fn set_circle_params(&mut self, params: &[crate::osd::CircleParams]) {
         let len = std::cmp::min(
-            self.as_native_type_ref().circle_params.len() - start,
+            self.as_native_type_ref().circle_params.len(),
             params.len(),
         );
 
-        self.as_native_type_mut().num_circles = (start + len) as _;
+        self.as_native_type_mut().num_circles = len as _;
         for i in 0..len {
-            self.as_native_type_mut().circle_params[start + i] = *params[i].as_native_type_ref();
+            self.as_native_type_mut().circle_params[i] = *params[i].as_native_type_ref();
         }
     }
 
