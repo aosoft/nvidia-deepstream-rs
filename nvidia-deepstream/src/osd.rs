@@ -19,6 +19,15 @@ pub enum ArrowHeadDirection {
 crate::wrapper_impl!(ColorParams, nvidia_deepstream_sys::NvOSD_ColorParams);
 
 impl ColorParams {
+    pub fn new(red: f64, green: f64, blue: f64, alpha: f64) -> ColorParams {
+        ColorParams::from_native_type(nvidia_deepstream_sys::NvOSD_ColorParams {
+            red,
+            green,
+            blue,
+            alpha,
+        })
+    }
+
     pub fn red(&self) -> f64 {
         self.as_native_type_ref().red
     }
@@ -34,6 +43,10 @@ impl ColorParams {
     pub fn alpha(&self) -> f64 {
         self.as_native_type_ref().alpha
     }
+
+    pub fn black() -> ColorParams { ColorParams::new(0.0, 0.0, 0.0, 1.0) }
+
+    pub fn white() -> ColorParams { ColorParams::new(1.0, 1.0, 1.0, 1.0) }
 }
 
 crate::wrapper_impl!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
@@ -53,6 +66,37 @@ impl FontParams {
 
     pub fn font_color(&self) -> &ColorParams {
         ColorParams::from_native_type_ref(&self.as_native_type_ref().font_color)
+    }
+}
+
+pub struct FontParamsBuilder {
+    font_name: Option<&'static str>,
+    font_size: Option<u32>,
+    font_color: Option<ColorParams>
+}
+
+impl FontParamsBuilder {
+    pub fn font_name(mut self, name: &'static str) -> Self {
+        self.font_name = Some(name);
+        self
+    }
+
+    pub fn font_size(mut self, size: u32) -> Self {
+        self.font_size = Some(size);
+        self
+    }
+
+    pub fn font_color(mut self, color: ColorParams) -> Self {
+        self.font_color = Some(color);
+        self
+    }
+
+    pub fn build(self) -> FontParams {
+        FontParams::from_native_type(nvidia_deepstream_sys::NvOSD_FontParams {
+            font_name: self.font_name.unwrap_or_default().as_ptr() as _,
+            font_size: 0,
+            font_color: *self.font_color.unwrap_or(ColorParams::black()).as_native_type_ref(),
+        })
     }
 }
 
@@ -86,6 +130,10 @@ impl TextParams {
     pub fn text_bg_clr(&self) -> &ColorParams {
         ColorParams::from_native_type_ref(&self.as_native_type_ref().text_bg_clr)
     }
+}
+
+pub struct TextParamsBuilder {
+
 }
 
 crate::wrapper_impl!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
