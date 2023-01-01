@@ -2,6 +2,7 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
+use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::WrapperExt;
 use std::ffi::CString;
 use std::ptr;
@@ -108,37 +109,27 @@ fn main() {
                                     num_rects += 1;
                                 }
 
-                                let display_meta = batch_meta.acquire_display_meta_from_pool();
-                                /*
-                                display_meta.num_labels = 1;
-
-                                // Now set the offsets where the string should appear
-                                display_meta.text_params[0].x_offset = 10;
-                                display_meta.text_params[0].y_offset = 12;
-
-                                // Font , font-color and font-size
-                                display_meta.text_params[0].font_params.font_name = CString::new("Serif").unwrap().as_ptr() as _;
-                                display_meta.text_params[0].font_params.font_size = 10;
-                                display_meta.text_params[0].font_params.font_color.red = 1.0;
-                                display_meta.text_params[0].font_params.font_color.green = 1.0;
-                                display_meta.text_params[0].font_params.font_color.blue = 1.0;
-                                display_meta.text_params[0].font_params.font_color.alpha = 1.0;
-
-                                // Text background color
-                                display_meta.text_params[0].set_bg_clr = 1;
-                                display_meta.text_params[0].text_bg_clr.red = 0.0;
-                                display_meta.text_params[0].text_bg_clr.green = 0.0;
-                                display_meta.text_params[0].text_bg_clr.blue = 0.0;
-                                display_meta.text_params[0].text_bg_clr.alpha = 1.0;
-
-                                nvidia_deepstream_sys::nvds_add_display_meta_to_frame(frame_meta.as_native_type_ref() as *const _ as _, display_meta as _);
-                                */
+                                if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
+                                    display_meta.set_text_params(0,&[TextParamsBuilder::new()
+                                        .x_offset(10)
+                                        .y_offset(12)
+                                        .font_params(FontParamsBuilder::new()
+                                            .font_name("Serif")
+                                            .font_size(10)
+                                            .font_color(ColorParams::white())
+                                            .build())
+                                        .text_bg_clr(ColorParams::black())
+                                        .build()]);
+                                    frame_meta.add_display_meta(display_meta);
+                                }
                             }
                         }
                     }
                 }
-                println!("Number of objects = {} Vehicle Count = {} Person Count = {}",
-                         num_rects, vehicle_count, person_count);
+                println!(
+                    "Number of objects = {} Vehicle Count = {} Person Count = {}",
+                    num_rects, vehicle_count, person_count
+                );
             }
         }
         PadProbeReturn::Ok

@@ -76,6 +76,14 @@ pub struct FontParamsBuilder {
 }
 
 impl FontParamsBuilder {
+    pub fn new() -> FontParamsBuilder {
+        FontParamsBuilder {
+            font_name: None,
+            font_size: None,
+            font_color: None,
+        }
+    }
+
     pub fn font_name(mut self, name: &'static str) -> Self {
         self.font_name = Some(name);
         self
@@ -123,22 +131,80 @@ impl TextParams {
         FontParams::from_native_type_ref(&self.as_native_type_ref().font_params)
     }
 
-    pub fn set_bg_clr(&self) -> i32 {
-        self.as_native_type_ref().set_bg_clr
-    }
-
-    pub fn text_bg_clr(&self) -> &ColorParams {
-        ColorParams::from_native_type_ref(&self.as_native_type_ref().text_bg_clr)
+    pub fn text_bg_clr(&self) -> Option<&ColorParams> {
+        if self.as_native_type_ref().set_bg_clr != 0 {
+            Some(ColorParams::from_native_type_ref(&self.as_native_type_ref().text_bg_clr))
+        } else {
+            None
+        }
     }
 }
 
 pub struct TextParamsBuilder {
+    display_text: Option<*mut i8>,
+    x_offset: Option<u32>,
+    y_offset: Option<u32>,
+    font_params: Option<FontParams>,
+    text_bg_clr: Option<ColorParams>
+}
 
+impl TextParamsBuilder {
+    pub fn new() -> TextParamsBuilder {
+        TextParamsBuilder {
+            display_text: None,
+            x_offset: None,
+            y_offset: None,
+            font_params: None,
+            text_bg_clr: None,
+        }
+    }
+
+    pub fn display_text(mut self, text: *mut i8) -> Self {
+        self.display_text = Some(text);
+        self
+    }
+
+    pub fn x_offset(mut self, offset: u32) -> Self {
+        self.x_offset = Some(offset);
+        self
+    }
+
+    pub fn y_offset(mut self, offset: u32) -> Self {
+        self.y_offset = Some(offset);
+        self
+    }
+
+    pub fn font_params(mut self, params: FontParams) -> Self {
+        self.font_params = Some(params);
+        self
+    }
+
+    pub fn text_bg_clr(mut self, params: ColorParams) -> Self {
+        self.text_bg_clr = Some(params);
+        self
+    }
+
+    pub fn build(self) -> TextParams {
+        TextParams::from_native_type(nvidia_deepstream_sys::NvOSD_TextParams {
+            display_text: self.display_text.unwrap_or(std::ptr::null_mut()) as _,
+            x_offset: self.x_offset.unwrap_or_default(),
+            y_offset: self.y_offset.unwrap_or_default(),
+            font_params: self.font_params.unwrap_or_default().as_native_type(),
+            set_bg_clr: if self.text_bg_clr.is_some() { 1 } else { 0},
+            text_bg_clr: self.text_bg_clr.unwrap_or_default().as_native_type(),
+        })
+    }
 }
 
 crate::wrapper_impl!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
 
 impl ColorInfo {
+    pub fn new(id: i32, color: ColorParams) -> ColorInfo {
+        ColorInfo::from_native_type(nvidia_deepstream_sys::NvOSD_Color_info {
+            id: id, color: color.as_native_type()
+        })
+    }
+
     pub fn id(&self) -> i32 {
         self.as_native_type_ref().id
     }

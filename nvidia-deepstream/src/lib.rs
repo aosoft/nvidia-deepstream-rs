@@ -8,6 +8,8 @@ pub trait WrapperExt {
     type NativeType;
 
     fn from_native_type(n: Self::NativeType) -> Self;
+    fn as_native_type(&self) -> Self::NativeType;
+
     fn from_native_type_ref(n: &Self::NativeType) -> &Self;
     fn as_native_type_ref(&self) -> &Self::NativeType;
 
@@ -30,6 +32,11 @@ macro_rules! wrapper_impl {
             }
 
             #[inline]
+            fn as_native_type(&self) -> Self::NativeType {
+                self.0
+            }
+
+            #[inline]
             fn from_native_type_ref(n: &Self::NativeType) -> &Self {
                 unsafe { std::mem::transmute(n) }
             }
@@ -47,6 +54,12 @@ macro_rules! wrapper_impl {
             #[inline]
             fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
                 &mut self.0
+            }
+        }
+
+        impl Default for $W {
+            fn default() -> Self {
+                unsafe { std::mem::zeroed::<$W>() }
             }
         }
     };

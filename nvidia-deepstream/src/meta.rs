@@ -1,5 +1,4 @@
 use crate::WrapperExt;
-use gstreamer::glib;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
@@ -188,9 +187,11 @@ impl BatchMeta {
 
     pub fn acquire_display_meta_from_pool(&self) -> Option<&mut DisplayMeta> {
         unsafe {
-            let meta = nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(self.as_native_type_ref() as *const _ as _);
+            let meta = nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(
+                self.as_native_type_ref() as *const _ as _,
+            );
             if meta != std::ptr::null_mut() {
-                unsafe { Some(DisplayMeta::from_native_type_mut(&mut *meta)) }
+                Some(DisplayMeta::from_native_type_mut(&mut *meta))
             } else {
                 None
             }
@@ -287,6 +288,15 @@ impl FrameMeta {
 
     pub fn pipeline_height(&self) -> u32 {
         self.as_native_type_ref().pipeline_height
+    }
+
+    pub fn add_display_meta(&self, meta: &DisplayMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_display_meta_to_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
     }
 }
 
@@ -489,7 +499,12 @@ impl DisplayMeta {
     }
 
     pub fn set_rect_params(&mut self, start: usize, params: &[crate::osd::RectParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().rect_params.len() - start, params.len());
+        let len = std::cmp::min(
+            self.as_native_type_ref().rect_params.len() - start,
+            params.len(),
+        );
+
+        self.as_native_type_mut().num_rects = (start + len) as _;
         for i in 0..len {
             self.as_native_type_mut().rect_params[start + i] = *params[i].as_native_type_ref();
         }
@@ -508,7 +523,12 @@ impl DisplayMeta {
     }
 
     pub fn set_text_params(&mut self, start: usize, params: &[crate::osd::TextParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().text_params.len() - start, params.len());
+        let len = std::cmp::min(
+            self.as_native_type_ref().text_params.len() - start,
+            params.len(),
+        );
+
+        self.as_native_type_mut().num_labels = (start + len) as _;
         for i in 0..len {
             self.as_native_type_mut().text_params[start + i] = *params[i].as_native_type_ref();
         }
@@ -527,7 +547,12 @@ impl DisplayMeta {
     }
 
     pub fn set_line_params(&mut self, start: usize, params: &[crate::osd::LineParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().line_params.len() - start, params.len());
+        let len = std::cmp::min(
+            self.as_native_type_ref().line_params.len() - start,
+            params.len(),
+        );
+
+        self.as_native_type_mut().num_lines = (start + len) as _;
         for i in 0..len {
             self.as_native_type_mut().line_params[start + i] = *params[i].as_native_type_ref();
         }
@@ -546,7 +571,12 @@ impl DisplayMeta {
     }
 
     pub fn set_arrow_params(&mut self, start: usize, params: &[crate::osd::ArrowParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().arrow_params.len() - start, params.len());
+        let len = std::cmp::min(
+            self.as_native_type_ref().arrow_params.len() - start,
+            params.len(),
+        );
+
+        self.as_native_type_mut().num_arrows = (start + len) as _;
         for i in 0..len {
             self.as_native_type_mut().arrow_params[start + i] = *params[i].as_native_type_ref();
         }
@@ -565,7 +595,12 @@ impl DisplayMeta {
     }
 
     pub fn set_circle_params(&mut self, start: usize, params: &[crate::osd::CircleParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().circle_params.len() - start, params.len());
+        let len = std::cmp::min(
+            self.as_native_type_ref().circle_params.len() - start,
+            params.len(),
+        );
+
+        self.as_native_type_mut().num_circles = (start + len) as _;
         for i in 0..len {
             self.as_native_type_mut().circle_params[start + i] = *params[i].as_native_type_ref();
         }
