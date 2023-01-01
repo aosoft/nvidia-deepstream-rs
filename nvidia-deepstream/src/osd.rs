@@ -44,18 +44,20 @@ impl ColorParams {
         self.as_native_type_ref().alpha
     }
 
-    pub fn black() -> ColorParams { ColorParams::new(0.0, 0.0, 0.0, 1.0) }
+    pub fn black() -> ColorParams {
+        ColorParams::new(0.0, 0.0, 0.0, 1.0)
+    }
 
-    pub fn white() -> ColorParams { ColorParams::new(1.0, 1.0, 1.0, 1.0) }
+    pub fn white() -> ColorParams {
+        ColorParams::new(1.0, 1.0, 1.0, 1.0)
+    }
 }
 
 crate::wrapper_impl!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
 
 impl FontParams {
     pub fn font_name(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(self.as_native_type_ref().font_name)
-        }
+        unsafe { CStr::from_ptr(self.as_native_type_ref().font_name) }
     }
 
     pub fn font_size(&self) -> u32 {
@@ -70,7 +72,7 @@ impl FontParams {
 pub struct FontParamsBuilder {
     font_name: Option<&'static CStr>,
     font_size: Option<u32>,
-    font_color: Option<ColorParams>
+    font_color: Option<ColorParams>,
 }
 
 impl FontParamsBuilder {
@@ -101,7 +103,10 @@ impl FontParamsBuilder {
         FontParams::from_native_type(nvidia_deepstream_sys::NvOSD_FontParams {
             font_name: self.font_name.unwrap_or_default().as_ptr() as _,
             font_size: self.font_size.unwrap_or(8),
-            font_color: *self.font_color.unwrap_or(ColorParams::black()).as_native_type_ref(),
+            font_color: *self
+                .font_color
+                .unwrap_or(ColorParams::black())
+                .as_native_type_ref(),
         })
     }
 }
@@ -110,9 +115,7 @@ crate::wrapper_impl!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
 
 impl TextParams {
     pub fn display_text(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(self.as_native_type_ref().display_text)
-        }
+        unsafe { CStr::from_ptr(self.as_native_type_ref().display_text) }
     }
 
     pub fn x_offset(&self) -> u32 {
@@ -129,7 +132,9 @@ impl TextParams {
 
     pub fn text_bg_clr(&self) -> Option<&ColorParams> {
         if self.as_native_type_ref().set_bg_clr != 0 {
-            Some(ColorParams::from_native_type_ref(&self.as_native_type_ref().text_bg_clr))
+            Some(ColorParams::from_native_type_ref(
+                &self.as_native_type_ref().text_bg_clr,
+            ))
         } else {
             None
         }
@@ -137,17 +142,19 @@ impl TextParams {
 }
 
 pub struct TextParamsBuilder {
-    display_text: Option<&'static CStr>,
+    display_text: Option<String>,
+    display_text_ref: Option<&'static str>,
     x_offset: Option<u32>,
     y_offset: Option<u32>,
     font_params: Option<FontParams>,
-    text_bg_clr: Option<ColorParams>
+    text_bg_clr: Option<ColorParams>,
 }
 
 impl TextParamsBuilder {
     pub fn new() -> TextParamsBuilder {
         TextParamsBuilder {
             display_text: None,
+            display_text_ref: None,
             x_offset: None,
             y_offset: None,
             font_params: None,
@@ -155,8 +162,15 @@ impl TextParamsBuilder {
         }
     }
 
-    pub fn display_text(mut self, text: &'static CStr) -> Self {
+    pub fn display_text(mut self, text: String) -> Self {
         self.display_text = Some(text);
+        self.display_text_ref = None;
+        self
+    }
+
+    pub fn display_text_ref(mut self, text: &'static str) -> Self {
+        self.display_text = None;
+        self.display_text_ref = Some(text);
         self
     }
 
@@ -180,13 +194,27 @@ impl TextParamsBuilder {
         self
     }
 
-    pub fn build(self) -> TextParams {
+    pub unsafe fn build(self) -> TextParams {
+        let (p, len) = if let Some(text) = &self.display_text {
+            (text.as_ptr(), text.len())
+        } else if let Some(text) = self.display_text_ref {
+            (text.as_ptr(), text.len())
+        } else {
+            (std::ptr::null(), 0)
+        };
+        let display_text = if p != std::ptr::null() {
+            let r = glib::ffi::g_malloc0(len + 1);
+            r.copy_from(p as _, len);
+            r
+        } else {
+            std::ptr::null_mut()
+        };
         TextParams::from_native_type(nvidia_deepstream_sys::NvOSD_TextParams {
-            display_text: self.display_text.unwrap_or_default().as_ptr() as _,
+            display_text: display_text as _,
             x_offset: self.x_offset.unwrap_or_default(),
             y_offset: self.y_offset.unwrap_or_default(),
             font_params: self.font_params.unwrap_or_default().as_native_type(),
-            set_bg_clr: if self.text_bg_clr.is_some() { 1 } else { 0},
+            set_bg_clr: if self.text_bg_clr.is_some() { 1 } else { 0 },
             text_bg_clr: self.text_bg_clr.unwrap_or_default().as_native_type(),
         })
     }
@@ -197,7 +225,8 @@ crate::wrapper_impl!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
 impl ColorInfo {
     pub fn new(id: i32, color: ColorParams) -> ColorInfo {
         ColorInfo::from_native_type(nvidia_deepstream_sys::NvOSD_Color_info {
-            id: id, color: color.as_native_type()
+            id: id,
+            color: color.as_native_type(),
         })
     }
 

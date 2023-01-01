@@ -3,14 +3,11 @@ use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
 use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
-use nvidia_deepstream::WrapperExt;
-use std::ffi::{CStr, CString};
-use std::ptr;
+use std::ffi::CStr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
 
-static MAX_DISPLAY_LEN: i32 = 64;
 static PGIE_CLASS_ID_VEHICLE: i32 = 0;
 static PGIE_CLASS_ID_PERSON: i32 = 2;
 
@@ -90,7 +87,7 @@ fn main() {
     .unwrap();
 
     let osd_sink_pad = nvosd.static_pad("sink").unwrap();
-    osd_sink_pad.add_probe(PadProbeType::BUFFER, |pad, info| {
+    osd_sink_pad.add_probe(PadProbeType::BUFFER, |_, info| {
         if let PadProbeData::Buffer(buf) = &info.data.as_ref().unwrap() {
             unsafe {
                 let mut vehicle_count: u32 = 0;
@@ -109,19 +106,13 @@ fn main() {
                                     num_rects += 1;
                                 }
 
-                                let display_text_org: &'static str = "Person = , Vehicle = \0";
-                                let font_name: &'static str = "Serif\0";
-
-                                let display_text = nvidia_deepstream_sys::g_malloc0(64);
-                                unsafe { display_text.copy_from(display_text_org.as_ptr() as _, display_text_org.len()) }
-
                                 if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
                                     display_meta.set_text_params(&[TextParamsBuilder::new()
-                                        .display_text(unsafe { CStr::from_ptr(display_text as _) })
+                                        .display_text(format!("Person = {}, Vehicle = {}", person_count, vehicle_count))
                                         .x_offset(10)
                                         .y_offset(12)
                                         .font_params(FontParamsBuilder::new()
-                                            .font_name(unsafe { CStr::from_ptr(font_name.as_ptr() as _)} )
+                                            .font_name(CStr::from_ptr("Serif\0".as_ptr() as _))
                                             .font_size(10)
                                             .font_color(ColorParams::white())
                                             .build())
