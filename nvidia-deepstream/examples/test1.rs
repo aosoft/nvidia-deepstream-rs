@@ -4,7 +4,7 @@ use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
 use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::WrapperExt;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::ptr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
@@ -109,12 +109,19 @@ fn main() {
                                     num_rects += 1;
                                 }
 
+                                let display_text_org: &'static str = "Person = , Vehicle = \0";
+                                let font_name: &'static str = "Serif\0";
+
+                                let display_text = nvidia_deepstream_sys::g_malloc0(64);
+                                unsafe { display_text.copy_from(display_text_org.as_ptr() as _, display_text_org.len()) }
+
                                 if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
                                     display_meta.set_text_params(&[TextParamsBuilder::new()
+                                        .display_text(unsafe { CStr::from_ptr(display_text as _) })
                                         .x_offset(10)
                                         .y_offset(12)
                                         .font_params(FontParamsBuilder::new()
-                                            .font_name("Serif")
+                                            .font_name(unsafe { CStr::from_ptr(font_name.as_ptr() as _)} )
                                             .font_size(10)
                                             .font_color(ColorParams::white())
                                             .build())

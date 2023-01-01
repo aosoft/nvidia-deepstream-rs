@@ -52,11 +52,9 @@ impl ColorParams {
 crate::wrapper_impl!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
 
 impl FontParams {
-    pub fn font_name(&self) -> &str {
+    pub fn font_name(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(self.as_native_type_ref().font_name)
-                .to_str()
-                .unwrap_or_default()
         }
     }
 
@@ -70,7 +68,7 @@ impl FontParams {
 }
 
 pub struct FontParamsBuilder {
-    font_name: Option<&'static str>,
+    font_name: Option<&'static CStr>,
     font_size: Option<u32>,
     font_color: Option<ColorParams>
 }
@@ -84,7 +82,7 @@ impl FontParamsBuilder {
         }
     }
 
-    pub fn font_name(mut self, name: &'static str) -> Self {
+    pub fn font_name(mut self, name: &'static CStr) -> Self {
         self.font_name = Some(name);
         self
     }
@@ -102,7 +100,7 @@ impl FontParamsBuilder {
     pub fn build(self) -> FontParams {
         FontParams::from_native_type(nvidia_deepstream_sys::NvOSD_FontParams {
             font_name: self.font_name.unwrap_or_default().as_ptr() as _,
-            font_size: 0,
+            font_size: self.font_size.unwrap_or(8),
             font_color: *self.font_color.unwrap_or(ColorParams::black()).as_native_type_ref(),
         })
     }
@@ -111,11 +109,9 @@ impl FontParamsBuilder {
 crate::wrapper_impl!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
 
 impl TextParams {
-    pub fn display_text(&self) -> &str {
+    pub fn display_text(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(self.as_native_type_ref().display_text)
-                .to_str()
-                .unwrap_or_default()
         }
     }
 
@@ -141,7 +137,7 @@ impl TextParams {
 }
 
 pub struct TextParamsBuilder {
-    display_text: Option<*mut i8>,
+    display_text: Option<&'static CStr>,
     x_offset: Option<u32>,
     y_offset: Option<u32>,
     font_params: Option<FontParams>,
@@ -159,7 +155,7 @@ impl TextParamsBuilder {
         }
     }
 
-    pub fn display_text(mut self, text: *mut i8) -> Self {
+    pub fn display_text(mut self, text: &'static CStr) -> Self {
         self.display_text = Some(text);
         self
     }
@@ -186,7 +182,7 @@ impl TextParamsBuilder {
 
     pub fn build(self) -> TextParams {
         TextParams::from_native_type(nvidia_deepstream_sys::NvOSD_TextParams {
-            display_text: self.display_text.unwrap_or(std::ptr::null_mut()) as _,
+            display_text: self.display_text.unwrap_or_default().as_ptr() as _,
             x_offset: self.x_offset.unwrap_or_default(),
             y_offset: self.y_offset.unwrap_or_default(),
             font_params: self.font_params.unwrap_or_default().as_native_type(),
