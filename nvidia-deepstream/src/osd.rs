@@ -285,6 +285,88 @@ impl RectParams {
     }
 }
 
+pub struct RectParamsBuilder {
+    pub left: Option<f32>,
+    pub top: Option<f32>,
+    pub width: Option<f32>,
+    pub height: Option<f32>,
+    pub border_width: Option<u32>,
+    pub border_color: Option<ColorParams>,
+    pub bg_color: Option<ColorParams>,
+    pub color_id: Option<i32>,
+}
+
+impl RectParamsBuilder {
+    pub fn new() -> RectParamsBuilder {
+        RectParamsBuilder {
+            left: None,
+            top: None,
+            width: None,
+            height: None,
+            border_width: None,
+            border_color: None,
+            bg_color: None,
+            color_id: None,
+        }
+    }
+
+    pub fn left(mut self, left: f32) -> Self {
+        self.left = Some(left);
+        self
+    }
+
+    pub fn top(mut self, top: f32) -> Self {
+        self.top = Some(top);
+        self
+    }
+
+    pub fn width(mut self, width: f32) -> Self {
+        self.width = Some(width);
+        self
+    }
+
+    pub fn height(mut self, height: f32) -> Self {
+        self.height = Some(height);
+        self
+    }
+
+    pub fn border_width(mut self, width: u32) -> Self {
+        self.border_width = Some(width);
+        self
+    }
+
+    pub fn border_color(mut self, params: ColorParams) -> Self {
+        self.border_color = Some(params);
+        self
+    }
+
+    pub fn bg_color(mut self, params: Option<ColorParams>) -> Self {
+        self.bg_color = params;
+        self
+    }
+
+    pub fn color_id(mut self, id: Option<i32>) -> Self {
+        self.color_id = id;
+        self
+    }
+
+    pub fn build(self) -> RectParams {
+        RectParams::from_native_type(nvidia_deepstream_sys::_NvOSD_RectParams {
+            left: self.left.unwrap_or_default(),
+            top: self.top.unwrap_or_default(),
+            width: self.width.unwrap_or_default(),
+            height: self.height.unwrap_or_default(),
+            border_width: self.border_width.unwrap_or_default(),
+            border_color: self.border_color.unwrap_or_default().as_native_type(),
+            has_bg_color: if self.bg_color.is_some() { 1 } else { 0 },
+            reserved: 0,
+            bg_color: self.bg_color.unwrap_or_default().as_native_type(),
+            has_color_info: if self.color_id.is_some() { 1 } else { 0 },
+            color_id: self.color_id.unwrap_or_default(),
+        })
+    }
+}
+
 crate::wrapper_impl!(MaskParams, nvidia_deepstream_sys::NvOSD_MaskParams);
 
 impl MaskParams {
