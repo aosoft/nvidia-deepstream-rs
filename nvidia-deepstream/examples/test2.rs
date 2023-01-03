@@ -1,8 +1,11 @@
-use gstreamer::glib::ObjectExt;
+use std::ffi::CStr;
+use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
+use gstreamer::prelude::*;
+use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
+use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 
 static CONFIG_YML: &str = "dstest2_config.yml";
-static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
 
 static PGIE_CLASS_ID_VEHICLE: i32 = 0;
 static PGIE_CLASS_ID_PERSON: i32 = 2;
@@ -40,15 +43,15 @@ fn main() {
         .unwrap();
 
     let sgie1 = gstreamer::ElementFactory::make("nvinfer")
-        .name("primary-nvinference-engine")
+        .name("secondary1-nvinference-engine")
         .build()
         .unwrap();
     let sgie2 = gstreamer::ElementFactory::make("nvinfer")
-        .name("primary-nvinference-engine")
+        .name("secondary2-nvinference-engine")
         .build()
         .unwrap();
     let sgie3 = gstreamer::ElementFactory::make("nvinfer")
-        .name("primary-nvinference-engine")
+        .name("secondary3-nvinference-engine")
         .build()
         .unwrap();
 
@@ -75,5 +78,109 @@ fn main() {
     sgie2.set_property("config-file-path", "dstest2_sgie2_config.yml");
     sgie3.set_property("config-file-path", "dstest2_sgie3_config.yml");
 
-    tracker.nvds_parse_tracker(CONFIG_YML, "tracker").unwrap();
+    nvtracker.nvds_parse_tracker(CONFIG_YML, "tracker").unwrap();
+
+    pipeline
+        .add_many(&[
+            &source,
+            &h264parser,
+            &decoder,
+            &streammux,
+            &pgie,
+            &nvtracker,
+            &sgie1,
+            &sgie2,
+            &sgie3,
+            &nvvidconv,
+            &nvosd,
+            &sink,
+        ])
+        .unwrap();
+
+    let sinkpad = streammux.request_pad_simple("sink_0").unwrap();
+    let srcpad = decoder.static_pad("src").unwrap();
+    srcpad.link(&sinkpad).unwrap();
+
+    gstreamer::Element::link_many(&[&source, &h264parser, &decoder]).unwrap();
+    gstreamer::Element::link_many(&[
+        &streammux,
+        &pgie,
+        &nvtracker,
+        &sgie1,
+        &sgie2,
+        &sgie3,
+        &nvvidconv,
+        &nvosd,
+        &sink,
+    ])
+    .unwrap();
+
+    let osd_sink_pad = nvosd.static_pad("sink").unwrap();
+    osd_sink_pad.add_probe(PadProbeType::BUFFER, |_, info| {
+        if let PadProbeData::Buffer(buf) = &info.data.as_ref().unwrap() {
+            unsafe {
+                let mut vehicle_count: u32 = 0;
+                let mut person_count: u32 = 0;
+                let mut num_rects: u32 = 0;
+                if let Some(batch_meta) = buf.get_nvds_batch_meta() {
+                    for frame_meta in batch_meta.frame_meta_list().iter() {
+                        if let Some(obj_meta_list) = frame_meta.obj_meta_list() {
+                            for obj_meta in obj_meta_list.iter() {
+                                if obj_meta.class_id() == PGIE_CLASS_ID_VEHICLE {
+                                    vehicle_count += 1;
+                                    num_rects += 1;
+                                }
+                                if obj_meta.class_id() == PGIE_CLASS_ID_PERSON {
+                                    person_count += 1;
+                                    num_rects += 1;
+                                }
+                            }
+
+                            if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
+                                display_meta.set_text_params(&[TextParamsBuilder::new()
+                                    .display_text(format!("Person = {}, Vehicle = {}", person_count, vehicle_count))
+                                    .x_offset(10)
+                                    .y_offset(12)
+                                    .font_params(FontParamsBuilder::new()
+                                        .font_name(CStr::from_ptr("Serif\0".as_ptr() as _))
+                                        .font_size(10)
+                                        .font_color(ColorParams::white())
+                                        .build())
+                                    .text_bg_clr(ColorParams::black())
+                                    .build()]);
+                                frame_meta.add_display_meta(display_meta);
+                            }
+                        }
+                    }
+                }
+                println!(
+                    "Number of objects = {} Vehicle Count = {} Person Count = {}",
+                    num_rects, vehicle_count, person_count
+                );
+            }
+        }
+        PadProbeReturn::Ok
+    });
+
+    pipeline.set_state(gstreamer::State::Playing).unwrap();
+    let bus = pipeline.bus().unwrap();
+    for msg in bus.iter_timed(gstreamer::ClockTime::NONE) {
+        use gstreamer::MessageView;
+
+        match msg.view() {
+            MessageView::Error(err) => {
+                eprintln!(
+                    "Error received from element {:?}: {}",
+                    err.src().map(|s| s.path_string()),
+                    err.error()
+                );
+                eprintln!("Debugging information: {:?}", err.debug());
+                break;
+            }
+            MessageView::Eos(..) => break,
+            _ => (),
+        }
+    }
+
+    pipeline.set_state(gstreamer::State::Null).unwrap();
 }
