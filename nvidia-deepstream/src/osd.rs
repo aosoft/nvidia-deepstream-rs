@@ -198,6 +198,13 @@ impl TextParamsBuilder {
         self
     }
 
+    /// Build TextParams.
+    ///
+    /// # description
+    ///
+    /// This method is unsafe because allocate text buffer with g_malloc0.
+    /// If you register it with add_display_meta, it will be removed after use.
+    /// Failure to register it will cause memory leaks.
     pub unsafe fn build(self) -> TextParams {
         let (p, len) = if let Some(text) = &self.display_text {
             (text.as_ptr(), text.len())
