@@ -6,7 +6,6 @@ use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
-static PGIE_CONFIG_YML: &str = "dstest1_pgie_config.yml";
 
 static PGIE_CLASS_ID_VEHICLE: i32 = 0;
 static PGIE_CLASS_ID_PERSON: i32 = 2;
@@ -59,7 +58,7 @@ fn main() {
     streammux
         .nvds_parse_streammux(CONFIG_YML, "streammux")
         .unwrap();
-    pgie.set_property("config-file-path", PGIE_CONFIG_YML);
+    pgie.set_property("config-file-path", "dstest1_pgie_config.yml");
 
     pipeline
         .add_many(&[
