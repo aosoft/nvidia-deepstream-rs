@@ -4,7 +4,7 @@ use std::marker::PhantomData;
 use std::ptr::NonNull;
 
 #[repr(i32)]
-pub enum MetaType {
+pub enum BaseMetaType {
     InvalidMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_INVALID_META as _,
     BatchMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_BATCH_META as _,
     FrameMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_FRAME_META as _,
@@ -29,6 +29,30 @@ pub enum MetaType {
     ReservedMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_RESERVED_META as _,
     GstCustomMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_GST_CUSTOM_META as _,
     StartUserMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_START_USER_META as _,
+}
+
+pub enum MetaType {
+    Base(BaseMetaType),
+    User(i32),
+}
+
+impl From<nvidia_deepstream_sys::NvDsMetaType> for MetaType {
+    fn from(value: nvidia_deepstream_sys::NvDsMetaType) -> Self {
+        if value < nvidia_deepstream_sys::NvDsMetaType_NVDS_START_USER_META {
+            MetaType::Base(unsafe { std::mem::transmute(value) })
+        } else {
+            MetaType::User(value as _)
+        }
+    }
+}
+
+impl MetaType {
+    pub fn to_native_meta_type(self) -> nvidia_deepstream_sys::NvDsMetaType {
+        match self {
+            MetaType::Base(x) => x as _,
+            MetaType::User(x) => x as _,
+        }
+    }
 }
 
 pub struct MetaListIterator<'a, T>
@@ -84,7 +108,7 @@ crate::wrapper_impl!(MetaPool, nvidia_deepstream_sys::NvDsMetaPool);
 
 impl MetaPool {
     pub fn meta_type(&self) -> MetaType {
-        unsafe { std::mem::transmute(self.as_native_type_ref().meta_type) }
+        self.as_native_type_ref().meta_type.into()
     }
 
     pub fn max_elements_in_pool(&self) -> u32 {
@@ -134,11 +158,20 @@ impl BaseMeta {
     }
 
     pub fn meta_type(&self) -> MetaType {
-        unsafe { std::mem::transmute(self.as_native_type_ref().meta_type) }
+        self.as_native_type_ref().meta_type.into()
     }
 
     pub unsafe fn user_context(&self) -> *mut () {
         self.as_native_type_ref().uContext as _
+    }
+
+    pub fn add_frame_meta(&self, meta: &FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_frame_meta_to_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
     }
 }
 
@@ -206,9 +239,12 @@ impl BatchMeta {
     }
 
     #[inline]
-    fn acquire_from_pool<T: WrapperExt>(&self, f: unsafe extern "C" fn(*mut nvidia_deepstream_sys::NvDsBatchMeta) -> *mut T::NativeType) -> Option<&mut T> {
+    fn acquire_from_pool<T: WrapperExt>(
+        &self,
+        f: unsafe extern "C" fn(*mut nvidia_deepstream_sys::NvDsBatchMeta) -> *mut T::NativeType,
+    ) -> Option<&mut T> {
         unsafe {
-            let meta = f(self.as_native_type_ref() as *const _ as _,);
+            let meta = f(self.as_native_type_ref() as *const _ as _);
             if meta != std::ptr::null_mut() {
                 Some(T::from_native_type_mut(&mut *meta))
             } else {
@@ -216,9 +252,16 @@ impl BatchMeta {
             }
         }
     }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
 }
-
-
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
 
@@ -311,9 +354,28 @@ impl FrameMeta {
         self.as_native_type_ref().pipeline_height
     }
 
+    pub fn add_obj_meta(&self, obj_meta: &ObjectMeta, parent_meta: &ObjectMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_obj_meta_to_frame(
+                self.as_native_type_ref() as *const _ as _,
+                obj_meta.as_native_type_ref() as *const _ as _,
+                parent_meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
     pub fn add_display_meta(&self, meta: &DisplayMeta) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_display_meta_to_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_frame(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
@@ -409,6 +471,24 @@ impl ObjectMeta {
     pub fn misc_obj_info(&self) -> [i64; 4usize] {
         self.as_native_type_ref().misc_obj_info
     }
+
+    pub fn add_classifier_meta(&self, meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_classifier_meta_to_object(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_obj(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
 }
 
 crate::wrapper_impl!(ClassifierMeta, nvidia_deepstream_sys::NvDsClassifierMeta);
@@ -438,6 +518,15 @@ impl ClassifierMeta {
             CStr::from_ptr(self.as_native_type_ref().classifier_type)
                 .to_str()
                 .unwrap_or_default()
+        }
+    }
+
+    pub fn add_label_info_meta(&self, meta: &LabelInfo) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_label_info_meta_to_classifier(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
         }
     }
 }
@@ -520,10 +609,7 @@ impl DisplayMeta {
     }
 
     pub fn set_rect_params(&mut self, params: &[crate::osd::RectParams]) {
-        let len = std::cmp::min(
-            self.as_native_type_ref().rect_params.len(),
-            params.len(),
-        );
+        let len = std::cmp::min(self.as_native_type_ref().rect_params.len(), params.len());
 
         self.as_native_type_mut().num_rects = len as _;
         for i in 0..len {
@@ -544,10 +630,7 @@ impl DisplayMeta {
     }
 
     pub fn set_text_params(&mut self, params: &[crate::osd::TextParams]) {
-        let len = std::cmp::min(
-            self.as_native_type_ref().text_params.len(),
-            params.len(),
-        );
+        let len = std::cmp::min(self.as_native_type_ref().text_params.len(), params.len());
 
         self.as_native_type_mut().num_labels = len as _;
         for i in 0..len {
@@ -568,10 +651,7 @@ impl DisplayMeta {
     }
 
     pub fn set_line_params(&mut self, params: &[crate::osd::LineParams]) {
-        let len = std::cmp::min(
-            self.as_native_type_ref().line_params.len(),
-            params.len(),
-        );
+        let len = std::cmp::min(self.as_native_type_ref().line_params.len(), params.len());
 
         self.as_native_type_mut().num_lines = len as _;
         for i in 0..len {
@@ -592,10 +672,7 @@ impl DisplayMeta {
     }
 
     pub fn set_arrow_params(&mut self, params: &[crate::osd::ArrowParams]) {
-        let len = std::cmp::min(
-            self.as_native_type_ref().arrow_params.len(),
-            params.len(),
-        );
+        let len = std::cmp::min(self.as_native_type_ref().arrow_params.len(), params.len());
 
         self.as_native_type_mut().num_arrows = len as _;
         for i in 0..len {
@@ -616,10 +693,7 @@ impl DisplayMeta {
     }
 
     pub fn set_circle_params(&mut self, params: &[crate::osd::CircleParams]) {
-        let len = std::cmp::min(
-            self.as_native_type_ref().circle_params.len(),
-            params.len(),
-        );
+        let len = std::cmp::min(self.as_native_type_ref().circle_params.len(), params.len());
 
         self.as_native_type_mut().num_circles = len as _;
         for i in 0..len {
@@ -635,11 +709,63 @@ impl DisplayMeta {
 crate::wrapper_impl!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
 
 impl UserMeta {
+    pub fn get_user_meta_type(name: &CStr) -> MetaType {
+        unsafe {
+            MetaType::from(nvidia_deepstream_sys::nvds_get_user_meta_type(
+                name.as_ptr() as _,
+            ))
+        }
+    }
+
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
-    pub fn user_meta_data(&self) -> *mut () {
+    pub unsafe fn user_meta_data<T>(&self) -> *mut T {
         self.as_native_type_ref().user_meta_data as _
+    }
+
+    pub fn set_user_meta_data<T: Clone + Drop>(&mut self, meta_type: MetaType, meta_data: Box<T>) {
+        self.as_native_type_mut().base_meta.meta_type = meta_type.to_native_meta_type();
+        self.as_native_type_mut().base_meta.copy_func = Some(Self::base_meta_copy_func::<T>);
+        self.as_native_type_mut().base_meta.release_func = Some(Self::base_meta_release_func::<T>);
+        self.as_native_type_mut().user_meta_data = Box::into_raw(meta_data) as _;
+    }
+
+    extern "C" fn base_meta_copy_func<T: Clone + Drop>(
+        data: nvidia_deepstream_sys::gpointer,
+        _: nvidia_deepstream_sys::gpointer,
+    ) -> nvidia_deepstream_sys::gpointer {
+        unsafe {
+            let user_meta = data as *mut nvidia_deepstream_sys::NvDsUserMeta;
+            if user_meta == std::ptr::null_mut() {
+                return std::ptr::null_mut();
+            }
+            let src_user_meta_data = (*user_meta).user_meta_data as *mut T;
+            if src_user_meta_data == std::ptr::null_mut() {
+                return std::ptr::null_mut();
+            }
+
+            let dst_user_meta_data = Box::<T>::new((*src_user_meta_data).clone());
+            Box::into_raw(dst_user_meta_data) as _
+        }
+    }
+
+    extern "C" fn base_meta_release_func<T: Clone + Drop>(
+        data: nvidia_deepstream_sys::gpointer,
+        _: nvidia_deepstream_sys::gpointer,
+    ) {
+        unsafe {
+            let user_meta = data as *mut nvidia_deepstream_sys::NvDsUserMeta;
+            if user_meta == std::ptr::null_mut() {
+                return;
+            }
+            let user_meta_data = (*user_meta).user_meta_data;
+            if user_meta_data == std::ptr::null_mut() {
+                return;
+            }
+            let _ = Box::from_raw(user_meta_data as *mut T);
+            (*user_meta).user_meta_data = std::ptr::null_mut();
+        }
     }
 }

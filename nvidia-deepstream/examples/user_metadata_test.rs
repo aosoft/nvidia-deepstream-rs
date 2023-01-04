@@ -4,11 +4,23 @@ use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::element::ElementNvdsExt;
 use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;
+use nvidia_deepstream::meta;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 
 static PGIE_CLASS_ID_VEHICLE: i32 = 0;
 static PGIE_CLASS_ID_PERSON: i32 = 2;
+
+#[derive(Clone)]
+struct UserMetaData {
+    data: i32
+}
+
+impl Drop for UserMetaData {
+    fn drop(&mut self) {
+    }
+}
+
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -87,6 +99,24 @@ fn main() {
         &sink,
     ])
         .unwrap();
+
+    let infer_src_pad = pgie.static_pad("src").unwrap();
+    infer_src_pad.add_probe(PadProbeType::BUFFER, |_, info| {
+        if let PadProbeData::Buffer(buf) = &info.data.as_ref().unwrap() {
+            unsafe {
+                if let Some(batch_meta) = buf.get_nvds_batch_meta() {
+                    for frame_meta in batch_meta.frame_meta_list().iter() {
+                        if let Some(user_meta) = batch_meta.acquire_user_meta_from_pool() {
+                            user_meta.set_user_meta_data(meta::UserMeta::get_user_meta_type(CStr::from_ptr("NVIDIA.NVINFER.USER_META\0".as_ptr() as _)),
+                            Box::new(UserMetaData { data: 10 } ));
+                            frame_meta.add_user_meta(user_meta);
+                        }
+                    }
+                }
+            }
+        }
+        PadProbeReturn::Ok
+    });
 
     pipeline.set_state(gstreamer::State::Playing).unwrap();
     let bus = pipeline.bus().unwrap();
