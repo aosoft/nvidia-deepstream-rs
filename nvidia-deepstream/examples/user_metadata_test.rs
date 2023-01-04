@@ -1,19 +1,12 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::buffer::BufferNvdsExt;
-use nvidia_deepstream::element::ElementNvdsExt;
-use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;
-use nvidia_deepstream::meta;
-
-static CONFIG_YML: &str = "dstest1_config.yml";
-
-static PGIE_CLASS_ID_VEHICLE: i32 = 0;
-static PGIE_CLASS_ID_PERSON: i32 = 2;
+use nvidia_deepstream::{meta, WrapperExt};
 
 #[derive(Clone)]
 struct UserMetaData {
-    data: i32
+    data: usize
 }
 
 impl Drop for UserMetaData {
@@ -108,8 +101,26 @@ fn main() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(user_meta) = batch_meta.acquire_user_meta_from_pool() {
                             user_meta.set_user_meta_data(meta::UserMeta::get_user_meta_type(CStr::from_ptr("NVIDIA.NVINFER.USER_META\0".as_ptr() as _)),
-                            Box::new(UserMetaData { data: 10 } ));
+                            Box::new(UserMetaData { data: user_meta.as_native_type_ref() as *const _ as _} ));
                             frame_meta.add_user_meta(user_meta);
+                        }
+                    }
+                }
+            }
+        }
+        PadProbeReturn::Ok
+    });
+
+    let osd_sink_pad = nvosd.static_pad("sink").unwrap();
+    osd_sink_pad.add_probe(PadProbeType::BUFFER, |_, info| {
+        if let PadProbeData::Buffer(buf) = &info.data.as_ref().unwrap() {
+            unsafe {
+                if let Some(batch_meta) = buf.get_nvds_batch_meta() {
+                    for frame_meta in batch_meta.frame_meta_list().iter() {
+                        if let Some(user_meta_list) = frame_meta.frame_user_meta_list() {
+                            for user_meta in user_meta_list.iter() {
+                                println!("user_meta_data = {}", (*user_meta.user_meta_data::<UserMetaData>()).data)
+                            }
                         }
                     }
                 }
