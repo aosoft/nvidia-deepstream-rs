@@ -185,19 +185,40 @@ impl BatchMeta {
         MetaList::<FrameMeta>::new(NonNull::new(self.as_native_type_ref().frame_meta_list).unwrap())
     }
 
+    pub fn acquire_obj_meta_from_pool(&self) -> Option<&mut ObjectMeta> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_obj_meta_from_pool)
+    }
+
+    pub fn acquire_classifier_meta_from_pool(&self) -> Option<&mut ClassifierMeta> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_classifier_meta_from_pool)
+    }
+
+    pub fn acquire_label_info_meta_from_pool(&self) -> Option<&mut LabelInfo> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_label_info_meta_from_pool)
+    }
+
+    pub fn acquire_user_meta_from_pool(&self) -> Option<&mut UserMeta> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_user_meta_from_pool)
+    }
+
     pub fn acquire_display_meta_from_pool(&self) -> Option<&mut DisplayMeta> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool)
+    }
+
+    #[inline]
+    fn acquire_from_pool<T: WrapperExt>(&self, f: unsafe extern "C" fn(*mut nvidia_deepstream_sys::NvDsBatchMeta) -> *mut T::NativeType) -> Option<&mut T> {
         unsafe {
-            let meta = nvidia_deepstream_sys::nvds_acquire_display_meta_from_pool(
-                self.as_native_type_ref() as *const _ as _,
-            );
+            let meta = f(self.as_native_type_ref() as *const _ as _,);
             if meta != std::ptr::null_mut() {
-                Some(DisplayMeta::from_native_type_mut(&mut *meta))
+                Some(T::from_native_type_mut(&mut *meta))
             } else {
                 None
             }
         }
     }
 }
+
+
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
 
