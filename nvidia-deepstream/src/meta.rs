@@ -2,6 +2,58 @@ use crate::WrapperExt;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
+use crate::osd::RectParams;
+
+crate::wrapper_impl!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
+
+impl RoiMeta {
+    pub fn roi(&self) -> &RectParams {
+        RectParams::from_native_type_ref(&self.as_native_type_ref().roi)
+    }
+
+    pub fn roi_polygon(&self, index: usize) -> Option<(u32, u32)> {
+        let p = &self.as_native_type_ref().roi_polygon;
+        if index < p.len() {
+            Some((p[index][0], p[index][1]))
+        } else {
+            None
+        }
+    }
+
+    pub fn frame_meta(&self) -> &FrameMeta {
+        unsafe { FrameMeta::from_native_type_ref(&*self.as_native_type_ref().frame_meta) }
+    }
+
+    pub fn scale_ratio_x(&self) -> f64 {
+        self.as_native_type_ref().scale_ratio_x
+    }
+
+    pub fn scale_ratio_y(&self) -> f64 {
+        self.as_native_type_ref().scale_ratio_y
+    }
+
+    pub fn offset_left(&self) -> f64  {
+        self.as_native_type_ref().offset_left
+    }
+
+    pub fn offset_top(&self) -> f64 {
+        self.as_native_type_ref().scale_ratio_y
+    }
+
+    pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
+        match NonNull::new(self.as_native_type_ref().classifier_meta_list) {
+            Some(x) => Some(MetaList::<ClassifierMeta>::new(x)),
+            None => None,
+        }
+    }
+
+    pub fn roi_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
+        match NonNull::new(self.as_native_type_ref().roi_user_meta_list) {
+            Some(x) => Some(MetaList::<UserMeta>::new(x)),
+            None => None,
+        }
+    }
+}
 
 #[repr(i32)]
 pub enum BaseMetaType {
@@ -216,6 +268,10 @@ impl BatchMeta {
 
     pub fn frame_meta_list(&self) -> MetaList<FrameMeta> {
         MetaList::<FrameMeta>::new(NonNull::new(self.as_native_type_ref().frame_meta_list).unwrap())
+    }
+
+    pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta> {
+        self.acquire_from_pool(nvidia_deepstream_sys::nvds_acquire_frame_meta_from_pool)
     }
 
     pub fn acquire_obj_meta_from_pool(&self) -> Option<&mut ObjectMeta> {
