@@ -56,6 +56,7 @@ impl RoiMeta {
 }
 
 #[repr(i32)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum BaseMetaType {
     InvalidMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_INVALID_META as _,
     BatchMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_BATCH_META as _,
@@ -83,6 +84,7 @@ pub enum BaseMetaType {
     StartUserMeta = nvidia_deepstream_sys::NvDsMetaType_NVDS_START_USER_META as _,
 }
 
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MetaType {
     Base(BaseMetaType),
     User(i32),

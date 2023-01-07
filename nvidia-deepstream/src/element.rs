@@ -3,6 +3,7 @@ use gstreamer::Element;
 use std::ffi::{CString, NulError};
 
 #[repr(u32)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub enum YamlParserStatus {
     Success = nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS as _,
     Disabled = nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_DISABLED as _,

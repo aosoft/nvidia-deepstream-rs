@@ -3,6 +3,7 @@ pub mod buffer;
 pub mod element;
 pub mod meta;
 pub mod osd;
+pub mod surface;
 
 pub trait WrapperExt {
     type NativeType;

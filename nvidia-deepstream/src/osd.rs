@@ -3,7 +3,7 @@ use gstreamer::glib;
 use std::ffi::CStr;
 
 #[repr(u32)]
-#[derive(Default)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum Mode {
     #[default]
     CPU = nvidia_deepstream_sys::NvOSD_Mode_MODE_CPU as _,
@@ -12,7 +12,7 @@ pub enum Mode {
 }
 
 #[repr(u32)]
-#[derive(Default)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum ArrowHeadDirection {
     #[default]
     Start = nvidia_deepstream_sys::NvOSD_Arrow_Head_Direction_START_HEAD as _,
