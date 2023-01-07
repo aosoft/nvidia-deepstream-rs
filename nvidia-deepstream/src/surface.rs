@@ -271,3 +271,98 @@ impl AllocateParams {
         unsafe { std::mem::transmute(self.as_native_type_ref().memtag) }
     }
 }
+
+
+crate::wrapper_impl!(MappedAddr, nvidia_deepstream_sys::NvBufSurfaceMappedAddr);
+
+impl MappedAddr {
+    pub fn addr(&self, index: usize) -> Option<*mut ()> {
+        if index < self.as_native_type_ref().addr.len() {
+            Some(self.as_native_type_ref().addr[index] as _)
+        } else {
+            None
+        }
+    }
+
+    pub fn egl_image(&self) -> *mut () {
+        self.as_native_type_ref().eglImage as _
+    }
+}
+
+
+crate::wrapper_impl!(SurfaceParamsEx, nvidia_deepstream_sys::NvBufSurfaceParamsEx);
+
+impl SurfaceParamsEx {
+    pub fn start_of_valid_data(&self) -> i32 {
+        self.as_native_type_ref().startofvaliddata
+    }
+
+    pub fn size_of_valid_data_in_bytes(&self) -> i32 {
+        self.as_native_type_ref().sizeofvaliddatainbytes
+    }
+
+    pub fn chroma_subsampling(&self) -> &ChromaSubsamplingParams {
+        ChromaSubsamplingParams::from_native_type_ref(&self.as_native_type_ref().chromaSubsampling)
+    }
+
+    pub fn is_protected(&self) -> bool {
+        self.as_native_type_ref().is_protected
+    }
+
+    pub fn plane_params_ex(&self) -> &PlaneParamsEx {
+        PlaneParamsEx::from_native_type_ref(&self.as_native_type_ref().planeParamsex)
+    }
+}
+
+crate::wrapper_impl!(SurfaceParams, nvidia_deepstream_sys::NvBufSurfaceParams);
+
+impl SurfaceParams {
+    pub fn width(&self) -> u32 {
+        self.as_native_type_ref().width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.as_native_type_ref().height
+    }
+
+    pub fn pitch(&self) -> u32 {
+        self.as_native_type_ref().pitch
+    }
+
+    pub fn color_format(&self) -> ColorFormat {
+        unsafe { std::mem::transmute(self.as_native_type_ref().colorFormat) }
+    }
+
+    pub fn layout(&self) -> Layout {
+        unsafe { std::mem::transmute(self.as_native_type_ref().layout) }
+    }
+
+    pub fn buffer_desc(&self) -> u64 {
+        self.as_native_type_ref().bufferDesc
+    }
+
+    pub fn data_size(&self) -> u32 {
+        self.as_native_type_ref().dataSize
+    }
+
+    pub fn data_ptr(&self) -> *mut () {
+        self.as_native_type_ref().dataPtr as _
+    }
+
+    pub fn plane_params(&self) -> &PlaneParams {
+        PlaneParams::from_native_type_ref(&self.as_native_type_ref().planeParams)
+    }
+
+    pub fn mapped_addr(&self) -> &MappedAddr {
+        MappedAddr::from_native_type_ref(&self.as_native_type_ref().mappedAddr)
+    }
+
+    pub fn paramex(&self) -> Option<&SurfaceParamsEx> {
+        let p = self.as_native_type_ref().paramex;
+        if p != std::ptr::null_mut() {
+            Some(SurfaceParamsEx::from_native_type_ref(unsafe { &*p }))
+        } else {
+            None
+        }
+    }
+}
