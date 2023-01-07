@@ -142,11 +142,16 @@ pub enum MemType {
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum DisplayScanFormat {
-    Progressive = nvidia_deepstream_sys::NvBufSurfaceDisplayScanFormat_NVBUF_DISPLAYSCANFORMAT_PROGRESSIVE,
-    Interlaced = nvidia_deepstream_sys::NvBufSurfaceDisplayScanFormat_NVBUF_DISPLAYSCANFORMAT_INTERLACED,
+    Progressive =
+        nvidia_deepstream_sys::NvBufSurfaceDisplayScanFormat_NVBUF_DISPLAYSCANFORMAT_PROGRESSIVE,
+    Interlaced =
+        nvidia_deepstream_sys::NvBufSurfaceDisplayScanFormat_NVBUF_DISPLAYSCANFORMAT_INTERLACED,
 }
 
-crate::wrapper_impl!(PlaneParamsEx, nvidia_deepstream_sys::NvBufSurfacePlaneParamsEx);
+crate::wrapper_impl!(
+    PlaneParamsEx,
+    nvidia_deepstream_sys::NvBufSurfacePlaneParamsEx
+);
 
 pub struct PlaneParamEx {
     pub scanformat: DisplayScanFormat,
@@ -165,7 +170,7 @@ impl PlaneParamsEx {
                 secondfieldoffset: p.secondfieldoffset[index],
                 blockheightlog2: p.blockheightlog2[index],
                 physicaladdress: p.physicaladdress[index],
-                flags: p.flags[index]
+                flags: p.flags[index],
             })
         } else {
             None
@@ -202,7 +207,10 @@ impl PlaneParams {
     }
 }
 
-crate::wrapper_impl!(ChromaSubsamplingParams, nvidia_deepstream_sys::NvBufSurfaceChromaSubsamplingParams);
+crate::wrapper_impl!(
+    ChromaSubsamplingParams,
+    nvidia_deepstream_sys::NvBufSurfaceChromaSubsamplingParams
+);
 
 impl ChromaSubsamplingParams {
     pub fn chroma_loc_horiz(&self) -> u8 {
@@ -214,10 +222,34 @@ impl ChromaSubsamplingParams {
     }
 }
 
-
-crate::wrapper_impl!(CreateParams, nvidia_deepstream_sys::NvBufSurfaceCreateParams);
+crate::wrapper_impl!(
+    CreateParams,
+    nvidia_deepstream_sys::NvBufSurfaceCreateParams
+);
 
 impl CreateParams {
+    pub fn new(
+        gpu_id: u32,
+        width: u32,
+        height: u32,
+        size: u32,
+        is_contiguous: bool,
+        color_format: ColorFormat,
+        layout: Layout,
+        mem_type: MemType,
+    ) -> CreateParams {
+        CreateParams::from_native_type(nvidia_deepstream_sys::NvBufSurfaceCreateParams {
+            gpuId: gpu_id,
+            width,
+            height,
+            size,
+            isContiguous: is_contiguous,
+            colorFormat: color_format as _,
+            layout: layout as _,
+            memType: mem_type as _,
+        })
+    }
+
     pub fn gpu_id(&self) -> u32 {
         self.as_native_type_ref().gpuId
     }
@@ -251,15 +283,32 @@ impl CreateParams {
     }
 }
 
-
-crate::wrapper_impl!(AllocateParams, nvidia_deepstream_sys::NvBufSurfaceAllocateParams);
+crate::wrapper_impl!(
+    AllocateParams,
+    nvidia_deepstream_sys::NvBufSurfaceAllocateParams
+);
 
 impl AllocateParams {
+    pub fn new(
+        params: &CreateParams,
+        display_scan_format: DisplayScanFormat,
+        chroma_subsampling: ChromaSubsamplingParams,
+        memtag: Tag,
+    ) -> AllocateParams {
+        AllocateParams::from_native_type(nvidia_deepstream_sys::NvBufSurfaceAllocateParams {
+            params: params.as_native_type(),
+            displayscanformat: display_scan_format as _,
+            chromaSubsampling: chroma_subsampling.as_native_type(),
+            memtag: memtag as _,
+            _reserved: [std::ptr::null_mut(); 4usize],
+        })
+    }
+
     pub fn params(&self) -> &CreateParams {
         CreateParams::from_native_type_ref(&self.as_native_type_ref().params)
     }
 
-    pub fn displayscanformat(&self) -> DisplayScanFormat {
+    pub fn display_scan_format(&self) -> DisplayScanFormat {
         unsafe { std::mem::transmute(self.as_native_type_ref().displayscanformat) }
     }
 
@@ -271,7 +320,6 @@ impl AllocateParams {
         unsafe { std::mem::transmute(self.as_native_type_ref().memtag) }
     }
 }
-
 
 crate::wrapper_impl!(MappedAddr, nvidia_deepstream_sys::NvBufSurfaceMappedAddr);
 
@@ -288,7 +336,6 @@ impl MappedAddr {
         self.as_native_type_ref().eglImage as _
     }
 }
-
 
 crate::wrapper_impl!(SurfaceParamsEx, nvidia_deepstream_sys::NvBufSurfaceParamsEx);
 
@@ -361,6 +408,40 @@ impl SurfaceParams {
         let p = self.as_native_type_ref().paramex;
         if p != std::ptr::null_mut() {
             Some(SurfaceParamsEx::from_native_type_ref(unsafe { &*p }))
+        } else {
+            None
+        }
+    }
+}
+
+crate::wrapper_impl!(Surface, nvidia_deepstream_sys::NvBufSurface);
+
+impl Surface {
+    pub fn gpu_id(&self) -> u32 {
+        self.as_native_type_ref().gpuId
+    }
+
+    pub fn batch_size(&self) -> u32 {
+        self.as_native_type_ref().batchSize
+    }
+
+    pub fn num_filled(&self) -> u32 {
+        self.as_native_type_ref().numFilled
+    }
+
+    pub fn is_contiguous(&self) -> bool {
+        self.as_native_type_ref().isContiguous
+    }
+
+    pub fn mem_type(&self) -> MemType {
+        unsafe { std::mem::transmute(self.as_native_type_ref().memType) }
+    }
+
+    pub fn surface_params(&self, index: u32) -> Option<&SurfaceParams> {
+        if index < self.batch_size() {
+            Some(SurfaceParams::from_native_type_ref(unsafe {
+                &*self.as_native_type_ref().surfaceList.offset(index as _)
+            }))
         } else {
             None
         }
