@@ -1,5 +1,7 @@
 #![allow(non_camel_case_types)]
 
+use crate::WrapperExt;
+
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum MemMapFlags {
@@ -145,3 +147,127 @@ pub enum DisplayScanFormat {
 }
 
 crate::wrapper_impl!(PlaneParamsEx, nvidia_deepstream_sys::NvBufSurfacePlaneParamsEx);
+
+pub struct PlaneParamEx {
+    pub scanformat: DisplayScanFormat,
+    pub secondfieldoffset: u32,
+    pub blockheightlog2: u32,
+    pub physicaladdress: u32,
+    pub flags: u64,
+}
+
+impl PlaneParamsEx {
+    pub fn param(&self, index: usize) -> Option<PlaneParamEx> {
+        let p = self.as_native_type_ref();
+        if index < p.scanformat.len() {
+            Some(PlaneParamEx {
+                scanformat: unsafe { std::mem::transmute(p.scanformat[index]) },
+                secondfieldoffset: p.secondfieldoffset[index],
+                blockheightlog2: p.blockheightlog2[index],
+                physicaladdress: p.physicaladdress[index],
+                flags: p.flags[index]
+            })
+        } else {
+            None
+        }
+    }
+}
+
+crate::wrapper_impl!(PlaneParams, nvidia_deepstream_sys::NvBufSurfacePlaneParams);
+
+pub struct PlaneParam {
+    pub width: u32,
+    pub height: u32,
+    pub pitch: u32,
+    pub offset: u32,
+    pub psize: u32,
+    pub bytes_per_pix: u32,
+}
+
+impl PlaneParams {
+    pub fn param(&self, index: usize) -> Option<PlaneParam> {
+        let p = self.as_native_type_ref();
+        if index < p.num_planes as usize {
+            Some(PlaneParam {
+                width: p.width[index],
+                height: p.height[index],
+                pitch: p.pitch[index],
+                offset: p.offset[index],
+                psize: p.psize[index],
+                bytes_per_pix: p.bytesPerPix[index],
+            })
+        } else {
+            None
+        }
+    }
+}
+
+crate::wrapper_impl!(ChromaSubsamplingParams, nvidia_deepstream_sys::NvBufSurfaceChromaSubsamplingParams);
+
+impl ChromaSubsamplingParams {
+    pub fn chroma_loc_horiz(&self) -> u8 {
+        self.as_native_type_ref().chromaLocHoriz
+    }
+
+    pub fn chroma_loc_vert(&self) -> u8 {
+        self.as_native_type_ref().chromaLocVert
+    }
+}
+
+
+crate::wrapper_impl!(CreateParams, nvidia_deepstream_sys::NvBufSurfaceCreateParams);
+
+impl CreateParams {
+    pub fn gpu_id(&self) -> u32 {
+        self.as_native_type_ref().gpuId
+    }
+
+    pub fn width(&self) -> u32 {
+        self.as_native_type_ref().width
+    }
+
+    pub fn height(&self) -> u32 {
+        self.as_native_type_ref().height
+    }
+
+    pub fn size(&self) -> u32 {
+        self.as_native_type_ref().size
+    }
+
+    pub fn is_contiguous(&self) -> bool {
+        self.as_native_type_ref().isContiguous
+    }
+
+    pub fn color_format(&self) -> ColorFormat {
+        unsafe { std::mem::transmute(self.as_native_type_ref().colorFormat) }
+    }
+
+    pub fn layout(&self) -> Layout {
+        unsafe { std::mem::transmute(self.as_native_type_ref().layout) }
+    }
+
+    pub fn mem_type(&self) -> MemType {
+        unsafe { std::mem::transmute(self.as_native_type_ref().memType) }
+    }
+}
+
+
+crate::wrapper_impl!(AllocateParams, nvidia_deepstream_sys::NvBufSurfaceAllocateParams);
+
+impl AllocateParams {
+    pub fn params(&self) -> &CreateParams {
+        CreateParams::from_native_type_ref(&self.as_native_type_ref().params)
+    }
+
+    pub fn displayscanformat(&self) -> DisplayScanFormat {
+        unsafe { std::mem::transmute(self.as_native_type_ref().displayscanformat) }
+    }
+
+    pub fn chroma_subsampling(&self) -> ChromaSubsamplingParams {
+        unsafe { std::mem::transmute(self.as_native_type_ref().chromaSubsampling) }
+    }
+
+    pub fn memtag(&self) -> Tag {
+        unsafe { std::mem::transmute(self.as_native_type_ref().memtag) }
+    }
+}
