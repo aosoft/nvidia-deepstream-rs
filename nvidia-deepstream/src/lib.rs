@@ -1,6 +1,7 @@
 pub mod bounding_box;
 pub mod buffer;
 pub mod element;
+pub mod mem;
 pub mod meta;
 pub mod osd;
 pub mod surface;
