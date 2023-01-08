@@ -2,7 +2,7 @@
 
 use crate::mem::NvdsBox;
 use crate::WrapperExt;
-use std::ptr::NonNull;
+use std::ptr::{null_mut, NonNull};
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -496,49 +496,110 @@ impl Surface {
         }
     }
 
-    pub fn map(mut self, index: i32, plane: i32, mem_type: MemType) -> Result<(), i32> {
-        unsafe {
-            let ret = nvidia_deepstream_sys::NvBufSurfaceMap(
-                self.as_native_type_mut() as _,
-                index,
-                plane,
-                std::mem::transmute(mem_type),
-            );
-            if ret == 0 {
-                Ok(())
-            } else {
-                Err(ret)
-            }
+    fn to_result(r: i32) -> Result<(), i32> {
+        if r == 0 {
+            Ok(())
+        } else {
+            Err(r)
         }
     }
 
-    pub fn unmap(mut self, index: i32, plane: i32) -> Result<(), i32> {
+    pub fn map(mut self, index: u32, plane: u32, mem_type: MemType) -> Result<(), i32> {
         unsafe {
-            let ret = nvidia_deepstream_sys::NvBufSurfaceUnMap(
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceMap(
                 self.as_native_type_mut() as _,
-                index,
-                plane,
-            );
-            if ret == 0 {
-                Ok(())
-            } else {
-                Err(ret)
-            }
+                index as _,
+                plane as _,
+                std::mem::transmute(mem_type),
+            ))
+        }
+    }
+
+    pub fn unmap(mut self, index: u32, plane: u32) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceUnMap(
+                self.as_native_type_mut() as _,
+                index as _,
+                plane as _,
+            ))
         }
     }
 
     pub fn copy(src: &Surface, dst: &mut Surface) -> Result<(), i32> {
         unsafe {
-            let ret = nvidia_deepstream_sys::NvBufSurfaceCopy(
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceCopy(
                 src.as_native_type_ref() as *const _ as _,
                 dst.as_native_type_mut() as _,
-            );
-            if ret == 0 {
-                Ok(())
-            } else {
-                Err(ret)
-            }
+            ))
         }
+    }
+
+    pub unsafe fn copy_to_raw(
+        &self,
+        index: u32,
+        plane: u32,
+        out_width: u32,
+        out_height: u32,
+        ptr: *mut (),
+    ) -> Result<(), i32> {
+        Self::to_result(nvidia_deepstream_sys::NvBufSurface2Raw(
+            self.as_native_type_ref() as *const _ as _,
+            index,
+            plane,
+            out_width,
+            out_height,
+            ptr as _,
+        ))
+    }
+
+    pub unsafe fn copy_from_raw(
+        &mut self,
+        ptr: *mut (),
+        index: u32,
+        plane: u32,
+        in_width: u32,
+        in_height: u32,
+    ) -> Result<(), i32> {
+        Self::to_result(nvidia_deepstream_sys::Raw2NvBufSurface(
+            ptr as _,
+            index,
+            plane,
+            in_width,
+            in_height,
+            self.as_native_type_mut() as _,
+        ))
+    }
+
+    pub fn sync_for_cpu(&mut self, index: u32, plane: u32) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceSyncForCpu(
+                self.as_native_type_mut() as _,
+                index as _,
+                plane as _,
+            ))
+        }
+    }
+
+    pub fn sync_for_device(&mut self, index: u32, plane: u32) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceSyncForDevice(
+                self.as_native_type_mut() as _,
+                index as _,
+                plane as _,
+            ))
+        }
+    }
+
+    pub fn from_fd(dmabuf_fd: i32) -> Result<*mut Surface, i32> {
+        let mut buffer: *mut ::std::os::raw::c_void = null_mut();
+        Self::to_result(unsafe {
+            nvidia_deepstream_sys::NvBufSurfaceFromFd(dmabuf_fd, &mut buffer)
+        })
+        .map(|_| {
+            Surface::from_native_type_mut(unsafe {
+                &mut *(buffer as *mut nvidia_deepstream_sys::NvBufSurface)
+            }) as _
+        })
     }
 
     pub fn gpu_id(&self) -> u32 {
