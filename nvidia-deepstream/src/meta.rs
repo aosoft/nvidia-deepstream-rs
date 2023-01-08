@@ -1,8 +1,8 @@
+use crate::osd::RectParams;
 use crate::WrapperExt;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
-use crate::osd::RectParams;
 
 crate::wrapper_impl!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
 
@@ -32,7 +32,7 @@ impl RoiMeta {
         self.as_native_type_ref().scale_ratio_y
     }
 
-    pub fn offset_left(&self) -> f64  {
+    pub fn offset_left(&self) -> f64 {
         self.as_native_type_ref().offset_left
     }
 
@@ -41,17 +41,13 @@ impl RoiMeta {
     }
 
     pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
-        match NonNull::new(self.as_native_type_ref().classifier_meta_list) {
-            Some(x) => Some(MetaList::<ClassifierMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().classifier_meta_list)
+            .map(|v| MetaList::<ClassifierMeta>::new(v))
     }
 
     pub fn roi_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
-        match NonNull::new(self.as_native_type_ref().roi_user_meta_list) {
-            Some(x) => Some(MetaList::<UserMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().roi_user_meta_list)
+            .map(|v| MetaList::<UserMeta>::new(v))
     }
 }
 
@@ -121,14 +117,10 @@ impl<'a, T: WrapperExt> Iterator for MetaListIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        match self.current {
-            Some(cur) => unsafe {
-                self.current = NonNull::new(cur.as_ref().next);
-                let item = T::from_native_type_ref(&*(cur.as_ref().data as *const T::NativeType));
-                Some(item)
-            },
-            None => None,
-        }
+        self.current.map(|cur| unsafe {
+            self.current = NonNull::new(cur.as_ref().next);
+            T::from_native_type_ref(&*(cur.as_ref().data as *const T::NativeType))
+        })
     }
 }
 
@@ -182,17 +174,11 @@ impl MetaPool {
     }
 
     pub fn empty_list(&self) -> Option<MetaList<Meta>> {
-        match NonNull::new(self.as_native_type_ref().empty_list) {
-            Some(x) => Some(MetaList::<Meta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().empty_list).map(|v| MetaList::<Meta>::new(v))
     }
 
     pub fn full_list(&self) -> Option<MetaList<Meta>> {
-        match NonNull::new(self.as_native_type_ref().full_list) {
-            Some(x) => Some(MetaList::<Meta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().full_list).map(|v| MetaList::<Meta>::new(v))
     }
 }
 
@@ -200,15 +186,8 @@ crate::wrapper_impl!(BaseMeta, nvidia_deepstream_sys::NvDsBaseMeta);
 
 impl BaseMeta {
     pub fn batch_meta(&self) -> Option<&BatchMeta> {
-        unsafe {
-            if self.as_native_type_ref().batch_meta != std::ptr::null_mut() {
-                Some(BatchMeta::from_native_type_ref(
-                    &*self.as_native_type_ref().batch_meta,
-                ))
-            } else {
-                None
-            }
-        }
+        NonNull::new(self.as_native_type_ref().batch_meta)
+            .map(|p| unsafe { BatchMeta::from_native_type_ref(p.as_ref()) })
     }
 
     pub fn meta_type(&self) -> MetaType {
@@ -302,12 +281,8 @@ impl BatchMeta {
         f: unsafe extern "C" fn(*mut nvidia_deepstream_sys::NvDsBatchMeta) -> *mut T::NativeType,
     ) -> Option<&mut T> {
         unsafe {
-            let meta = f(self.as_native_type_ref() as *const _ as _);
-            if meta != std::ptr::null_mut() {
-                Some(T::from_native_type_mut(&mut *meta))
-            } else {
-                None
-            }
+            NonNull::new(f(self.as_native_type_ref() as *const _ as _))
+                .map(|mut p| T::from_native_type_mut(p.as_mut()))
         }
     }
 
@@ -380,24 +355,18 @@ impl FrameMeta {
     }
 
     pub fn obj_meta_list(&self) -> Option<MetaList<ObjectMeta>> {
-        match NonNull::new(self.as_native_type_ref().obj_meta_list) {
-            Some(x) => Some(MetaList::<ObjectMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().obj_meta_list)
+            .map(|v| MetaList::<ObjectMeta>::new(v))
     }
 
     pub fn display_meta_list(&self) -> Option<MetaList<DisplayMeta>> {
-        match NonNull::new(self.as_native_type_ref().display_meta_list) {
-            Some(x) => Some(MetaList::<DisplayMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().display_meta_list)
+            .map(|v| MetaList::<DisplayMeta>::new(v))
     }
 
     pub fn frame_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
-        match NonNull::new(self.as_native_type_ref().frame_user_meta_list) {
-            Some(x) => Some(MetaList::<UserMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().frame_user_meta_list)
+            .map(|v| MetaList::<UserMeta>::new(v))
     }
 
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
@@ -449,15 +418,8 @@ impl ObjectMeta {
     }
 
     pub fn parent(&self) -> Option<&ObjectMeta> {
-        if self.as_native_type_ref().parent != std::ptr::null_mut() {
-            unsafe {
-                Some(ObjectMeta::from_native_type_ref(
-                    &*self.as_native_type_ref().parent,
-                ))
-            }
-        } else {
-            None
-        }
+        NonNull::new(self.as_native_type_ref().parent)
+            .map(|p| ObjectMeta::from_native_type_ref(unsafe { p.as_ref() }))
     }
 
     pub fn unique_component_id(&self) -> i32 {
@@ -513,17 +475,13 @@ impl ObjectMeta {
     }
 
     pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
-        match NonNull::new(self.as_native_type_ref().classifier_meta_list) {
-            Some(x) => Some(MetaList::<ClassifierMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().classifier_meta_list)
+            .map(|v| MetaList::<ClassifierMeta>::new(v))
     }
 
     pub fn obj_user_meta_list(&self) -> Option<MetaList<UserMeta>> {
-        match NonNull::new(self.as_native_type_ref().obj_user_meta_list) {
-            Some(x) => Some(MetaList::<UserMeta>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().obj_user_meta_list)
+            .map(|v| MetaList::<UserMeta>::new(v))
     }
 
     pub fn misc_obj_info(&self) -> [i64; 4usize] {
@@ -565,10 +523,8 @@ impl ClassifierMeta {
     }
 
     pub fn label_info_list(&self) -> Option<MetaList<LabelInfo>> {
-        match NonNull::new(self.as_native_type_ref().label_info_list) {
-            Some(x) => Some(MetaList::<LabelInfo>::new(x)),
-            None => None,
-        }
+        NonNull::new(self.as_native_type_ref().label_info_list)
+            .map(|v| MetaList::<LabelInfo>::new(v))
     }
 
     pub fn classifier_type(&self) -> &str {
@@ -602,14 +558,11 @@ impl LabelInfo {
 
     pub fn result_label(&self) -> &str {
         unsafe {
-            if self.as_native_type_ref().pResult_label != std::ptr::null_mut() {
-                CStr::from_ptr(self.as_native_type_ref().pResult_label)
+            match NonNull::new(self.as_native_type_ref().pResult_label) {
+                Some(p) => CStr::from_ptr(p.as_ptr()).to_str().unwrap_or_default(),
+                None => CStr::from_ptr(&self.as_native_type_ref().result_label as _)
                     .to_str()
-                    .unwrap_or_default()
-            } else {
-                CStr::from_ptr(&self.as_native_type_ref().result_label as _)
-                    .to_str()
-                    .unwrap_or_default()
+                    .unwrap_or_default(),
             }
         }
     }
