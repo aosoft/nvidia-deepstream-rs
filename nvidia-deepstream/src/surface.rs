@@ -602,6 +602,35 @@ impl Surface {
         })
     }
 
+    pub fn memset(&mut self, index: u32, plane: u32, value: u8) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceMemSet(
+                self.as_native_type_mut() as _,
+                index as _,
+                plane as _,
+                value,
+            ))
+        }
+    }
+
+    pub fn map_egl_image(mut self, index: u32) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceMapEglImage(
+                self.as_native_type_mut() as _,
+                index as _,
+            ))
+        }
+    }
+
+    pub fn unmap_egl_image(mut self, index: u32,) -> Result<(), i32> {
+        unsafe {
+            Self::to_result(nvidia_deepstream_sys::NvBufSurfaceUnMapEglImage(
+                self.as_native_type_mut() as _,
+                index as _,
+            ))
+        }
+    }
+
     pub fn gpu_id(&self) -> u32 {
         self.as_native_type_ref().gpuId
     }
