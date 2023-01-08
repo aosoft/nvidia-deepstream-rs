@@ -1,6 +1,8 @@
 #![allow(non_camel_case_types)]
 
+use crate::mem::NvdsBox;
 use crate::WrapperExt;
+use std::ptr::NonNull;
 
 #[repr(u32)]
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -416,7 +418,129 @@ impl SurfaceParams {
 
 crate::wrapper_impl!(Surface, nvidia_deepstream_sys::NvBufSurface);
 
+impl crate::mem::NvdsDrop for Surface {
+    fn drop(p: NonNull<Self::NativeType>) {
+        unsafe {
+            nvidia_deepstream_sys::NvBufSurfaceDestroy(p.as_ptr());
+        }
+    }
+}
+
 impl Surface {
+    pub fn create(batch_size: u32, params: &CreateParams) -> Result<Vec<NvdsBox<Surface>>, i32> {
+        if batch_size < 1 {
+            return Err(-1);
+        }
+
+        unsafe {
+            let mut buf =
+                Vec::<*mut <Self as WrapperExt>::NativeType>::with_capacity(batch_size as _);
+            let mut r = Vec::<NvdsBox<Surface>>::with_capacity(batch_size as _);
+
+            if buf.capacity() < batch_size as _ || r.capacity() < batch_size as _ {
+                return Err(-1);
+            }
+
+            buf.set_len(batch_size as _);
+            let result = nvidia_deepstream_sys::NvBufSurfaceCreate(
+                buf.as_mut_ptr(),
+                batch_size,
+                params.as_native_type_ref() as *const _ as _,
+            );
+            if result == 0 {
+                for x in buf {
+                    if let Some(x) = NvdsBox::<Surface>::new(|| NonNull::new(x)) {
+                        r.push(x);
+                    }
+                }
+                Ok(r)
+            } else {
+                Err(result)
+            }
+        }
+    }
+
+    pub fn allocate(
+        batch_size: u32,
+        params_ext: &AllocateParams,
+    ) -> Result<Vec<NvdsBox<Surface>>, i32> {
+        if batch_size < 1 {
+            return Err(-1);
+        }
+
+        unsafe {
+            let mut buf =
+                Vec::<*mut <Self as WrapperExt>::NativeType>::with_capacity(batch_size as _);
+            let mut r = Vec::<NvdsBox<Surface>>::with_capacity(batch_size as _);
+
+            if buf.capacity() < batch_size as _ || r.capacity() < batch_size as _ {
+                return Err(-1);
+            }
+
+            buf.set_len(batch_size as _);
+            let ret = nvidia_deepstream_sys::NvBufSurfaceAllocate(
+                buf.as_mut_ptr(),
+                batch_size,
+                params_ext.as_native_type_ref() as *const _ as _,
+            );
+            if ret == 0 {
+                for x in buf {
+                    if let Some(x) = NvdsBox::<Surface>::new(|| NonNull::new(x)) {
+                        r.push(x);
+                    }
+                }
+                Ok(r)
+            } else {
+                Err(ret)
+            }
+        }
+    }
+
+    pub fn map(mut self, index: i32, plane: i32, mem_type: MemType) -> Result<(), i32> {
+        unsafe {
+            let ret = nvidia_deepstream_sys::NvBufSurfaceMap(
+                self.as_native_type_mut() as _,
+                index,
+                plane,
+                std::mem::transmute(mem_type),
+            );
+            if ret == 0 {
+                Ok(())
+            } else {
+                Err(ret)
+            }
+        }
+    }
+
+    pub fn unmap(mut self, index: i32, plane: i32) -> Result<(), i32> {
+        unsafe {
+            let ret = nvidia_deepstream_sys::NvBufSurfaceUnMap(
+                self.as_native_type_mut() as _,
+                index,
+                plane,
+            );
+            if ret == 0 {
+                Ok(())
+            } else {
+                Err(ret)
+            }
+        }
+    }
+
+    pub fn copy(src: &Surface, dst: &mut Surface) -> Result<(), i32> {
+        unsafe {
+            let ret = nvidia_deepstream_sys::NvBufSurfaceCopy(
+                src.as_native_type_ref() as *const _ as _,
+                dst.as_native_type_mut() as _,
+            );
+            if ret == 0 {
+                Ok(())
+            } else {
+                Err(ret)
+            }
+        }
+    }
+
     pub fn gpu_id(&self) -> u32 {
         self.as_native_type_ref().gpuId
     }
