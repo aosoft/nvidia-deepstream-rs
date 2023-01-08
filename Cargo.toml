@@ -2,4 +2,5 @@
 members = [
     "nvidia-deepstream-sys",
     "nvidia-deepstream",
+    "nvidia-deepstream-examples",
 ]
