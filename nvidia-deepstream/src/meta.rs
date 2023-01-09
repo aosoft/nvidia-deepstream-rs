@@ -393,6 +393,24 @@ impl BatchMeta {
             ) != 0
         }
     }
+
+    pub fn clear_frame_meta_list(&mut self, meta_list: &MetaList<FrameMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_frame_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_batch_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
 }
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
@@ -540,6 +558,45 @@ impl FrameMeta {
             );
         }
     }
+
+    pub fn clear_obj_meta_list(&mut self, meta_list: &MetaList<ObjectMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_obj_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_display_meta_list(&mut self, meta_list: &MetaList<DisplayMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_display_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_frame_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+}
+
+impl MetaList<'_, FrameMeta> {
+    pub fn get_nth_frame_meta(&self, index: u32) -> Option<&FrameMeta> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_get_nth_frame_meta(
+                self.list.as_ptr(),
+                index,
+            ))
+            .map(|mut p| FrameMeta::from_native_type_ref(p.as_mut()))
+        }
+    }
 }
 
 crate::wrapper_impl!(ObjectMeta, nvidia_deepstream_sys::NvDsObjectMeta);
@@ -659,6 +716,24 @@ impl ObjectMeta {
             );
         }
     }
+
+    pub fn clear_classifier_meta_list(&mut self, meta_list: &MetaList<ClassifierMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_classifier_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_obj_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
 }
 
 crate::wrapper_impl!(ClassifierMeta, nvidia_deepstream_sys::NvDsClassifierMeta);
@@ -707,6 +782,15 @@ impl ClassifierMeta {
             nvidia_deepstream_sys::nvds_remove_label_info_meta_from_classifier(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn clear_label_info_meta_list(&mut self, meta_list: &MetaList<LabelInfo>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_label_info_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
             );
         }
     }
