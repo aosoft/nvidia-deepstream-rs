@@ -54,7 +54,7 @@ impl RoiMeta {
         unsafe {
             nvidia_deepstream_sys::nvds_add_classifier_meta_to_roi(
                 self.as_native_type_ref() as *const _ as _,
-                obj_meta.as_native_type_ref() as *const _ as _,),
+                classifier_meta.as_native_type_ref() as *const _ as _,
             );
         }
     }
@@ -63,7 +63,7 @@ impl RoiMeta {
         unsafe {
             nvidia_deepstream_sys::nvds_remove_classifier_meta_from_roi(
                 self.as_native_type_ref() as *const _ as _,
-                obj_meta.as_native_type_ref() as *const _ as _,
+                classifier_meta.as_native_type_ref() as *const _ as _,
             );
         }
     }
@@ -244,16 +244,18 @@ crate::wrapper_impl!(BatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
 
 impl crate::mem::NvdsDrop for BatchMeta {
     fn drop(p: NonNull<Self::NativeType>) {
-        unsafe { nvidia_deepstream_sys::nvds_destroy_batch_meta(p.as_ptr()); }
+        unsafe {
+            nvidia_deepstream_sys::nvds_destroy_batch_meta(p.as_ptr());
+        }
     }
 }
 
 impl BatchMeta {
     pub fn create(max_batch_size: u32) -> Option<crate::mem::NvdsBox<BatchMeta>> {
-        crate::mem::NvdsBox::new(|| {
-            unsafe {
-                NonNull::new(nvidia_deepstream_sys::nvds_create_batch_meta(max_batch_size))
-            }
+        crate::mem::NvdsBox::new(|| unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_create_batch_meta(
+                max_batch_size,
+            ))
         })
     }
 
@@ -302,11 +304,15 @@ impl BatchMeta {
     }
 
     pub fn acquire_meta_lock(&mut self) {
-        unsafe { nvidia_deepstream_sys::nvds_acquire_meta_lock(self.as_native_type_mut() as _); }
+        unsafe {
+            nvidia_deepstream_sys::nvds_acquire_meta_lock(self.as_native_type_mut() as _);
+        }
     }
 
     pub fn release_meta_lock(&mut self) {
-        unsafe { nvidia_deepstream_sys::nvds_release_meta_lock(self.as_native_type_mut() as _); }
+        unsafe {
+            nvidia_deepstream_sys::nvds_release_meta_lock(self.as_native_type_mut() as _);
+        }
     }
 
     pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta> {
@@ -377,6 +383,14 @@ impl BatchMeta {
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
+        }
+    }
+
+    pub fn get_current_metadata_info(&self) -> bool {
+        unsafe {
+            nvidia_deepstream_sys::nvds_get_current_metadata_info(
+                &self.as_native_type_ref() as *const _ as _
+            ) != 0
         }
     }
 }
@@ -475,7 +489,9 @@ impl FrameMeta {
             nvidia_deepstream_sys::nvds_add_obj_meta_to_frame(
                 self.as_native_type_ref() as *const _ as _,
                 obj_meta.as_native_type_ref() as *const _ as _,
-                parent_meta.map_or(std::ptr::null_mut(), |p| p.as_native_type_ref() as *const _ as _),
+                parent_meta.map_or(std::ptr::null_mut(), |p| {
+                    p.as_native_type_ref() as *const _ as _
+                }),
             );
         }
     }
@@ -619,7 +635,7 @@ impl ObjectMeta {
 
     pub fn remove_classifier_meta(&self, meta: &ClassifierMeta) {
         unsafe {
-            nvidia_deepstream_sys::nvds_remove_classifier_meta_to_object(
+            nvidia_deepstream_sys::nvds_remove_classifier_meta_from_obj(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
