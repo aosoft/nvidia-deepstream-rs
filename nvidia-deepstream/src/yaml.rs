@@ -1,5 +1,5 @@
 use gstreamer::glib::IsA;
-use gstreamer::Element;
+use gstreamer::{Element, glib};
 use std::ffi::{CString, NulError};
 
 #[repr(u32)]
@@ -76,4 +76,23 @@ impl<O: IsA<Element>> ElementNvdsYamlExt for O {
     impl_element_nvds_yaml_ext_method!(nvds_parse_egl_sink);
     impl_element_nvds_yaml_ext_method!(nvds_parse_file_sink);
     impl_element_nvds_yaml_ext_method!(nvds_parse_fake_sink);
+}
+
+pub fn nvds_parse_source_list(cfg_file_path: &str, group: &str) -> Result<Vec<String>, NulError> {
+    unsafe {
+        let mut src_list: *mut nvidia_deepstream_sys::GList = std::ptr::null_mut();
+        let cfg_file_path = CString::new(cfg_file_path)?;
+        let group = CString::new(group)?;
+        if nvidia_deepstream_sys::nvds_parse_source_list(&mut src_list, cfg_file_path.as_ptr() as _, group.as_ptr() as _) ==
+            nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS {
+            let src_list = glib::collections::List::<glib::GString>::from_glib_full(src_list as _);
+            let mut r = Vec::<String>::new();
+            for s in src_list {
+                r.push(s.to_string());
+            }
+            Ok(r)
+        } else {
+            Ok(Vec::<String>::new())
+        }
+    }
 }
