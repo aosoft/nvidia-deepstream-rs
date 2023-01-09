@@ -411,6 +411,16 @@ impl BatchMeta {
             );
         }
     }
+
+    pub fn clear_meta_list(&mut self, meta_list: &MetaList<UserMeta>, meta_pool: &MetaPool) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+                meta_pool.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
 }
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
@@ -585,6 +595,15 @@ impl FrameMeta {
             );
         }
     }
+
+    pub fn copy_to(&self, dst_frame_meta: &mut FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_frame_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_frame_meta.as_native_type_mut() as _,
+            )
+        }
+    }
 }
 
 impl MetaList<'_, FrameMeta> {
@@ -734,6 +753,15 @@ impl ObjectMeta {
             );
         }
     }
+
+    pub fn copy_to(&self, dst_object_meta: &mut ObjectMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_obj_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_object_meta.as_native_type_mut() as _,
+            )
+        }
+    }
 }
 
 crate::wrapper_impl!(ClassifierMeta, nvidia_deepstream_sys::NvDsClassifierMeta);
@@ -794,6 +822,15 @@ impl ClassifierMeta {
             );
         }
     }
+
+    pub fn copy_to(&self, dst_classifier_meta: &mut ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_classifier_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_classifier_meta.as_native_type_mut() as _,
+            )
+        }
+    }
 }
 
 crate::wrapper_impl!(LabelInfo, nvidia_deepstream_sys::NvDsLabelInfo);
@@ -832,6 +869,15 @@ impl LabelInfo {
 
     pub fn result_prob(&self) -> f32 {
         self.as_native_type_ref().result_prob
+    }
+
+    pub fn copy_to(&self, dst_label_info: &mut LabelInfo) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_label_info_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_label_info.as_native_type_mut() as _,
+            )
+        }
     }
 }
 
@@ -973,6 +1019,15 @@ impl DisplayMeta {
 
     pub fn misc_osd_data(&self) -> &[i64] {
         &self.as_native_type_ref().misc_osd_data
+    }
+
+    pub fn copy_to(&self, dst_display_meta: &mut DisplayMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_display_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_display_meta.as_native_type_mut() as _,
+            )
+        }
     }
 }
 
