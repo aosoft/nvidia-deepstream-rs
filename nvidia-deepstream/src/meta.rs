@@ -49,6 +49,42 @@ impl RoiMeta {
         NonNull::new(self.as_native_type_ref().roi_user_meta_list)
             .map(|v| MetaList::<UserMeta>::new(v))
     }
+
+    pub fn add_classifier_meta(&mut self, classifier_meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_classifier_meta_to_roi(
+                self.as_native_type_ref() as *const _ as _,
+                obj_meta.as_native_type_ref() as *const _ as _,),
+            );
+        }
+    }
+
+    pub fn remove_classifier_meta(&mut self, classifier_meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_classifier_meta_from_roi(
+                self.as_native_type_ref() as *const _ as _,
+                obj_meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_roi(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_roi(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
 }
 
 #[repr(i32)]
@@ -334,6 +370,15 @@ impl BatchMeta {
             );
         }
     }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
 }
 
 crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
@@ -453,9 +498,27 @@ impl FrameMeta {
         }
     }
 
+    pub fn remove_display_meta(&self, meta: &DisplayMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_display_meta_from_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
     pub fn add_user_meta(&self, meta: &UserMeta) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_user_meta_to_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_frame(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
@@ -554,9 +617,27 @@ impl ObjectMeta {
         }
     }
 
+    pub fn remove_classifier_meta(&self, meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_classifier_meta_to_object(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
     pub fn add_user_meta(&self, meta: &UserMeta) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_user_meta_to_obj(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_object(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
@@ -599,6 +680,15 @@ impl ClassifierMeta {
     pub fn add_label_info_meta(&self, meta: &LabelInfo) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_label_info_meta_to_classifier(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_label_info_meta(&self, meta: &LabelInfo) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_label_info_meta_from_classifier(
                 self.as_native_type_ref() as *const _ as _,
                 meta.as_native_type_ref() as *const _ as _,
             );
