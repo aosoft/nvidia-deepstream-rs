@@ -606,18 +606,6 @@ impl FrameMeta {
     }
 }
 
-impl MetaList<'_, FrameMeta> {
-    pub fn get_nth_frame_meta(&self, index: u32) -> Option<&FrameMeta> {
-        unsafe {
-            NonNull::new(nvidia_deepstream_sys::nvds_get_nth_frame_meta(
-                self.list.as_ptr(),
-                index,
-            ))
-            .map(|mut p| FrameMeta::from_native_type_ref(p.as_mut()))
-        }
-    }
-}
-
 crate::wrapper_impl!(ObjectMeta, nvidia_deepstream_sys::NvDsObjectMeta);
 
 impl ObjectMeta {
@@ -1095,6 +1083,105 @@ impl UserMeta {
             }
             let _ = Box::from_raw(user_meta_data as *mut T);
             (*user_meta).user_meta_data = std::ptr::null_mut();
+        }
+    }
+}
+
+impl MetaList<'_, FrameMeta> {
+    pub fn get_nth_frame_meta(&self, index: u32) -> Option<&FrameMeta> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_get_nth_frame_meta(
+                self.list.as_ptr(),
+                index,
+            ))
+                .map(|mut p| FrameMeta::from_native_type_ref(p.as_mut()))
+        }
+    }
+
+    pub fn copy_to_batch_meta(&self, dst_batch_meta: &mut BatchMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_frame_meta_list(
+                self.list.as_ptr(),
+                dst_batch_meta.as_native_type_mut() as _
+            )
+        }
+    }
+}
+
+
+impl MetaList<'_, DisplayMeta> {
+    pub fn copy_to_frame_meta(&self, dst_frame_meta: &mut FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_display_meta_list(
+                self.list.as_ptr(),
+                dst_frame_meta.as_native_type_mut() as _
+            )
+        }
+    }
+}
+
+
+impl MetaList<'_, ObjectMeta> {
+    pub fn copy_to_frame_meta(&self, dst_frame_meta: &mut FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_obj_meta_list(
+                self.list.as_ptr(),
+                dst_frame_meta.as_native_type_mut() as _
+            )
+        }
+    }
+}
+
+
+impl MetaList<'_, ClassifierMeta> {
+    pub fn copy_to_obj_meta(&self, dst_object_meta: &mut ObjectMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_classification_list(
+                self.list.as_ptr(),
+                dst_object_meta.as_native_type_mut() as _
+            )
+        }
+    }
+}
+
+
+impl MetaList<'_, LabelInfo> {
+    pub fn copy_to_obj_meta(&self, dst_classifier_meta: &mut ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_label_info_list(
+                self.list.as_ptr(),
+                dst_classifier_meta.as_native_type_mut() as _
+            )
+        }
+    }
+}
+
+
+impl MetaList<'_, UserMeta> {
+    pub fn copy_to_batch_meta(&self, dst_batch_meta: &mut BatchMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_batch_user_meta_list(
+                self.list.as_ptr(),
+                dst_batch_meta.as_native_type_mut() as _
+            )
+        }
+    }
+
+    pub fn copy_to_frame_meta(&self, dst_frame_meta: &mut FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_frame_user_meta_list(
+                self.list.as_ptr(),
+                dst_frame_meta.as_native_type_mut() as _
+            )
+        }
+    }
+
+    pub fn copy_to_obj_meta(&self, dst_object_meta: &mut ObjectMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_obj_user_meta_list(
+                self.list.as_ptr(),
+                dst_object_meta.as_native_type_mut() as _
+            )
         }
     }
 }
