@@ -210,7 +210,21 @@ impl BaseMeta {
 
 crate::wrapper_impl!(BatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
 
+impl crate::mem::NvdsDrop for BatchMeta {
+    fn drop(p: NonNull<Self::NativeType>) {
+        unsafe { nvidia_deepstream_sys::nvds_destroy_batch_meta(p.as_ptr()); }
+    }
+}
+
 impl BatchMeta {
+    pub fn create(max_batch_size: u32) -> Option<crate::mem::NvdsBox<BatchMeta>> {
+        crate::mem::NvdsBox::new(|| {
+            unsafe {
+                NonNull::new(nvidia_deepstream_sys::nvds_create_batch_meta(max_batch_size))
+            }
+        })
+    }
+
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
@@ -249,6 +263,14 @@ impl BatchMeta {
 
     pub fn frame_meta_list(&self) -> MetaList<FrameMeta> {
         MetaList::<FrameMeta>::new(NonNull::new(self.as_native_type_ref().frame_meta_list).unwrap())
+    }
+
+    pub fn acquire_meta_lock(&mut self) {
+        unsafe { nvidia_deepstream_sys::nvds_acquire_meta_lock(self.as_native_type_mut() as _); }
+    }
+
+    pub fn release_meta_lock(&mut self) {
+        unsafe { nvidia_deepstream_sys::nvds_release_meta_lock(self.as_native_type_mut() as _); }
     }
 
     pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta> {
