@@ -190,21 +190,17 @@ impl BaseMeta {
             .map(|p| unsafe { BatchMeta::from_native_type_ref(p.as_ref()) })
     }
 
+    pub fn batch_meta_mut(&mut self) -> Option<&mut BatchMeta> {
+        NonNull::new(self.as_native_type_ref().batch_meta)
+            .map(|mut p| unsafe { BatchMeta::from_native_type_mut(p.as_mut()) })
+    }
+
     pub fn meta_type(&self) -> MetaType {
         self.as_native_type_ref().meta_type.into()
     }
 
     pub unsafe fn user_context(&self) -> *mut () {
         self.as_native_type_ref().uContext as _
-    }
-
-    pub fn add_frame_meta(&self, meta: &FrameMeta) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_add_frame_meta_to_batch(
-                self.as_native_type_ref() as *const _ as _,
-                meta.as_native_type_ref() as *const _ as _,
-            );
-        }
     }
 }
 
@@ -227,6 +223,10 @@ impl BatchMeta {
 
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn max_frames_in_batch(&self) -> u32 {
@@ -308,6 +308,24 @@ impl BatchMeta {
         }
     }
 
+    pub fn add_frame_meta(&mut self, meta: &FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_frame_meta_to_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_frame_meta(&mut self, meta: &FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_frame_meta_from_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
     pub fn add_user_meta(&self, meta: &UserMeta) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_user_meta_to_batch(
@@ -323,6 +341,10 @@ crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
 impl FrameMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn pad_index(&self) -> u32 {
@@ -403,12 +425,21 @@ impl FrameMeta {
         self.as_native_type_ref().pipeline_height
     }
 
-    pub fn add_obj_meta(&self, obj_meta: &ObjectMeta, parent_meta: &ObjectMeta) {
+    pub fn add_obj_meta(&mut self, obj_meta: &ObjectMeta, parent_meta: Option<&ObjectMeta>) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_obj_meta_to_frame(
                 self.as_native_type_ref() as *const _ as _,
                 obj_meta.as_native_type_ref() as *const _ as _,
-                parent_meta.as_native_type_ref() as *const _ as _,
+                parent_meta.map_or(std::ptr::null_mut(), |p| p.as_native_type_ref() as *const _ as _),
+            );
+        }
+    }
+
+    pub fn remove_obj_meta(&mut self, obj_meta: &ObjectMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_obj_meta_from_frame(
+                self.as_native_type_ref() as *const _ as _,
+                obj_meta.as_native_type_ref() as *const _ as _,
             );
         }
     }
@@ -437,6 +468,10 @@ crate::wrapper_impl!(ObjectMeta, nvidia_deepstream_sys::NvDsObjectMeta);
 impl ObjectMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn parent(&self) -> Option<&ObjectMeta> {
@@ -536,6 +571,10 @@ impl ClassifierMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
+    }
+
     pub fn num_labels(&self) -> u32 {
         self.as_native_type_ref().num_labels
     }
@@ -574,6 +613,10 @@ impl LabelInfo {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
+    }
+
     pub fn num_classes(&self) -> u32 {
         self.as_native_type_ref().num_classes
     }
@@ -607,6 +650,10 @@ crate::wrapper_impl!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMeta);
 impl DisplayMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn num_rects(&self) -> u32 {
@@ -752,6 +799,10 @@ impl UserMeta {
 
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
+    }
+
+    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
+        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub unsafe fn user_meta_data<T>(&self) -> *mut T {
