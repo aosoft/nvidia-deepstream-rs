@@ -1,4 +1,7 @@
-use crate::osd::RectParams;
+pub mod audio;
+pub mod osd;
+
+use osd::RectParams;
 use crate::WrapperExt;
 use std::ffi::CStr;
 use std::marker::PhantomData;
@@ -654,16 +657,16 @@ impl ObjectMeta {
         self.as_native_type_ref().tracker_confidence
     }
 
-    pub fn rect_params(&self) -> &crate::osd::RectParams {
-        crate::osd::RectParams::from_native_type_ref(&self.as_native_type_ref().rect_params)
+    pub fn rect_params(&self) -> &osd::RectParams {
+        osd::RectParams::from_native_type_ref(&self.as_native_type_ref().rect_params)
     }
 
-    pub fn mask_params(&self) -> &crate::osd::MaskParams {
-        crate::osd::MaskParams::from_native_type_ref(&self.as_native_type_ref().mask_params)
+    pub fn mask_params(&self) -> &osd::MaskParams {
+        osd::MaskParams::from_native_type_ref(&self.as_native_type_ref().mask_params)
     }
 
-    pub fn text_params(&self) -> &crate::osd::TextParams {
-        crate::osd::TextParams::from_native_type_ref(&self.as_native_type_ref().text_params)
+    pub fn text_params(&self) -> &osd::TextParams {
+        osd::TextParams::from_native_type_ref(&self.as_native_type_ref().text_params)
     }
 
     pub fn obj_label(&self) -> &str {
@@ -900,11 +903,11 @@ impl DisplayMeta {
         self.as_native_type_ref().num_rects
     }
 
-    pub fn get_rect_params(&self, index: usize) -> Option<&crate::osd::RectParams> {
+    pub fn get_rect_params(&self, index: usize) -> Option<&osd::RectParams> {
         if index < self.as_native_type_ref().num_rects as usize
             && index < self.as_native_type_ref().rect_params.len()
         {
-            Some(crate::osd::RectParams::from_native_type_ref(
+            Some(osd::RectParams::from_native_type_ref(
                 &self.as_native_type_ref().rect_params[index],
             ))
         } else {
@@ -912,7 +915,7 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_rect_params(&mut self, params: &[crate::osd::RectParams]) {
+    pub fn set_rect_params(&mut self, params: &[osd::RectParams]) {
         let len = std::cmp::min(self.as_native_type_ref().rect_params.len(), params.len());
 
         self.as_native_type_mut().num_rects = len as _;
@@ -921,11 +924,11 @@ impl DisplayMeta {
         }
     }
 
-    pub fn get_text_params(&self, index: usize) -> Option<&crate::osd::TextParams> {
+    pub fn get_text_params(&self, index: usize) -> Option<&osd::TextParams> {
         if index < self.as_native_type_ref().num_labels as usize
             && index < self.as_native_type_ref().text_params.len()
         {
-            Some(crate::osd::TextParams::from_native_type_ref(
+            Some(osd::TextParams::from_native_type_ref(
                 &self.as_native_type_ref().text_params[index],
             ))
         } else {
@@ -933,7 +936,7 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_text_params(&mut self, params: &[crate::osd::TextParams]) {
+    pub fn set_text_params(&mut self, params: &[osd::TextParams]) {
         let len = std::cmp::min(self.as_native_type_ref().text_params.len(), params.len());
 
         self.as_native_type_mut().num_labels = len as _;
@@ -942,11 +945,11 @@ impl DisplayMeta {
         }
     }
 
-    pub fn get_line_params(&self, index: usize) -> Option<&crate::osd::LineParams> {
+    pub fn get_line_params(&self, index: usize) -> Option<&osd::LineParams> {
         if index < self.as_native_type_ref().num_lines as usize
             && index < self.as_native_type_ref().line_params.len()
         {
-            Some(crate::osd::LineParams::from_native_type_ref(
+            Some(osd::LineParams::from_native_type_ref(
                 &self.as_native_type_ref().line_params[index],
             ))
         } else {
@@ -954,7 +957,7 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_line_params(&mut self, params: &[crate::osd::LineParams]) {
+    pub fn set_line_params(&mut self, params: &[osd::LineParams]) {
         let len = std::cmp::min(self.as_native_type_ref().line_params.len(), params.len());
 
         self.as_native_type_mut().num_lines = len as _;
@@ -963,11 +966,11 @@ impl DisplayMeta {
         }
     }
 
-    pub fn get_arrow_params(&self, index: usize) -> Option<&crate::osd::ArrowParams> {
+    pub fn get_arrow_params(&self, index: usize) -> Option<&osd::ArrowParams> {
         if index < self.as_native_type_ref().num_arrows as usize
             && index < self.as_native_type_ref().arrow_params.len()
         {
-            Some(crate::osd::ArrowParams::from_native_type_ref(
+            Some(osd::ArrowParams::from_native_type_ref(
                 &self.as_native_type_ref().arrow_params[index],
             ))
         } else {
@@ -975,7 +978,7 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_arrow_params(&mut self, params: &[crate::osd::ArrowParams]) {
+    pub fn set_arrow_params(&mut self, params: &[osd::ArrowParams]) {
         let len = std::cmp::min(self.as_native_type_ref().arrow_params.len(), params.len());
 
         self.as_native_type_mut().num_arrows = len as _;
@@ -984,11 +987,11 @@ impl DisplayMeta {
         }
     }
 
-    pub fn get_circle_params(&self, index: usize) -> Option<&crate::osd::CircleParams> {
+    pub fn get_circle_params(&self, index: usize) -> Option<&osd::CircleParams> {
         if index < self.as_native_type_ref().num_circles as usize
             && index < self.as_native_type_ref().circle_params.len()
         {
-            Some(crate::osd::CircleParams::from_native_type_ref(
+            Some(osd::CircleParams::from_native_type_ref(
                 &self.as_native_type_ref().circle_params[index],
             ))
         } else {
@@ -996,7 +999,7 @@ impl DisplayMeta {
         }
     }
 
-    pub fn set_circle_params(&mut self, params: &[crate::osd::CircleParams]) {
+    pub fn set_circle_params(&mut self, params: &[osd::CircleParams]) {
         let len = std::cmp::min(self.as_native_type_ref().circle_params.len(), params.len());
 
         self.as_native_type_mut().num_circles = len as _;

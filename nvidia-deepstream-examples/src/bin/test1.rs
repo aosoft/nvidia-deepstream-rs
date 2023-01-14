@@ -2,7 +2,7 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::BufferExt;
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
-use nvidia_deepstream::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
+use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";

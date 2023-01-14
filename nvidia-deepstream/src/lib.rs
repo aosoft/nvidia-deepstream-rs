@@ -8,7 +8,6 @@ pub mod mem;
 #[cfg(feature = "meta")]
 pub mod meta;
 
-pub mod osd;
 pub mod surface;
 //pub mod surface_transform;    //  pending
 
