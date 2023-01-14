@@ -1185,3 +1185,24 @@ impl MetaList<'_, UserMeta> {
         }
     }
 }
+
+
+pub trait BufferExt: 'static {
+    fn get_nvds_batch_meta(&self) -> Option<&mut BatchMeta>;
+}
+
+impl BufferExt for gstreamer::Buffer {
+    fn get_nvds_batch_meta(&self) -> Option<&mut BatchMeta> {
+        unsafe {
+            let batch_meta = nvidia_deepstream_sys::gst_buffer_get_nvds_batch_meta(
+                self.as_mut_ptr() as *mut nvidia_deepstream_sys::GstBuffer,
+            );
+
+            if batch_meta != std::ptr::null_mut() {
+                Some(BatchMeta::from_native_type_mut(&mut *batch_meta))
+            } else {
+                None
+            }
+        }
+    }
+}

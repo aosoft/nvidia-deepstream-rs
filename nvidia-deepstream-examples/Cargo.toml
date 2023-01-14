@@ -8,4 +8,4 @@ edition = "2021"
 [dependencies]
 
 gstreamer = "0.19.4"
-nvidia-deepstream = { version = "0.1.0", path = "../nvidia-deepstream" }
+nvidia-deepstream = { version = "0.1.0", path = "../nvidia-deepstream", features = ["meta", "yaml"] }

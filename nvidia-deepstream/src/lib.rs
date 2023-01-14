@@ -1,8 +1,13 @@
 pub mod bounding_box;
-pub mod buffer;
+
+#[cfg(feature = "yaml")]
 pub mod yaml;
+
 pub mod mem;
+
+#[cfg(feature = "meta")]
 pub mod meta;
+
 pub mod osd;
 pub mod surface;
 //pub mod surface_transform;    //  pending
