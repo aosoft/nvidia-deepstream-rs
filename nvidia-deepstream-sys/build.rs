@@ -7,18 +7,9 @@ static NVDS_VER: &str = "6.1";
 
 fn main() {
     let pk = pkg_config::Config::new().probe("gstreamer-1.0").unwrap();
-
-    println!(
-        "cargo:rustc-link-search=/opt/nvidia/deepstream/deepstream-{}/lib/",
-        NVDS_VER
-    );
     for path in &pk.link_paths {
         println!("cargo:rustc-link-search={:?}", path);
     }
-    println!("cargo:rustc-link-lib=dylib=nvdsgst_meta");
-    println!("cargo:rustc-link-lib=dylib=nvds_meta");
-    println!("cargo:rustc-link-lib=dylib=nvds_yml_parser");
-    println!("cargo:rerun-if-changed=wrapper.h");
 
     let mut bindings = bindgen::Builder::default()
         .header("wrapper.h")
