@@ -1,5 +1,5 @@
 use gstreamer::prelude::*;
-use gstreamer::{Element, PadProbeData, PadProbeReturn, PadProbeType};
+use gstreamer::{ChildProxy, Element, PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::buffer::BufferNvdsExt;
 use nvidia_deepstream::yaml;
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
@@ -185,7 +185,7 @@ fn main() {
 
 fn create_source_bin(index: u32, uri: &str) -> Element {
     let bin = gstreamer::Bin::new(Some(format!("source-bin-{}", index).as_str()));
-    let uri_decode_bin = gstreamer::ElementFactory::make("nvurisrcbin")
+    let uri_decode_bin = gstreamer::ElementFactory::make("uridecodebin")
         .name("uri-decode-bin")
         .build()
         .unwrap();
@@ -206,9 +206,31 @@ fn create_source_bin(index: u32, uri: &str) -> Element {
             bin_ghost_pad.set_target(Some(pad)).unwrap();
         }
     });
-    uri_decode_bin.connect("child-added", false, move |args| None);
+    uri_decode_bin
+        .clone()
+        .dynamic_cast::<gstreamer::ChildProxy>()
+        .unwrap()
+        .connect_child_added(decodebin_child_added);
 
     bin.add(&uri_decode_bin).unwrap();
+    bin.add_pad(&gstreamer::GhostPad::new(
+        Some("src"),
+        gstreamer::PadDirection::Src,
+    ))
+    .unwrap();
 
     bin.into()
+}
+
+fn decodebin_child_added(_: &ChildProxy, object: &gstreamer::glib::Object, name: &str) {
+    if name.starts_with("decodebin") {
+        object
+            .clone()
+            .dynamic_cast::<gstreamer::ChildProxy>()
+            .unwrap()
+            .connect_child_added(decodebin_child_added);
+    }
+    if name.starts_with("source") && object.has_property("drop-on-latency", None) {
+        object.set_property::<bool>("drop-on-latency", true);
+    }
 }
