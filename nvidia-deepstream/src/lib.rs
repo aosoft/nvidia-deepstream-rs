@@ -1,14 +1,15 @@
 pub mod bounding_box;
+pub mod mem;
 
 #[cfg(feature = "yaml")]
 pub mod yaml;
 
-pub mod mem;
-
 #[cfg(feature = "meta")]
 pub mod meta;
 
+#[cfg(feature = "surface")]
 pub mod surface;
+
 //pub mod surface_transform;    //  pending
 
 pub trait WrapperExt {
