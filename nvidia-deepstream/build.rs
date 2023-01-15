@@ -6,6 +6,10 @@ fn main() {
         NVDS_VER
     );
 
+    if cfg!(feature = "logger") {
+        println!("cargo:rustc-link-lib=dylib=nvds_logger");
+    }
+
     if cfg!(feature = "meta") {
         println!("cargo:rustc-link-lib=dylib=nvdsgst_meta");
         println!("cargo:rustc-link-lib=dylib=nvds_meta");

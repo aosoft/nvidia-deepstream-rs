@@ -8,6 +8,7 @@ edition = "2021"
 [features]
 
 default = []
+logger = []
 meta = []
 surface = []
 yaml = []

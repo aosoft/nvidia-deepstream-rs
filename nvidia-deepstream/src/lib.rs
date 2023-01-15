@@ -1,6 +1,9 @@
 pub mod bounding_box;
 pub mod mem;
 
+#[cfg(feature = "logger")]
+pub mod logger;
+
 #[cfg(feature = "yaml")]
 pub mod yaml;
 
