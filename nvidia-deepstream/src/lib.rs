@@ -15,6 +15,11 @@ pub mod surface;
 
 //pub mod surface_transform;    //  pending
 
+#[cfg(feature = "obj_encode")]
+pub mod obj_encode;
+
+
+
 pub trait WrapperExt {
     type NativeType;
 

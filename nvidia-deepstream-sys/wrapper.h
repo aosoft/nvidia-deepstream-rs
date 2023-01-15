@@ -6,3 +6,4 @@
 
 #include <nvds_audio_meta.h>
 
+#include <nvds_obj_encode.h>

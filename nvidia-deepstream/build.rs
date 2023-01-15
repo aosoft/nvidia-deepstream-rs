@@ -15,6 +15,10 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=nvds_meta");
     }
 
+    if cfg!(feature = "obj_encode") {
+        println!("cargo:rustc-link-lib=dylib=nvds_batch_jpegenc");
+    }
+
     if cfg!(feature = "surface") {
         println!("cargo:rustc-link-lib=dylib=nvbufsurface");
     }
