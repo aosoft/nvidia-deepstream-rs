@@ -183,6 +183,69 @@ impl AudioFrameMeta {
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
         self.as_native_type_ref().misc_frame_info
     }
+
+    pub fn add_classifier_meta(&mut self, classifier_meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_classifier_meta_to_audio_frame(
+                self.as_native_type_ref() as *const _ as _,
+                classifier_meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_classifier_meta(&mut self, classifier_meta: &ClassifierMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_classifier_meta_from_audio_frame(
+                self.as_native_type_ref() as *const _ as _,
+                classifier_meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_audio_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_audio_frame(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn clear_classifier_meta_list(&mut self, meta_list: &MetaList<ClassifierMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_audio_classifier_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_audio_frame_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn copy_to(&self, dst_frame_meta: &mut AudioFrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_audio_frame_meta(
+                self.as_native_type_ref() as *const _ as _,
+                dst_frame_meta.as_native_type_mut() as _,
+            )
+        }
+    }
 }
 
 crate::wrapper_impl!(AudioBatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
@@ -202,5 +265,90 @@ impl AudioBatchMeta {
                 max_batch_size,
             ))
         })
+    }
+
+    pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut AudioFrameMeta> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_acquire_audio_frame_meta_from_pool(
+                self.as_native_type_ptr(),
+            ))
+                .map(|mut p| AudioFrameMeta::from_native_type_mut(p.as_mut()))
+        }
+    }
+
+    pub fn add_frame_meta(&mut self, meta: &AudioFrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_audio_frame_meta_to_audio_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_frame_meta(&mut self, meta: &AudioFrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_audio_frame_meta_from_audio_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_audio_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_audio_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn clear_frame_meta_list(&mut self, meta_list: &MetaList<AudioFrameMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_audio_frame_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_audio_batch_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+}
+
+impl MetaList<'_, AudioFrameMeta> {
+    pub fn get_nth_audio_frame_meta(&self, index: u32) -> Option<&AudioFrameMeta> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_get_nth_audio_frame_meta(
+                self.list.as_ptr(),
+                index,
+            ))
+                .map(|mut p| AudioFrameMeta::from_native_type_ref(p.as_mut()))
+        }
+    }
+
+    pub fn copy_to_audio_batch_meta(&self, dst_batch_meta: &mut AudioBatchMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_audio_frame_meta_list(
+                self.list.as_ptr(),
+                dst_batch_meta.as_native_type_mut() as _,
+            )
+        }
     }
 }

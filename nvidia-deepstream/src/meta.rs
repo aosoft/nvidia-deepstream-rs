@@ -259,19 +259,12 @@ pub trait BatchMetaExt {
     fn frame_meta_list(&self) -> MetaList<FrameMeta>;
     fn acquire_meta_lock(&mut self);
     fn release_meta_lock(&mut self);
-    fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta>;
     fn acquire_obj_meta_from_pool(&self) -> Option<&mut ObjectMeta>;
     fn acquire_classifier_meta_from_pool(&self) -> Option<&mut ClassifierMeta>;
     fn acquire_label_info_meta_from_pool(&self) -> Option<&mut LabelInfo>;
     fn acquire_user_meta_from_pool(&self) -> Option<&mut UserMeta>;
     fn acquire_display_meta_from_pool(&self) -> Option<&mut DisplayMeta>;
-    fn add_frame_meta(&mut self, meta: &FrameMeta);
-    fn remove_frame_meta(&mut self, meta: &FrameMeta);
-    fn add_user_meta(&self, meta: &UserMeta);
-    fn remove_user_meta(&self, meta: &UserMeta);
     fn get_current_metadata_info(&self) -> bool;
-    fn clear_frame_meta_list(&mut self, meta_list: &MetaList<FrameMeta>);
-    fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>);
     fn clear_meta_list(&mut self, meta_list: &MetaList<UserMeta>, meta_pool: &MetaPool);
 }
 
@@ -290,6 +283,69 @@ impl BatchMeta {
                 max_batch_size,
             ))
         })
+    }
+
+    pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_acquire_frame_meta_from_pool(
+                self.as_native_type_ptr(),
+            ))
+                .map(|mut p| FrameMeta::from_native_type_mut(p.as_mut()))
+        }
+    }
+
+    pub fn add_frame_meta(&mut self, meta: &FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_frame_meta_to_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_frame_meta(&mut self, meta: &FrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_frame_meta_from_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn add_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_add_user_meta_to_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn remove_user_meta(&self, meta: &UserMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_remove_user_meta_from_batch(
+                self.as_native_type_ref() as *const _ as _,
+                meta.as_native_type_ref() as *const _ as _,
+            );
+        }
+    }
+
+    pub fn clear_frame_meta_list(&mut self, meta_list: &MetaList<FrameMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_frame_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
+    }
+
+    pub fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_clear_batch_user_meta_list(
+                self.as_native_type_mut() as _,
+                meta_list.list.as_ptr(),
+            );
+        }
     }
 }
 
@@ -350,15 +406,6 @@ impl<T: WrapperExt<NativeType = nvidia_deepstream_sys::NvDsBatchMeta>> BatchMeta
         }
     }
 
-    fn acquire_frame_meta_from_pool(&self) -> Option<&mut FrameMeta> {
-        unsafe {
-            NonNull::new(nvidia_deepstream_sys::nvds_acquire_frame_meta_from_pool(
-                self.as_native_type_ptr(),
-            ))
-            .map(|mut p| FrameMeta::from_native_type_mut(p.as_mut()))
-        }
-    }
-
     fn acquire_obj_meta_from_pool(&self) -> Option<&mut ObjectMeta> {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::nvds_acquire_obj_meta_from_pool(
@@ -408,65 +455,11 @@ impl<T: WrapperExt<NativeType = nvidia_deepstream_sys::NvDsBatchMeta>> BatchMeta
         }
     }
 
-    fn add_frame_meta(&mut self, meta: &FrameMeta) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_add_frame_meta_to_batch(
-                self.as_native_type_ref() as *const _ as _,
-                meta.as_native_type_ref() as *const _ as _,
-            );
-        }
-    }
-
-    fn remove_frame_meta(&mut self, meta: &FrameMeta) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_remove_frame_meta_from_batch(
-                self.as_native_type_ref() as *const _ as _,
-                meta.as_native_type_ref() as *const _ as _,
-            );
-        }
-    }
-
-    fn add_user_meta(&self, meta: &UserMeta) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_add_user_meta_to_batch(
-                self.as_native_type_ref() as *const _ as _,
-                meta.as_native_type_ref() as *const _ as _,
-            );
-        }
-    }
-
-    fn remove_user_meta(&self, meta: &UserMeta) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_remove_user_meta_from_batch(
-                self.as_native_type_ref() as *const _ as _,
-                meta.as_native_type_ref() as *const _ as _,
-            );
-        }
-    }
-
     fn get_current_metadata_info(&self) -> bool {
         unsafe {
             nvidia_deepstream_sys::nvds_get_current_metadata_info(
                 &self.as_native_type_ref() as *const _ as _
             ) != 0
-        }
-    }
-
-    fn clear_frame_meta_list(&mut self, meta_list: &MetaList<FrameMeta>) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_clear_frame_meta_list(
-                self.as_native_type_mut() as _,
-                meta_list.list.as_ptr(),
-            );
-        }
-    }
-
-    fn clear_user_meta_list(&mut self, meta_list: &MetaList<UserMeta>) {
-        unsafe {
-            nvidia_deepstream_sys::nvds_clear_batch_user_meta_list(
-                self.as_native_type_mut() as _,
-                meta_list.list.as_ptr(),
-            );
         }
     }
 
@@ -1197,6 +1190,15 @@ impl MetaList<'_, ClassifierMeta> {
             )
         }
     }
+
+    pub fn copy_to_audio_frame_meta(&self, dst_frame_meta: &mut audio::AudioFrameMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_audio_classification_list(
+                self.list.as_ptr(),
+                dst_frame_meta.as_native_type_mut() as _,
+            )
+        }
+    }
 }
 
 impl MetaList<'_, LabelInfo> {
@@ -1234,6 +1236,15 @@ impl MetaList<'_, UserMeta> {
             nvidia_deepstream_sys::nvds_copy_obj_user_meta_list(
                 self.list.as_ptr(),
                 dst_object_meta.as_native_type_mut() as _,
+            )
+        }
+    }
+
+    pub fn copy_to_audio_batch_meta(&self, dst_batch_meta: &mut audio::AudioBatchMeta) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_copy_audio_batch_user_meta_list(
+                self.list.as_ptr(),
+                dst_batch_meta.as_native_type_mut() as _,
             )
         }
     }
