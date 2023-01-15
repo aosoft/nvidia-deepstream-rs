@@ -1,6 +1,6 @@
 use gstreamer::prelude::*;
 use gstreamer::{ChildProxy, Element, PadProbeData, PadProbeReturn, PadProbeType};
-use nvidia_deepstream::buffer::BufferNvdsExt;
+use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::yaml;
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 
