@@ -183,5 +183,24 @@ impl AudioFrameMeta {
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
         self.as_native_type_ref().misc_frame_info
     }
+}
 
+crate::wrapper_impl!(AudioBatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
+
+impl crate::mem::NvdsDrop for AudioBatchMeta {
+    fn drop(p: NonNull<Self::NativeType>) {
+        unsafe {
+            nvidia_deepstream_sys::nvds_destroy_audio_batch_meta(p.as_ptr());
+        }
+    }
+}
+
+impl AudioBatchMeta {
+    pub fn create(max_batch_size: u32) -> Option<crate::mem::NvdsBox<AudioBatchMeta>> {
+        crate::mem::NvdsBox::new(|| unsafe {
+            NonNull::new(nvidia_deepstream_sys::nvds_create_audio_batch_meta(
+                max_batch_size,
+            ))
+        })
+    }
 }

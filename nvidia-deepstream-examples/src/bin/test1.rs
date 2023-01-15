@@ -1,6 +1,6 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
-use nvidia_deepstream::meta::BufferExt;
+use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;

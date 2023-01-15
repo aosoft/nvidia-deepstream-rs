@@ -22,6 +22,8 @@ pub trait WrapperExt {
 
     fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self;
     fn as_native_type_mut(&mut self) -> &mut Self::NativeType;
+
+    unsafe fn as_native_type_ptr(&self) -> *mut Self::NativeType;
 }
 
 #[macro_export(local_inner_macros)]
@@ -50,6 +52,11 @@ macro_rules! wrapper_impl_body {
             #[inline]
             fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
                 &mut self.0
+            }
+
+            #[inline]
+            unsafe fn as_native_type_ptr(&self) -> *mut Self::NativeType {
+                self.as_native_type_ref() as *const _ as *mut _
             }
     }
 }
