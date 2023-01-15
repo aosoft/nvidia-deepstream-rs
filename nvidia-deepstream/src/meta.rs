@@ -1,4 +1,5 @@
 pub mod audio;
+pub mod latency;
 pub mod osd;
 
 use crate::WrapperExt;
