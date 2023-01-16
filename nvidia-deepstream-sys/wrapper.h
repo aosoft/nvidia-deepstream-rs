@@ -1,4 +1,6 @@
 #include <nvds_logger.h>
+#include <nvds_version.h>
+
 #include <gstnvdsmeta.h>
 #include <nvbufsurface.h>
 //#include <nvbufsurftransform.h>   //  pending

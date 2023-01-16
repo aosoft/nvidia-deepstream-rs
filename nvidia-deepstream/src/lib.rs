@@ -4,19 +4,22 @@ pub mod mem;
 #[cfg(feature = "logger")]
 pub mod logger;
 
-#[cfg(feature = "yaml")]
-pub mod yaml;
-
 #[cfg(feature = "meta")]
 pub mod meta;
+
+#[cfg(feature = "obj_encode")]
+pub mod obj_encode;
 
 #[cfg(feature = "surface")]
 pub mod surface;
 
 //pub mod surface_transform;    //  pending
 
-#[cfg(feature = "obj_encode")]
-pub mod obj_encode;
+#[cfg(feature = "utils")]
+pub mod utils;
+
+#[cfg(feature = "yaml")]
+pub mod yaml;
 
 
 
