@@ -119,7 +119,7 @@ fn main() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(user_meta_list) = frame_meta.frame_user_meta_list() {
                             for user_meta in user_meta_list.iter() {
-                                println!("user_meta_data = {}", (*user_meta.user_meta_data::<UserMetaData>()).data)
+                                println!("user_meta_data = {}", user_meta.user_meta_data::<UserMetaData>().unwrap().data)
                             }
                         }
                     }

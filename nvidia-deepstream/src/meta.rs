@@ -1,6 +1,7 @@
 pub mod audio;
 pub mod dewarper;
 pub mod latency;
+pub mod optical_flow;
 pub mod osd;
 
 use crate::WrapperExt;
@@ -292,7 +293,7 @@ impl BatchMeta {
             NonNull::new(nvidia_deepstream_sys::nvds_acquire_frame_meta_from_pool(
                 self.as_native_type_ptr(),
             ))
-                .map(|mut p| FrameMeta::from_native_type_mut(p.as_mut()))
+            .map(|mut p| FrameMeta::from_native_type_mut(p.as_mut()))
         }
     }
 
@@ -1084,11 +1085,15 @@ impl UserMeta {
     }
 
     pub fn user_custom_meta_type() -> MetaType {
-        unsafe { Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.USER.CUSTOM_META\0".as_ptr() as _)) }
+        unsafe {
+            Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.USER.CUSTOM_META\0".as_ptr() as _))
+        }
     }
 
     pub fn dummy_bbox_meta_type() -> MetaType {
-        unsafe { Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.DUMMY.BBOX.META\0".as_ptr() as _)) }
+        unsafe {
+            Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.DUMMY.BBOX.META\0".as_ptr() as _))
+        }
     }
 
     pub fn base_meta(&self) -> &BaseMeta {
@@ -1099,8 +1104,8 @@ impl UserMeta {
         BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
-    pub unsafe fn user_meta_data<T>(&self) -> *mut T {
-        self.as_native_type_ref().user_meta_data as _
+    pub unsafe fn user_meta_data<T>(&self) -> Option<&T> {
+        NonNull::new(self.as_native_type_ref().user_meta_data as *mut T).map(|p| p.as_ref())
     }
 
     pub fn set_user_meta_data<T: Clone + Drop>(&mut self, meta_type: MetaType, meta_data: Box<T>) {

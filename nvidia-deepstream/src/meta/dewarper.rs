@@ -12,7 +12,7 @@ crate::wrapper_impl!(DewarperSurfaceMeta, nvidia_deepstream_sys::NvDewarperSurfa
 
 impl DewarperSurfaceMeta {
     pub fn surface_type(&self) -> &[SurfaceType] {
-        unsafe { std::mem::transmute::<_, [SurfaceType; 4usize]>(self.as_native_type_ref().type_).as_slice() }
+        unsafe { std::mem::transmute::<_, &[SurfaceType; 4usize]>(&self.as_native_type_ref().type_).as_slice() }
     }
 
     pub fn index(&self) -> &[u32] {
