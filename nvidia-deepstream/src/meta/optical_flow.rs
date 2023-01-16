@@ -34,7 +34,7 @@ impl OpticalFlowMeta {
         unsafe {
             std::slice::from_raw_parts(
                 self.as_native_type_ref().data as _,
-                (self.as_native_type_ref().mv_size / std::mem::size_of::<FlowVector>()) as usize,
+                self.as_native_type_ref().mv_size as usize / std::mem::size_of::<FlowVector>(),
             )
         }
     }

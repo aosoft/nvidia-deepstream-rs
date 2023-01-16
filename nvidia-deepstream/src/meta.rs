@@ -3,6 +3,7 @@ pub mod dewarper;
 pub mod latency;
 pub mod optical_flow;
 pub mod osd;
+pub mod tracker;
 
 use crate::WrapperExt;
 use osd::RectParams;
