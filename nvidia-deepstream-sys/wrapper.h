@@ -3,6 +3,9 @@
 
 #include <gstnvdsmeta.h>
 #include <nvds_audio_meta.h>
+#include <nvds_dewarper_meta.h>
+#include <nvds_opticalflow_meta.h>
+#include <nvds_tracker_meta.h>
 #include <nvdscustomusermeta.h>
 #include <nvdsdummyusermeta.h>
 
