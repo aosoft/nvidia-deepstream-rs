@@ -1082,6 +1082,14 @@ impl UserMeta {
         }
     }
 
+    pub fn user_custom_meta_type() -> MetaType {
+        unsafe { Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.USER.CUSTOM_META\0".as_ptr() as _)) }
+    }
+
+    pub fn dummy_bbox_meta_type() -> MetaType {
+        unsafe { Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.DUMMY.BBOX.META\0".as_ptr() as _)) }
+    }
+
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
@@ -1136,6 +1144,35 @@ impl UserMeta {
             let _ = Box::from_raw(user_meta_data as *mut T);
             (*user_meta).user_meta_data = std::ptr::null_mut();
         }
+    }
+}
+
+crate::wrapper_impl!(FaceBoxes, nvidia_deepstream_sys::faceboxes);
+
+impl FaceBoxes {
+    pub fn new(x: f32, y: f32, width: f32, height: f32) -> FaceBoxes {
+        FaceBoxes::from_native_type(nvidia_deepstream_sys::faceboxes {
+            x,
+            y,
+            width,
+            height,
+        })
+    }
+
+    pub fn x(&self) -> f32 {
+        self.as_native_type_ref().x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.as_native_type_ref().y
+    }
+
+    pub fn width(&self) -> f32 {
+        self.as_native_type_ref().width
+    }
+
+    pub fn height(&self) -> f32 {
+        self.as_native_type_ref().height
     }
 }
 
