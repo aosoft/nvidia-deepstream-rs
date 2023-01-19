@@ -1,6 +1,9 @@
 pub mod bounding_box;
 pub mod mem;
 
+#[cfg(feature = "helper")]
+pub mod helper;
+
 #[cfg(feature = "logger")]
 pub mod logger;
 

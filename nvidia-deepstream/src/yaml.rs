@@ -42,7 +42,7 @@ macro_rules! impl_element_nvds_yaml_ext_method {
     }
 }
 
-pub trait ElementNvdsYamlExt: 'static {
+pub trait ElementNvdsYamlExt {
     define_element_nvds_yaml_ext_method!(nvds_parse_file_source);
     define_element_nvds_yaml_ext_method!(nvds_parse_uridecodebin);
     define_element_nvds_yaml_ext_method!(nvds_parse_nvarguscamerasrc);
