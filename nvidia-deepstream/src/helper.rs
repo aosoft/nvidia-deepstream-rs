@@ -1,3 +1,4 @@
+use gstreamer::glib::translate::{FromGlibPtrFull, ToGlibPtr};
 use gstreamer::glib::ObjectType;
 use std::ffi::CStr;
 use std::ptr::NonNull;
@@ -54,22 +55,46 @@ impl ElementHelperExt for gstreamer::Element {
                 self.as_ptr() as _,
                 stream_id.as_ptr() as _,
             ))
-                .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+            .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
         }
     }
 }
 
 pub trait EventHelperExt {
+    fn gst_nvevent_parse_stream_segment(&self) -> (u32, Option<gstreamer::Segment>);
     fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&CStr>);
 }
 
 impl EventHelperExt for gstreamer::Event {
+    fn gst_nvevent_parse_stream_segment(&self) -> (u32, Option<gstreamer::Segment>) {
+        unsafe {
+            let mut source_id: u32 = 0;
+            let mut segment: *mut nvidia_deepstream_sys::GstSegment = std::ptr::null_mut();
+            nvidia_deepstream_sys::gst_nvevent_parse_stream_segment(
+                self.as_ptr() as _,
+                &mut source_id,
+                &mut segment,
+            );
+            (
+                source_id,
+                NonNull::new(segment).map(|p| gstreamer::Segment::from_glib_full(p.as_ptr() as _)),
+            )
+        }
+    }
+
     fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&CStr>) {
         unsafe {
             let mut source_id: u32 = 0;
             let mut stream_id: *mut nvidia_deepstream_sys::gchar = std::ptr::null_mut();
-            nvidia_deepstream_sys::gst_nvevent_parse_stream_start(self.as_ptr() as _, &mut source_id, &mut stream_id);
-            (source_id, NonNull::new(stream_id).map(|p| { CStr::from_ptr(p.as_ptr() as _) }))
+            nvidia_deepstream_sys::gst_nvevent_parse_stream_start(
+                self.as_ptr() as _,
+                &mut source_id,
+                &mut stream_id,
+            );
+            (
+                source_id,
+                NonNull::new(stream_id).map(|p| CStr::from_ptr(p.as_ptr() as _)),
+            )
         }
     }
 }
@@ -86,7 +111,7 @@ pub fn gst_nvevent_new_pad_deleted(source_id: u32) -> Option<gstreamer::Event> {
         NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_pad_deleted(
             source_id,
         ))
-            .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+        .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
     }
 }
 
@@ -97,11 +122,21 @@ pub fn gst_nvevent_new_stream_eos(source_id: u32) -> Option<gstreamer::Event> {
     }
 }
 
+pub fn gst_nvevent_new_stream_segment(
+    source_id: u32,
+    segment: &gstreamer::Segment,
+) -> Option<gstreamer::Event> {
+    unsafe {
+        NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_stream_segment(source_id, segment.to_glib_none().0 as _))
+            .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+    }
+}
+
 pub fn gst_nvevent_new_stream_reset(source_id: u32) -> Option<gstreamer::Event> {
     unsafe {
         NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_stream_reset(
             source_id,
         ))
-            .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+        .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
     }
 }
