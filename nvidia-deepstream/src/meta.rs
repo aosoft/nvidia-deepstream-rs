@@ -721,11 +721,9 @@ impl ObjectMeta {
         osd::TextParams::from_native_type_ref(&self.as_native_type_ref().text_params)
     }
 
-    pub fn obj_label(&self) -> &str {
+    pub fn obj_label(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(&self.as_native_type_ref().obj_label as _)
-                .to_str()
-                .unwrap_or_default()
         }
     }
 
@@ -831,11 +829,9 @@ impl ClassifierMeta {
             .map(|v| MetaList::<LabelInfo>::new(v))
     }
 
-    pub fn classifier_type(&self) -> &str {
+    pub fn classifier_type(&self) -> &CStr {
         unsafe {
             CStr::from_ptr(self.as_native_type_ref().classifier_type)
-                .to_str()
-                .unwrap_or_default()
         }
     }
 
@@ -891,13 +887,11 @@ impl LabelInfo {
         self.as_native_type_ref().num_classes
     }
 
-    pub fn result_label(&self) -> &str {
+    pub fn result_label(&self) -> &CStr {
         unsafe {
             match NonNull::new(self.as_native_type_ref().pResult_label) {
-                Some(p) => CStr::from_ptr(p.as_ptr()).to_str().unwrap_or_default(),
+                Some(p) => CStr::from_ptr(p.as_ptr()),
                 None => CStr::from_ptr(&self.as_native_type_ref().result_label as _)
-                    .to_str()
-                    .unwrap_or_default(),
             }
         }
     }
