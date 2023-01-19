@@ -73,13 +73,13 @@ impl FontParams {
     }
 }
 
-pub struct FontParamsBuilder {
-    font_name: Option<&'static CStr>,
+pub struct FontParamsBuilder<'a> {
+    font_name: Option<&'a CStr>,
     font_size: Option<u32>,
     font_color: Option<ColorParams>,
 }
 
-impl FontParamsBuilder {
+impl<'a> FontParamsBuilder<'a> {
     pub fn new() -> Self {
         FontParamsBuilder {
             font_name: None,
@@ -88,7 +88,7 @@ impl FontParamsBuilder {
         }
     }
 
-    pub fn font_name(mut self, name: &'static CStr) -> Self {
+    pub fn font_name(mut self, name: &'a CStr) -> Self {
         self.font_name = Some(name);
         self
     }
