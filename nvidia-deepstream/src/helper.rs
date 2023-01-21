@@ -1,5 +1,5 @@
 use gstreamer::glib::translate::{FromGlibPtrFull, ToGlibPtr};
-use gstreamer::glib::ObjectType;
+use gstreamer::glib::IsA;
 use std::ffi::CStr;
 use std::ptr::NonNull;
 
@@ -12,7 +12,7 @@ pub trait ElementHelperExt {
     fn gst_nvevent_new_stream_start(&self, stream_id: &CStr) -> Option<gstreamer::Event>;
 }
 
-impl ElementHelperExt for gstreamer::Element {
+impl<O: IsA<gstreamer::Element>> ElementHelperExt for O {
     fn configure_source_for_ntp_sync(&self) {
         unsafe { nvidia_deepstream_sys::configure_source_for_ntp_sync(self.as_ptr() as _) }
     }
@@ -127,8 +127,11 @@ pub fn gst_nvevent_new_stream_segment(
     segment: &gstreamer::Segment,
 ) -> Option<gstreamer::Event> {
     unsafe {
-        NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_stream_segment(source_id, segment.to_glib_none().0 as _))
-            .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+        NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_stream_segment(
+            source_id,
+            segment.to_glib_none().0 as _,
+        ))
+        .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
     }
 }
 
@@ -138,5 +141,49 @@ pub fn gst_nvevent_new_stream_reset(source_id: u32) -> Option<gstreamer::Event> 
             source_id,
         ))
         .map(|p| gstreamer::Event::from_glib_full(p.as_ptr() as _))
+    }
+}
+
+pub trait ObjectHelperExt {
+    fn gst_nvmessage_new_stream_eos(&self, eos_stream_id: u32) -> Option<gstreamer::Message>;
+}
+
+impl<O: IsA<gstreamer::glib::Object>> ObjectHelperExt for O {
+    fn gst_nvmessage_new_stream_eos(&self, eos_stream_id: u32) -> Option<gstreamer::Message> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::gst_nvmessage_new_stream_eos(
+                self.to_glib_none().0 as _,
+                eos_stream_id,
+            ))
+            .map(|p| gstreamer::Message::from_glib_full(p.as_ptr() as _))
+        }
+    }
+}
+
+pub trait MessageHelperExt {
+    fn gst_nvmessage_is_stream_eos(&self) -> bool;
+    fn gst_nvmessage_parse_stream_eos(&self) -> Option<u32>;
+}
+
+impl MessageHelperExt for gstreamer::Message {
+    fn gst_nvmessage_is_stream_eos(&self) -> bool {
+        unsafe {
+            nvidia_deepstream_sys::gst_nvmessage_is_stream_eos(self.as_ptr() as _) != 0
+        }
+    }
+
+    fn gst_nvmessage_parse_stream_eos(&self) -> Option<u32> {
+        unsafe {
+            let mut eos_stream_id: u32 = 0;
+            if nvidia_deepstream_sys::gst_nvmessage_parse_stream_eos(
+                self.as_ptr() as _,
+                &mut eos_stream_id,
+            ) != 0
+            {
+                Some(eos_stream_id)
+            } else {
+                None
+            }
+        }
     }
 }
