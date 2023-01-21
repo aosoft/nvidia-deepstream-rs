@@ -1,5 +1,6 @@
 use gstreamer::glib::translate::{FromGlibPtrFull, ToGlibPtr};
 use gstreamer::glib::IsA;
+use gstreamer::Query;
 use std::ffi::CStr;
 use std::ptr::NonNull;
 
@@ -167,9 +168,7 @@ pub trait MessageHelperExt {
 
 impl MessageHelperExt for gstreamer::Message {
     fn gst_nvmessage_is_stream_eos(&self) -> bool {
-        unsafe {
-            nvidia_deepstream_sys::gst_nvmessage_is_stream_eos(self.as_ptr() as _) != 0
-        }
+        unsafe { nvidia_deepstream_sys::gst_nvmessage_is_stream_eos(self.as_ptr() as _) != 0 }
     }
 
     fn gst_nvmessage_parse_stream_eos(&self) -> Option<u32> {
@@ -181,6 +180,85 @@ impl MessageHelperExt for gstreamer::Message {
             ) != 0
             {
                 Some(eos_stream_id)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+pub trait QueryHelper {
+    fn gst_nvquery_batch_size_new() -> Option<gstreamer::Query>;
+    fn gst_nvquery_is_batch_size(&self) -> bool;
+    fn gst_nvquery_batch_size_set(&self, batch_size: u32);
+    fn gst_nvquery_batch_size_parse(&self) -> Option<u32>;
+
+    fn gst_nvquery_num_streams_size_new() -> Option<gstreamer::Query>;
+    fn gst_nvquery_is_num_streams_size(&self) -> bool;
+    fn gst_nvquery_batch_num_streams_set(&self, num_streams_size: u32);
+    fn gst_nvquery_batch_num_streams_parse(&self) -> Option<u32>;
+}
+
+impl QueryHelper for gstreamer::Query {
+    fn gst_nvquery_batch_size_new() -> Option<Query> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::gst_nvquery_batch_size_new())
+                .map(|p| gstreamer::Query::from_glib_full(p.as_ptr() as _))
+        }
+    }
+
+    fn gst_nvquery_is_batch_size(&self) -> bool {
+        unsafe { nvidia_deepstream_sys::gst_nvquery_is_batch_size(self.as_ptr() as _) != 0 }
+    }
+
+    fn gst_nvquery_batch_size_set(&self, batch_size: u32) {
+        unsafe { nvidia_deepstream_sys::gst_nvquery_batch_size_set(self.as_ptr() as _, batch_size) }
+    }
+
+    fn gst_nvquery_batch_size_parse(&self) -> Option<u32> {
+        unsafe {
+            let mut batch_size: u32 = 0;
+            if nvidia_deepstream_sys::gst_nvquery_batch_size_parse(
+                self.as_ptr() as _,
+                &mut batch_size,
+            ) != 0
+            {
+                Some(batch_size)
+            } else {
+                None
+            }
+        }
+    }
+
+    fn gst_nvquery_num_streams_size_new() -> Option<Query> {
+        unsafe {
+            NonNull::new(nvidia_deepstream_sys::gst_nvquery_numStreams_size_new())
+                .map(|p| gstreamer::Query::from_glib_full(p.as_ptr() as _))
+        }
+    }
+
+    fn gst_nvquery_is_num_streams_size(&self) -> bool {
+        unsafe { nvidia_deepstream_sys::gst_nvquery_is_numStreams_size(self.as_ptr() as _) != 0 }
+    }
+
+    fn gst_nvquery_batch_num_streams_set(&self, num_streams_size: u32) {
+        unsafe {
+            nvidia_deepstream_sys::gst_nvquery_numStreams_size_set(
+                self.as_ptr() as _,
+                num_streams_size,
+            )
+        }
+    }
+
+    fn gst_nvquery_batch_num_streams_parse(&self) -> Option<u32> {
+        unsafe {
+            let mut num_streams_size: u32 = 0;
+            if nvidia_deepstream_sys::gst_nvquery_numStreams_size_parse(
+                self.as_ptr() as _,
+                &mut num_streams_size,
+            ) != 0
+            {
+                Some(num_streams_size)
             } else {
                 None
             }
