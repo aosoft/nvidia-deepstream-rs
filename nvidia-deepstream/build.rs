@@ -23,6 +23,10 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=nvbufsurface");
     }
 
+    if cfg!(feature = "surface_transform") {
+        println!("cargo:rustc-link-lib=dylib=nvbufsurftransform");
+    }
+
     if cfg!(feature = "utils") {
         println!("cargo:rustc-link-lib=dylib=nvds_utils");
     }

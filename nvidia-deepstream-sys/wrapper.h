@@ -19,7 +19,9 @@
 
 //  surface
 #include <nvbufsurface.h>
-//#include <nvbufsurftransform.h>   //  pending
+
+//  surface_transform
+#include <nvbufsurftransform.h>
 
 //  yaml
 #include <nvds_yml_parser.h>

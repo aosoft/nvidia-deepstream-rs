@@ -8,12 +8,13 @@ edition = "2021"
 [features]
 
 default = []
-all = ["helper", "logger", "meta", "obj_encode", "surface", "yaml", "utils"]
+all = ["helper", "logger", "meta", "obj_encode", "surface", "surface_transform", "yaml", "utils"]
 helper = []
 logger = []
 meta = []
 obj_encode = []
 surface = []
+surface_transform = []
 utils = []
 yaml = []
 

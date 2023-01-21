@@ -16,7 +16,8 @@ pub mod obj_encode;
 #[cfg(feature = "surface")]
 pub mod surface;
 
-//pub mod surface_transform;    //  pending
+#[cfg(feature = "surface_transform")]
+pub mod surface_transform;    //  pending
 
 #[cfg(feature = "utils")]
 pub mod utils;
