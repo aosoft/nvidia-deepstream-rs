@@ -25,8 +25,9 @@ pub enum Flip {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum Inter {
+    #[default]
     Nearest = nvidia_deepstream_sys::NvBufSurfTransform_Inter_NvBufSurfTransformInter_Nearest as _,
     Bilinear =
         nvidia_deepstream_sys::NvBufSurfTransform_Inter_NvBufSurfTransformInter_Bilinear as _,
@@ -53,8 +54,9 @@ pub enum Error {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum TransformFlag {
+    #[default]
     None = 0,
     CropSrc =
         nvidia_deepstream_sys::NvBufSurfTransform_Transform_Flag_NVBUFSURF_TRANSFORM_CROP_SRC as _,
@@ -68,8 +70,9 @@ pub enum TransformFlag {
 }
 
 #[repr(u32)]
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum CompositeFlag {
+    #[default]
     None = 0,
     Composite = nvidia_deepstream_sys::NvBufSurfTransform_Composite_Flag_NVBUFSURF_TRANSFORM_COMPOSITE as _,
     Blend = nvidia_deepstream_sys::NvBufSurfTransform_Composite_Flag_NVBUFSURF_TRANSFORM_BLEND as _,
@@ -285,25 +288,6 @@ impl PerformBlendingFlags<'_> {
 }
 
 impl<'a> CompositeBlendParams<'a> {
-    pub fn new(
-        composite_blend_flag: CompositeFlag,
-        input_buf_count: u32,
-        composite_blend_filter: Inter,
-        color_bg: Option<&'a ColorParams>,
-    ) -> CompositeBlendParams<'a> {
-        CompositeBlendParams(
-            nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams {
-                composite_blend_flag: composite_blend_flag as _,
-                input_buf_count,
-                composite_blend_filter: composite_blend_filter as _,
-                color_bg: color_bg.map_or(std::ptr::null_mut(), |p| {
-                    p.as_native_type_ref() as *const _ as _
-                }),
-                perform_blending: std::ptr::null_mut(),
-            },
-            color_bg,
-        )
-    }
 
     pub fn composite_blend_flag(&self) -> CompositeFlag {
         unsafe { std::mem::transmute(self.as_native_type_ref().composite_blend_flag) }
@@ -329,6 +313,39 @@ impl<'a> CompositeBlendParams<'a> {
                 self.input_buf_count() as _,
             ))
         })
+    }
+}
+
+pub struct CompositeBlendParamsBuilder<'a> {
+    composite_blend_flag: Option<CompositeFlag>,
+    input_buf_count: Option<u32>,
+    composite_blend_filter: Option<Inter>,
+    color_bg: Option<&'a ColorParams>,
+}
+
+impl<'a> CompositeBlendParamsBuilder<'a> {
+    pub fn new() -> CompositeBlendParamsBuilder<'a> {
+        CompositeBlendParamsBuilder {
+            composite_blend_flag: None,
+            input_buf_count: None,
+            composite_blend_filter: None,
+            color_bg: None,
+        }
+    }
+
+    pub fn build(self) -> CompositeBlendParams<'a> {
+        CompositeBlendParams(
+            nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams {
+                composite_blend_flag: self.composite_blend_flag.unwrap_or_default() as _,
+                input_buf_count: self.input_buf_count.unwrap_or_default(),
+                composite_blend_filter: self.composite_blend_filter.unwrap_or_default() as _,
+                color_bg: self.color_bg.map_or(std::ptr::null_mut(), |p| {
+                    p.as_native_type_ref() as *const _ as _
+                }),
+                perform_blending: std::ptr::null_mut(),
+            },
+            self.color_bg,
+        )
     }
 }
 
