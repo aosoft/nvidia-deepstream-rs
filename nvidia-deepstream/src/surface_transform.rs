@@ -169,7 +169,7 @@ pub struct CompositeParams<'a>(
     Option<&'a TransformRect>,
     Option<&'a TransformRect>,
 );
-crate::wrapper_impl_with_lifetime!(
+crate::wrapper_impl_with_lifetime_body!(
     CompositeParams,
     nvidia_deepstream_sys::NvBufSurfTransformCompositeParams
 );
@@ -262,15 +262,6 @@ impl ColorParams {
     }
 }
 
-pub struct CompositeBlendParams<'a>(
-    nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams,
-    Option<&'a ColorParams>,
-);
-crate::wrapper_impl_with_lifetime!(
-    CompositeBlendParams,
-    nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams
-);
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct PerformBlendingFlags<'a>(&'a [u32]);
 
@@ -288,8 +279,12 @@ impl PerformBlendingFlags<'_> {
     }
 }
 
-impl<'a> CompositeBlendParams<'a> {
+crate::wrapper_impl_with_lifetime!(
+    CompositeBlendParams,
+    nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams
+);
 
+impl<'a> CompositeBlendParams<'a> {
     pub fn composite_blend_flag(&self) -> CompositeFlag {
         unsafe { std::mem::transmute(self.as_native_type_ref().composite_blend_flag) }
     }
@@ -322,7 +317,7 @@ pub struct CompositeBlendParamsBuilder<'a> {
     input_buf_count: Option<u32>,
     composite_blend_filter: Option<Inter>,
     color_bg: Option<&'a ColorParams>,
-    perform_blending: Option<&'a [u32]>
+    perform_blending: Option<&'a [u32]>,
 }
 
 impl<'a> CompositeBlendParamsBuilder<'a> {
@@ -332,7 +327,7 @@ impl<'a> CompositeBlendParamsBuilder<'a> {
             input_buf_count: None,
             composite_blend_filter: None,
             color_bg: None,
-            perform_blending: None
+            perform_blending: None,
         }
     }
 
@@ -374,19 +369,46 @@ impl<'a> CompositeBlendParamsBuilder<'a> {
                 color_bg: self.color_bg.map_or(std::ptr::null_mut(), |p| {
                     p.as_native_type_ref() as *const _ as _
                 }),
-                perform_blending: std::ptr::null_mut(),
+                perform_blending: self
+                    .perform_blending
+                    .map_or_else(|| std::ptr::null_mut(), |x| x.as_ptr() as _),
             },
-            self.color_bg,
+            Default::default(),
         )
     }
 }
 
-pub struct CompositeBlendParamsEx<'a>(
-    nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParamsEx,
-    Option<&'a TransformRect>,
-    Option<&'a TransformRect>,
-);
 crate::wrapper_impl_with_lifetime!(
     CompositeBlendParamsEx,
     nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParamsEx
 );
+
+impl<'a> CompositeBlendParamsEx<'a> {
+    pub fn params(&self) -> &CompositeBlendParams {
+        CompositeBlendParams::from_native_type_ref(&self.as_native_type_ref().params)
+    }
+
+    pub fn src_comp_rect(&self) -> &'a [TransformRect] {
+        unsafe {
+            std::slice::from_raw_parts(self.as_native_type_ref().src_comp_rect as _, self.params().input_buf_count() as _)
+        }
+    }
+
+    pub fn dst_comp_rect(&self) -> &'a [TransformRect] {
+        unsafe {
+            std::slice::from_raw_parts(self.as_native_type_ref().dst_comp_rect as _, self.params().input_buf_count() as _)
+        }
+    }
+
+    pub fn composite_blend_filter(&self) -> &'a [Inter] {
+        unsafe {
+            std::slice::from_raw_parts(self.as_native_type_ref().composite_blend_filter as _, self.params().input_buf_count() as _)
+        }
+    }
+
+    pub fn alpha(&self) -> &'a [f32] {
+        unsafe {
+            std::slice::from_raw_parts(self.as_native_type_ref().alpha as _, self.params().input_buf_count() as _)
+        }
+    }
+}
