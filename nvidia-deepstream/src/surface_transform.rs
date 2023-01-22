@@ -271,6 +271,7 @@ crate::wrapper_impl_with_lifetime!(
     nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams
 );
 
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct PerformBlendingFlags<'a>(&'a [u32]);
 
 impl PerformBlendingFlags<'_> {
@@ -321,6 +322,7 @@ pub struct CompositeBlendParamsBuilder<'a> {
     input_buf_count: Option<u32>,
     composite_blend_filter: Option<Inter>,
     color_bg: Option<&'a ColorParams>,
+    perform_blending: Option<&'a [u32]>
 }
 
 impl<'a> CompositeBlendParamsBuilder<'a> {
@@ -330,7 +332,37 @@ impl<'a> CompositeBlendParamsBuilder<'a> {
             input_buf_count: None,
             composite_blend_filter: None,
             color_bg: None,
+            perform_blending: None
         }
+    }
+
+    pub fn composite_blend_flag(mut self, flag: CompositeFlag) -> Self {
+        self.composite_blend_flag = Some(flag);
+        self
+    }
+
+    pub fn input_buf_count(mut self, count: u32) -> Self {
+        self.input_buf_count = Some(count);
+        self.perform_blending = None;
+        self
+    }
+
+    pub fn composite_blend_filter(mut self, filter: Inter) -> Self {
+        self.composite_blend_filter = Some(filter);
+        self
+    }
+
+    pub fn color_bg(mut self, color_bg: Option<&'a ColorParams>) -> Self {
+        self.color_bg = color_bg;
+        self
+    }
+
+    pub fn perform_blending(mut self, perform_blending: Option<PerformBlendingFlags<'a>>) -> Self {
+        if let Some(x) = perform_blending {
+            self.input_buf_count = Some(x.len() as _);
+        }
+        self.perform_blending = perform_blending.map(|x| x.0);
+        self
     }
 
     pub fn build(self) -> CompositeBlendParams<'a> {
