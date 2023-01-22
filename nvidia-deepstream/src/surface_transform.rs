@@ -1,4 +1,5 @@
 use crate::WrapperExt;
+use std::cmp::min;
 use std::ptr::NonNull;
 
 #[repr(u32)]
@@ -384,31 +385,74 @@ crate::wrapper_impl_with_lifetime!(
 );
 
 impl<'a> CompositeBlendParamsEx<'a> {
+    pub fn new(
+        params: &'a CompositeBlendParams,
+        src_comp_rect: &'a [TransformRect],
+        dst_comp_rect: &'a [TransformRect],
+        composite_blend_filter: &'a [Inter],
+        alpha: &'a [f32],
+    ) -> Option<CompositeBlendParamsEx<'a>> {
+        let count = min(
+            src_comp_rect.len(),
+            min(
+                dst_comp_rect.len(),
+                min(composite_blend_filter.len(), alpha.len()),
+            ),
+        );
+        if (params.input_buf_count() as usize) <= count {
+            Some(CompositeBlendParamsEx(
+                nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParamsEx {
+                    params: *params.as_native_type_ref(),
+                    src_comp_rect: src_comp_rect.as_ptr() as _,
+                    dst_comp_rect: dst_comp_rect.as_ptr() as _,
+                    composite_blend_filter: composite_blend_filter.as_ptr() as _,
+                    alpha: alpha.as_ptr() as _,
+                    reserved: [std::ptr::null_mut(); 4usize],
+                },
+                Default::default(),
+            ))
+        } else {
+            None
+        }
+    }
+
     pub fn params(&self) -> &CompositeBlendParams {
         CompositeBlendParams::from_native_type_ref(&self.as_native_type_ref().params)
     }
 
     pub fn src_comp_rect(&self) -> &'a [TransformRect] {
         unsafe {
-            std::slice::from_raw_parts(self.as_native_type_ref().src_comp_rect as _, self.params().input_buf_count() as _)
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().src_comp_rect as _,
+                self.params().input_buf_count() as _,
+            )
         }
     }
 
     pub fn dst_comp_rect(&self) -> &'a [TransformRect] {
         unsafe {
-            std::slice::from_raw_parts(self.as_native_type_ref().dst_comp_rect as _, self.params().input_buf_count() as _)
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().dst_comp_rect as _,
+                self.params().input_buf_count() as _,
+            )
         }
     }
 
     pub fn composite_blend_filter(&self) -> &'a [Inter] {
         unsafe {
-            std::slice::from_raw_parts(self.as_native_type_ref().composite_blend_filter as _, self.params().input_buf_count() as _)
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().composite_blend_filter as _,
+                self.params().input_buf_count() as _,
+            )
         }
     }
 
     pub fn alpha(&self) -> &'a [f32] {
         unsafe {
-            std::slice::from_raw_parts(self.as_native_type_ref().alpha as _, self.params().input_buf_count() as _)
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().alpha as _,
+                self.params().input_buf_count() as _,
+            )
         }
     }
 }
