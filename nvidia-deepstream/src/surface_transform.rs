@@ -600,3 +600,68 @@ pub fn compoiste_async(
         }
     }
 }
+
+pub fn compoiste_blend(
+    src0: &crate::surface::Surface,
+    src1: &crate::surface::Surface,
+    alpha: &crate::surface::Surface,
+    dst: &crate::surface::Surface,
+    blend_params: &CompositeBlendParams,
+) -> Result<(), Error> {
+    unsafe {
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformCompositeBlend(
+            src0.as_native_type_ptr(),
+            src1.as_native_type_ptr(),
+            alpha.as_native_type_ptr(),
+            dst.as_native_type_ptr(),
+            blend_params.as_native_type_ptr(),
+        ));
+        if e == Error::Success {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn multi_input_buf_compoiste_blend(
+    src: &[&crate::surface::Surface],
+    dst: &crate::surface::Surface,
+    blend_params: &CompositeBlendParamsEx,
+) -> Result<(), Error> {
+    unsafe {
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlend(
+            src.as_ptr() as _,
+            dst.as_native_type_ptr(),
+            blend_params.as_native_type_ptr(),
+        ));
+        if e == Error::Success {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn multi_input_buf_compoiste_blend_async(
+    src: &[&crate::surface::Surface],
+    dst: &crate::surface::Surface,
+    blend_params: &CompositeBlendParamsEx,
+) -> Result<TransformSyncObj, Error> {
+    unsafe {
+        let mut s: nvidia_deepstream_sys::NvBufSurfTransformSyncObj_t = std::ptr::null_mut();
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlendAsync(
+            src.as_ptr() as _,
+            dst.as_native_type_ptr(),
+            blend_params.as_native_type_ptr(),
+            &mut s
+        ));
+        if e == Error::Success {
+            NonNull::new(s)
+                .ok_or(Error::Unsupported)
+                .map(|x| TransformSyncObj(x))
+        } else {
+            Err(e)
+        }
+    }
+}
