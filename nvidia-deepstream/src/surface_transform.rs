@@ -54,6 +54,12 @@ pub enum Error {
     Success = nvidia_deepstream_sys::NvBufSurfTransform_Error_NvBufSurfTransformError_Success as _,
 }
 
+impl Error {
+    pub fn new(e: nvidia_deepstream_sys::NvBufSurfTransform_Error) -> Self {
+        unsafe { std::mem::transmute(e) }
+    }
+}
+
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum TransformFlag {
@@ -453,6 +459,144 @@ impl<'a> CompositeBlendParamsEx<'a> {
                 self.as_native_type_ref().alpha as _,
                 self.params().input_buf_count() as _,
             )
+        }
+    }
+}
+
+pub struct TransformSyncObj(NonNull<nvidia_deepstream_sys::NvBufSurfTransformSyncObj>);
+
+impl TransformSyncObj {
+    pub fn wait(&self, time_out: u32) -> Result<(), Error> {
+        unsafe {
+            let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformSyncObjWait(
+                self.0.as_ptr(),
+                time_out,
+            ));
+            if e == Error::Success {
+                Ok(())
+            } else {
+                Err(e)
+            }
+        }
+    }
+}
+
+impl Drop for TransformSyncObj {
+    fn drop(&mut self) {
+        unsafe {
+            let mut p = self.0.as_ptr();
+            nvidia_deepstream_sys::NvBufSurfTransformSyncObjDestroy(&mut p);
+        }
+    }
+}
+
+pub fn set_session_params(params: &ConfigParams) -> Result<(), Error> {
+    unsafe {
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformSetSessionParams(
+            params.as_native_type_ptr(),
+        ));
+        if e == Error::Success {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn get_session_params() -> Result<ConfigParams, Error> {
+    unsafe {
+        let mut r: nvidia_deepstream_sys::NvBufSurfTransformConfigParams = std::mem::zeroed();
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformGetSessionParams(
+            &mut r,
+        ));
+        if e == Error::Success {
+            Ok(ConfigParams::from_native_type(r))
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn transform(
+    src: &crate::surface::Surface,
+    dst: &crate::surface::Surface,
+    transform_params: &TransformParams,
+) -> Result<(), Error> {
+    unsafe {
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransform(
+            src.as_native_type_ptr(),
+            dst.as_native_type_ptr(),
+            transform_params.as_native_type_ptr(),
+        ));
+        if e == Error::Success {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn compoiste(
+    src: &crate::surface::Surface,
+    dst: &crate::surface::Surface,
+    composite_params: &CompositeParams,
+) -> Result<(), Error> {
+    unsafe {
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformComposite(
+            src.as_native_type_ptr(),
+            dst.as_native_type_ptr(),
+            composite_params.as_native_type_ptr(),
+        ));
+        if e == Error::Success {
+            Ok(())
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn transform_async(
+    src: &crate::surface::Surface,
+    dst: &crate::surface::Surface,
+    transform_params: &TransformParams,
+) -> Result<TransformSyncObj, Error> {
+    unsafe {
+        let mut s: nvidia_deepstream_sys::NvBufSurfTransformSyncObj_t = std::ptr::null_mut();
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformAsync(
+            src.as_native_type_ptr(),
+            dst.as_native_type_ptr(),
+            transform_params.as_native_type_ptr(),
+            &mut s,
+        ));
+        if e == Error::Success {
+            NonNull::new(s)
+                .ok_or(Error::Unsupported)
+                .map(|x| TransformSyncObj(x))
+        } else {
+            Err(e)
+        }
+    }
+}
+
+pub fn compoiste_async(
+    src: &crate::surface::Surface,
+    dst: &crate::surface::Surface,
+    composite_params: &CompositeParams,
+) -> Result<TransformSyncObj, Error> {
+    unsafe {
+        let mut s: nvidia_deepstream_sys::NvBufSurfTransformSyncObj_t = std::ptr::null_mut();
+        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformCompositeAsync(
+            src.as_native_type_ptr(),
+            dst.as_native_type_ptr(),
+            composite_params.as_native_type_ptr(),
+            &mut s,
+        ));
+        if e == Error::Success {
+            NonNull::new(s)
+                .ok_or(Error::Unsupported)
+                .map(|x| TransformSyncObj(x))
+        } else {
+            Err(e)
         }
     }
 }

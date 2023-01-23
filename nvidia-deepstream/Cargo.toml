@@ -14,7 +14,7 @@ logger = []
 meta = []
 obj_encode = []
 surface = []
-surface_transform = []
+surface_transform = ["surface"]
 utils = []
 yaml = []
 
