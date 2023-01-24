@@ -17,6 +17,9 @@
 #include <gst-nvmessage.h>
 #include <gst-nvquery.h>
 
+//  infer
+#include <nvdsinfer.h>
+
 //  surface
 #include <nvbufsurface.h>
 

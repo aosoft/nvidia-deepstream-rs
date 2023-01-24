@@ -4,6 +4,9 @@ pub mod mem;
 #[cfg(feature = "helper")]
 pub mod helper;
 
+#[cfg(feature = "infer")]
+pub mod infer;
+
 #[cfg(feature = "logger")]
 pub mod logger;
 
@@ -17,7 +20,7 @@ pub mod obj_encode;
 pub mod surface;
 
 #[cfg(feature = "surface_transform")]
-pub mod surface_transform;    //  pending
+pub mod surface_transform;
 
 #[cfg(feature = "utils")]
 pub mod utils;
