@@ -2,7 +2,7 @@
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
 pub enum Status {
     #[default]
-    SUCCESS = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_SUCCESS as _,
+    Success = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_SUCCESS as _,
     ConfigFailed = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_CONFIG_FAILED as _,
     CustomLibFailed = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_CUSTOM_LIB_FAILED as _,
     InvalidParams = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_INVALID_PARAMS as _,
@@ -12,4 +12,14 @@ pub enum Status {
     ResourceError = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_RESOURCE_ERROR as _,
     TritonError = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_TRITON_ERROR as _,
     UnknownError = nvidia_deepstream_sys::NvDsInferStatus_NVDSINFER_UNKNOWN_ERROR as _,
+}
+
+#[repr(u32)]
+#[derive(Default, Clone, Copy, PartialEq, Debug)]
+pub enum LogLevel {
+    #[default]
+    Error = nvidia_deepstream_sys::NvDsInferLogLevel_NVDSINFER_LOG_ERROR as _ ,
+    Warning = nvidia_deepstream_sys::NvDsInferLogLevel_NVDSINFER_LOG_WARNING as _,
+    Info = nvidia_deepstream_sys::NvDsInferLogLevel_NVDSINFER_LOG_INFO as _,
+    Debug = nvidia_deepstream_sys::NvDsInferLogLevel_NVDSINFER_LOG_DEBUG as _,
 }
