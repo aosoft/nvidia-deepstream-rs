@@ -82,7 +82,7 @@ macro_rules! wrapper_impl_body {
 #[macro_export(local_inner_macros)]
 macro_rules! wrapper_impl {
     ($W:ident, $N:ty) => {
-        #[derive(Debug, Copy, Clone)]
+        #[derive(Copy, Clone)]
         pub struct $W($N);
 
         impl $W {
@@ -125,7 +125,7 @@ macro_rules! wrapper_impl_with_lifetime_body {
 #[macro_export(local_inner_macros)]
 macro_rules! wrapper_impl_with_lifetime {
     ($W:ident, $N:ty) => {
-        #[derive(Debug, Copy, Clone)]
+        #[derive(Copy, Clone)]
         pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
 
         impl<'a> crate::WrapperExt for $W<'a> {
