@@ -68,11 +68,13 @@ impl Dims {
     pub fn to_chw(&self) -> Option<DimsChw> {
         let d = self.d();
         if d.len() >= 3 {
-            Some(DimsChw::from_native_type(nvidia_deepstream_sys::NvDsInferDimsCHW {
-                c: d[0],
-                h: d[1],
-                w: d[2],
-            }))
+            Some(DimsChw::from_native_type(
+                nvidia_deepstream_sys::NvDsInferDimsCHW {
+                    c: d[0],
+                    h: d[1],
+                    w: d[2],
+                },
+            ))
         } else {
             None
         }
@@ -81,15 +83,18 @@ impl Dims {
     pub fn to_hwc(&self) -> Option<DimsChw> {
         let d = self.d();
         if d.len() >= 3 {
-            Some(DimsChw::from_native_type(nvidia_deepstream_sys::NvDsInferDimsCHW {
-                c: d[2],
-                h: d[0],
-                w: d[1],
-            }))
+            Some(DimsChw::from_native_type(
+                nvidia_deepstream_sys::NvDsInferDimsCHW {
+                    c: d[2],
+                    h: d[0],
+                    w: d[1],
+                },
+            ))
         } else {
             None
         }
-    }}
+    }
+}
 
 crate::wrapper_impl!(DimsChw, nvidia_deepstream_sys::NvDsInferDimsCHW);
 
@@ -148,5 +153,36 @@ impl NetworkInfo {
 
     pub fn channels(&self) -> u32 {
         self.as_native_type_ref().channels
+    }
+}
+
+crate::wrapper_impl!(
+    ObjectDetectionInfo,
+    nvidia_deepstream_sys::NvDsInferObjectDetectionInfo
+);
+
+impl ObjectDetectionInfo {
+    pub fn class_id(&self) -> u32 {
+        self.as_native_type_ref().classId
+    }
+
+    pub fn left(&self) -> f32 {
+        self.as_native_type_ref().left
+    }
+
+    pub fn top(&self) -> f32 {
+        self.as_native_type_ref().top
+    }
+
+    pub fn width(&self) -> f32 {
+        self.as_native_type_ref().width
+    }
+
+    pub fn height(&self) -> f32 {
+        self.as_native_type_ref().height
+    }
+
+    pub fn detection_confidence(&self) -> f32 {
+        self.as_native_type_ref().detectionConfidence
     }
 }
