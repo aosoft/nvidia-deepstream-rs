@@ -64,7 +64,32 @@ impl Dims {
     pub fn num_elements(&self) -> u32 {
         self.as_native_type_ref().numElements
     }
-}
+
+    pub fn to_chw(&self) -> Option<DimsChw> {
+        let d = self.d();
+        if d.len() >= 3 {
+            Some(DimsChw::from_native_type(nvidia_deepstream_sys::NvDsInferDimsCHW {
+                c: d[0],
+                h: d[1],
+                w: d[2],
+            }))
+        } else {
+            None
+        }
+    }
+
+    pub fn to_hwc(&self) -> Option<DimsChw> {
+        let d = self.d();
+        if d.len() >= 3 {
+            Some(DimsChw::from_native_type(nvidia_deepstream_sys::NvDsInferDimsCHW {
+                c: d[2],
+                h: d[0],
+                w: d[1],
+            }))
+        } else {
+            None
+        }
+    }}
 
 crate::wrapper_impl!(DimsChw, nvidia_deepstream_sys::NvDsInferDimsCHW);
 
