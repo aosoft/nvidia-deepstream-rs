@@ -10,6 +10,7 @@
 #include <nvds_tracker_meta.h>
 #include <nvdscustomusermeta.h>
 #include <nvdsdummyusermeta.h>
+#include <nvdsmeta_schema.h>
 
 //  helper
 #include <nvdsgstutils.h>
