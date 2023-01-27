@@ -186,3 +186,51 @@ impl ObjectDetectionInfo {
         self.as_native_type_ref().detectionConfidence
     }
 }
+
+crate::wrapper_impl!(
+    InstanceMaskInfo,
+    nvidia_deepstream_sys::NvDsInferInstanceMaskInfo
+);
+
+impl InstanceMaskInfo {
+    pub fn class_id(&self) -> u32 {
+        self.as_native_type_ref().classId
+    }
+
+    pub fn left(&self) -> f32 {
+        self.as_native_type_ref().left
+    }
+
+    pub fn top(&self) -> f32 {
+        self.as_native_type_ref().top
+    }
+
+    pub fn width(&self) -> f32 {
+        self.as_native_type_ref().width
+    }
+
+    pub fn height(&self) -> f32 {
+        self.as_native_type_ref().height
+    }
+
+    pub fn detection_confidence(&self) -> f32 {
+        self.as_native_type_ref().detectionConfidence
+    }
+
+    pub fn mask(&self) -> &[f32] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().mask,
+                self.as_native_type_ref().mask_size as _ / std::mem::size_of::<f32>(),
+            )
+        }
+    }
+
+    pub fn mask_width(&self) -> u32 {
+        self.as_native_type_ref().mask_width
+    }
+
+    pub fn mask_height(&self) -> u32 {
+        self.as_native_type_ref().mask_height
+    }
+}
