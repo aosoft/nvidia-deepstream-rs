@@ -221,7 +221,7 @@ impl InstanceMaskInfo {
         unsafe {
             std::slice::from_raw_parts(
                 self.as_native_type_ref().mask,
-                self.as_native_type_ref().mask_size as _ / std::mem::size_of::<f32>(),
+                self.as_native_type_ref().mask_size as usize / std::mem::size_of::<f32>(),
             )
         }
     }
@@ -234,3 +234,27 @@ impl InstanceMaskInfo {
         self.as_native_type_ref().mask_height
     }
 }
+
+
+crate::wrapper_impl!(Attribute, nvidia_deepstream_sys::NvDsInferAttribute);
+
+impl Attribute {
+    pub fn attribute_index(&self) -> u32 {
+        self.as_native_type_ref().attributeIndex
+    }
+
+    pub fn attribute_value(&self) -> u32 {
+        self.as_native_type_ref().attributeValue
+    }
+
+    pub fn attribute_confidence(&self) -> f32 {
+        self.as_native_type_ref().attributeConfidence
+    }
+
+    pub fn attribute_label(&self) -> &CStr {
+        unsafe {
+            CStr::from_ptr(self.as_native_type_ref().attributeLabel)
+        }
+    }
+}
+
