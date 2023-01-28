@@ -1,6 +1,9 @@
 use crate::WrapperExt;
 
-crate::wrapper_impl!(Coords, nvidia_deepstream_sys::NvBbox_Coords);
+crate::wrapper_impl_ref_type!(
+    Coords,
+    nvidia_deepstream_sys::NvBbox_Coords
+);
 
 impl Coords {
     pub fn new(left: f32, top: f32, width: f32, height: f32) -> Coords {
@@ -29,7 +32,7 @@ impl Coords {
     }
 }
 
-crate::wrapper_impl!(Info, nvidia_deepstream_sys::NvDsComp_BboxInfo);
+crate::wrapper_impl_ref_type!(Info, nvidia_deepstream_sys::NvDsComp_BboxInfo);
 
 impl Info {
     pub fn org_bbox_coords(&self) -> &Coords {

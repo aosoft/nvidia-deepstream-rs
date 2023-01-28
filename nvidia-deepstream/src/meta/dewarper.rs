@@ -5,14 +5,21 @@ pub enum SurfaceType {
     NONE = nvidia_deepstream_sys::NvDsSurfaceType_NVDS_META_SURFACE_NONE as _,
     FishPushbroom = nvidia_deepstream_sys::NvDsSurfaceType_NVDS_META_SURFACE_FISH_PUSHBROOM as _,
     FishVertcyl = nvidia_deepstream_sys::NvDsSurfaceType_NVDS_META_SURFACE_FISH_VERTCYL as _,
-    PerspectivePerspective = nvidia_deepstream_sys::NvDsSurfaceType_NVDS_META_SURFACE_PERSPECTIVE_PERSPECTIVE as _,
+    PerspectivePerspective =
+        nvidia_deepstream_sys::NvDsSurfaceType_NVDS_META_SURFACE_PERSPECTIVE_PERSPECTIVE as _,
 }
 
-crate::wrapper_impl!(DewarperSurfaceMeta, nvidia_deepstream_sys::NvDewarperSurfaceMeta);
+crate::wrapper_impl_ref_type!(
+    DewarperSurfaceMeta,
+    nvidia_deepstream_sys::NvDewarperSurfaceMeta
+);
 
 impl DewarperSurfaceMeta {
     pub fn surface_type(&self) -> &[SurfaceType] {
-        unsafe { std::mem::transmute::<_, &[SurfaceType; 4usize]>(&self.as_native_type_ref().type_).as_slice() }
+        unsafe {
+            std::mem::transmute::<_, &[SurfaceType; 4usize]>(&self.as_native_type_ref().type_)
+                .as_slice()
+        }
     }
 
     pub fn index(&self) -> &[u32] {

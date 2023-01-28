@@ -45,7 +45,7 @@ pub enum PayloadType {
     Custom = nvidia_deepstream_sys::NvDsPayloadType_NVDS_PAYLOAD_CUSTOM as _,
 }
 
-crate::wrapper_impl!(Rect, nvidia_deepstream_sys::NvDsRect);
+crate::wrapper_impl_value_type!(Rect, nvidia_deepstream_sys::NvDsRect);
 
 impl Rect {
     pub fn top(&self) -> f32 {
@@ -65,7 +65,7 @@ impl Rect {
     }
 }
 
-crate::wrapper_impl!(GeoLocation, nvidia_deepstream_sys::NvDsGeoLocation);
+crate::wrapper_impl_value_type!(GeoLocation, nvidia_deepstream_sys::NvDsGeoLocation);
 
 impl GeoLocation {
     pub fn lat(&self) -> f64 {
@@ -81,7 +81,7 @@ impl GeoLocation {
     }
 }
 
-crate::wrapper_impl!(Coordinate, nvidia_deepstream_sys::NvDsCoordinate);
+crate::wrapper_impl_value_type!(Coordinate, nvidia_deepstream_sys::NvDsCoordinate);
 
 impl Coordinate {
     pub fn x(&self) -> f64 {
@@ -97,7 +97,7 @@ impl Coordinate {
     }
 }
 
-crate::wrapper_impl!(ObjectSignature, nvidia_deepstream_sys::NvDsObjectSignature);
+crate::wrapper_impl_value_type!(ObjectSignature, nvidia_deepstream_sys::NvDsObjectSignature);
 
 impl ObjectSignature {
     pub fn signature(&self) -> &[f64] {
@@ -110,7 +110,7 @@ impl ObjectSignature {
     }
 }
 
-crate::wrapper_impl!(VehicleObject, nvidia_deepstream_sys::NvDsVehicleObject);
+crate::wrapper_impl_ref_type!(VehicleObject, nvidia_deepstream_sys::NvDsVehicleObject);
 
 impl VehicleObject {
     pub fn type_(&self) -> &CStr {
@@ -166,7 +166,7 @@ impl Drop for VehicleObject {
     }
 }
 
-crate::wrapper_impl!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
+crate::wrapper_impl_ref_type!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
 
 impl PersonObject {
     pub fn gender(&self) -> &CStr {
@@ -215,7 +215,7 @@ impl Drop for PersonObject {
     }
 }
 
-crate::wrapper_impl!(FaceObject, nvidia_deepstream_sys::NvDsFaceObject);
+crate::wrapper_impl_ref_type!(FaceObject, nvidia_deepstream_sys::NvDsFaceObject);
 
 impl FaceObject {
     pub fn gender(&self) -> &CStr {
@@ -282,7 +282,7 @@ impl Drop for FaceObject {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     VehicleObjectExt,
     nvidia_deepstream_sys::NvDsVehicleObjectExt
 );
@@ -316,7 +316,7 @@ impl VehicleObjectExt {
     //}
 }
 
-crate::wrapper_impl!(PersonObjectExt, nvidia_deepstream_sys::NvDsPersonObjectExt);
+crate::wrapper_impl_ref_type!(PersonObjectExt, nvidia_deepstream_sys::NvDsPersonObjectExt);
 
 impl PersonObjectExt {
     pub fn gender(&self) -> &CStr {
@@ -343,7 +343,7 @@ impl PersonObjectExt {
     //}
 }
 
-crate::wrapper_impl!(FaceObjectExt, nvidia_deepstream_sys::NvDsFaceObjectExt);
+crate::wrapper_impl_ref_type!(FaceObjectExt, nvidia_deepstream_sys::NvDsFaceObjectExt);
 
 impl FaceObjectExt {
     pub fn gender(&self) -> &CStr {
@@ -382,7 +382,7 @@ impl FaceObjectExt {
     //}
 }
 
-crate::wrapper_impl!(EventMsgMeta, nvidia_deepstream_sys::NvDsEventMsgMeta);
+crate::wrapper_impl_ref_type!(EventMsgMeta, nvidia_deepstream_sys::NvDsEventMsgMeta);
 
 impl EventMsgMeta {
     pub fn type_(&self) -> EventType {
@@ -471,7 +471,7 @@ impl EventMsgMeta {
     }
 }
 
-crate::wrapper_impl!(Event, nvidia_deepstream_sys::NvDsEvent);
+crate::wrapper_impl_ref_type!(Event, nvidia_deepstream_sys::NvDsEvent);
 
 impl Event {
     pub fn event_type(&self) -> EventType {
@@ -486,7 +486,7 @@ impl Event {
     }
 }
 
-crate::wrapper_impl!(CustomMsgInfo, nvidia_deepstream_sys::NvDsCustomMsgInfo);
+crate::wrapper_impl_ref_type!(CustomMsgInfo, nvidia_deepstream_sys::NvDsCustomMsgInfo);
 
 impl CustomMsgInfo {
     pub fn message(&self) -> &[u8] {
@@ -499,7 +499,7 @@ impl CustomMsgInfo {
     }
 }
 
-crate::wrapper_impl!(Payload, nvidia_deepstream_sys::NvDsPayload);
+crate::wrapper_impl_ref_type!(Payload, nvidia_deepstream_sys::NvDsPayload);
 
 impl Payload {
     pub fn payload(&self) -> &[u8] {

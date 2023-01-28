@@ -3,7 +3,7 @@ use crate::WrapperExt;
 use std::ffi::CStr;
 use std::ptr::NonNull;
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     MetaSubCompLatency,
     nvidia_deepstream_sys::NvDsMetaSubCompLatency
 );
@@ -22,7 +22,7 @@ impl MetaSubCompLatency {
     }
 }
 
-crate::wrapper_impl!(MetaCompLatency, nvidia_deepstream_sys::NvDsMetaCompLatency);
+crate::wrapper_impl_ref_type!(MetaCompLatency, nvidia_deepstream_sys::NvDsMetaCompLatency);
 
 impl MetaCompLatency {
     pub fn component_name(&self) -> &CStr {
@@ -64,7 +64,7 @@ impl MetaCompLatency {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     FrameLatencyInfo,
     nvidia_deepstream_sys::NvDsFrameLatencyInfo
 );

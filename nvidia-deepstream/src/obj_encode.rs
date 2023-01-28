@@ -1,7 +1,7 @@
 use crate::WrapperExt;
 use std::ffi::CStr;
 use std::ptr::NonNull;
-crate::wrapper_impl!(ObjEncUsrArgs, nvidia_deepstream_sys::NvDsObjEncUsrArgs);
+crate::wrapper_impl_ref_type!(ObjEncUsrArgs, nvidia_deepstream_sys::NvDsObjEncUsrArgs);
 
 impl ObjEncUsrArgs {
     pub fn save_image(&self) -> bool {

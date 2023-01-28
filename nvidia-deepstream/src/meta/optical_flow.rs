@@ -1,5 +1,8 @@
 use crate::WrapperExt;
-crate::wrapper_impl!(FlowVector, nvidia_deepstream_sys::NvOFFlowVector);
+crate::wrapper_impl_value_type!(
+    FlowVector,
+    nvidia_deepstream_sys::NvOFFlowVector
+);
 
 impl FlowVector {
     pub fn new(x: i16, y: i16) -> FlowVector {
@@ -15,7 +18,7 @@ impl FlowVector {
     }
 }
 
-crate::wrapper_impl!(OpticalFlowMeta, nvidia_deepstream_sys::NvDsOpticalFlowMeta);
+crate::wrapper_impl_ref_type!(OpticalFlowMeta, nvidia_deepstream_sys::NvDsOpticalFlowMeta);
 
 impl OpticalFlowMeta {
     pub fn rows(&self) -> u32 {

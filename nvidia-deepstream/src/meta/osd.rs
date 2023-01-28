@@ -20,7 +20,10 @@ pub enum ArrowHeadDirection {
     Both = nvidia_deepstream_sys::NvOSD_Arrow_Head_Direction_BOTH_HEAD as _,
 }
 
-crate::wrapper_impl!(ColorParams, nvidia_deepstream_sys::NvOSD_ColorParams);
+crate::wrapper_impl_value_type!(
+    ColorParams,
+    nvidia_deepstream_sys::NvOSD_ColorParams
+);
 
 impl ColorParams {
     pub fn new(red: f64, green: f64, blue: f64, alpha: f64) -> ColorParams {
@@ -57,7 +60,7 @@ impl ColorParams {
     }
 }
 
-crate::wrapper_impl!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
+crate::wrapper_impl_ref_type!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
 
 impl FontParams {
     pub fn font_name(&self) -> &CStr {
@@ -115,7 +118,7 @@ impl<'a> FontParamsBuilder<'a> {
     }
 }
 
-crate::wrapper_impl!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
+crate::wrapper_impl_ref_type!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
 
 impl TextParams {
     pub fn display_text(&self) -> &CStr {
@@ -231,7 +234,10 @@ impl TextParamsBuilder {
     }
 }
 
-crate::wrapper_impl!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
+crate::wrapper_impl_value_type!(
+    ColorInfo,
+    nvidia_deepstream_sys::NvOSD_Color_info
+);
 
 impl ColorInfo {
     pub fn new(id: i32, color: ColorParams) -> ColorInfo {
@@ -250,7 +256,7 @@ impl ColorInfo {
     }
 }
 
-crate::wrapper_impl!(RectParams, nvidia_deepstream_sys::_NvOSD_RectParams);
+crate::wrapper_impl_ref_type!(RectParams, nvidia_deepstream_sys::_NvOSD_RectParams);
 
 impl RectParams {
     pub fn left(&self) -> f32 {
@@ -378,7 +384,7 @@ impl RectParamsBuilder {
     }
 }
 
-crate::wrapper_impl!(MaskParams, nvidia_deepstream_sys::NvOSD_MaskParams);
+crate::wrapper_impl_ref_type!(MaskParams, nvidia_deepstream_sys::NvOSD_MaskParams);
 
 impl MaskParams {
     pub fn data(&self) -> &[f32] {
@@ -447,19 +453,17 @@ impl MaskParamsBuilder {
     }
 
     pub fn build(self) -> MaskParams {
-        MaskParams::from_native_type(
-            nvidia_deepstream_sys::NvOSD_MaskParams {
-                data: self.data.map_or(std::ptr::null_mut(), |v| v.as_ptr() as _),
-                size: self.data.map_or(0, |v| v.len() as _),
-                threshold: self.threshold.unwrap_or_default(),
-                width: self.width.unwrap_or_default(),
-                height: self.height.unwrap_or_default(),
-            }
-        )
+        MaskParams::from_native_type(nvidia_deepstream_sys::NvOSD_MaskParams {
+            data: self.data.map_or(std::ptr::null_mut(), |v| v.as_ptr() as _),
+            size: self.data.map_or(0, |v| v.len() as _),
+            threshold: self.threshold.unwrap_or_default(),
+            width: self.width.unwrap_or_default(),
+            height: self.height.unwrap_or_default(),
+        })
     }
 }
 
-crate::wrapper_impl!(LineParams, nvidia_deepstream_sys::NvOSD_LineParams);
+crate::wrapper_impl_ref_type!(LineParams, nvidia_deepstream_sys::NvOSD_LineParams);
 
 impl LineParams {
     pub fn x1(&self) -> u32 {
@@ -539,21 +543,21 @@ impl LineParamsBuilder {
     }
 
     pub fn build(self) -> LineParams {
-        LineParams::from_native_type(
-            nvidia_deepstream_sys::NvOSD_LineParams {
-                x1: self.x1.unwrap_or_default(),
-                y1: self.y1.unwrap_or_default(),
-                x2: self.x2.unwrap_or_default(),
-                y2: self.y2.unwrap_or_default(),
-                line_width: self.line_width.unwrap_or_default(),
-                line_color: self.line_color.unwrap_or(ColorParams::white()).as_native_type(),
-            }
-        )
+        LineParams::from_native_type(nvidia_deepstream_sys::NvOSD_LineParams {
+            x1: self.x1.unwrap_or_default(),
+            y1: self.y1.unwrap_or_default(),
+            x2: self.x2.unwrap_or_default(),
+            y2: self.y2.unwrap_or_default(),
+            line_width: self.line_width.unwrap_or_default(),
+            line_color: self
+                .line_color
+                .unwrap_or(ColorParams::white())
+                .as_native_type(),
+        })
     }
 }
 
-
-crate::wrapper_impl!(ArrowParams, nvidia_deepstream_sys::NvOSD_ArrowParams);
+crate::wrapper_impl_ref_type!(ArrowParams, nvidia_deepstream_sys::NvOSD_ArrowParams);
 
 impl ArrowParams {
     pub fn x1(&self) -> u32 {
@@ -644,23 +648,23 @@ impl ArrowParamsBuilder {
     }
 
     pub fn build(self) -> ArrowParams {
-        ArrowParams::from_native_type(
-            nvidia_deepstream_sys::NvOSD_ArrowParams {
-                x1: self.x1.unwrap_or_default(),
-                y1: self.y1.unwrap_or_default(),
-                x2: self.x2.unwrap_or_default(),
-                y2: self.y2.unwrap_or_default(),
-                arrow_width: self.arrow_width.unwrap_or_default(),
-                arrow_head: unsafe { std::mem::transmute(self.arrow_head.unwrap_or_default()) },
-                arrow_color: self.arrow_color.unwrap_or(ColorParams::white()).as_native_type(),
-                reserved: 0,
-            }
-        )
+        ArrowParams::from_native_type(nvidia_deepstream_sys::NvOSD_ArrowParams {
+            x1: self.x1.unwrap_or_default(),
+            y1: self.y1.unwrap_or_default(),
+            x2: self.x2.unwrap_or_default(),
+            y2: self.y2.unwrap_or_default(),
+            arrow_width: self.arrow_width.unwrap_or_default(),
+            arrow_head: unsafe { std::mem::transmute(self.arrow_head.unwrap_or_default()) },
+            arrow_color: self
+                .arrow_color
+                .unwrap_or(ColorParams::white())
+                .as_native_type(),
+            reserved: 0,
+        })
     }
 }
 
-
-crate::wrapper_impl!(CircleParams, nvidia_deepstream_sys::NvOSD_CircleParams);
+crate::wrapper_impl_ref_type!(CircleParams, nvidia_deepstream_sys::NvOSD_CircleParams);
 
 impl CircleParams {
     pub fn xc(&self) -> u32 {
@@ -739,7 +743,10 @@ impl CircleParamsBuilder {
             xc: self.xc.unwrap_or_default(),
             yc: self.yc.unwrap_or_default(),
             radius: self.radius.unwrap_or_default(),
-            circle_color: self.circle_color.unwrap_or(ColorParams::white()).as_native_type(),
+            circle_color: self
+                .circle_color
+                .unwrap_or(ColorParams::white())
+                .as_native_type(),
             has_bg_color: if self.bg_color.is_some() { 1 } else { 0 },
             bg_color: self.bg_color.unwrap_or_default().as_native_type(),
             reserved: 0,

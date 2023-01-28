@@ -1,8 +1,8 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
+use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
-use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use std::ffi::CStr;
 
 static CONFIG_YML: &str = "dstest1_config.yml";
@@ -106,16 +106,22 @@ fn main() {
                                 }
                             }
 
-                            if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool() {
+                            if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool()
+                            {
                                 display_meta.set_text_params(&[TextParamsBuilder::new()
-                                    .display_text(format!("Person = {}, Vehicle = {}", person_count, vehicle_count))
+                                    .display_text(format!(
+                                        "Person = {}, Vehicle = {}",
+                                        person_count, vehicle_count
+                                    ))
                                     .x_offset(10)
                                     .y_offset(12)
-                                    .font_params(FontParamsBuilder::new()
-                                        .font_name(CStr::from_ptr("Serif\0".as_ptr() as _))
-                                        .font_size(10)
-                                        .font_color(ColorParams::white())
-                                        .build())
+                                    .font_params(
+                                        FontParamsBuilder::new()
+                                            .font_name(CStr::from_ptr("Serif\0".as_ptr() as _))
+                                            .font_size(10)
+                                            .font_color(ColorParams::white())
+                                            .build(),
+                                    )
                                     .text_bg_clr(ColorParams::black())
                                     .build()]);
                                 frame_meta.add_display_meta(display_meta);

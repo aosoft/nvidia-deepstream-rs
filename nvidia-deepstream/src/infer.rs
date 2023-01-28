@@ -49,7 +49,7 @@ pub enum LogLevel {
     Debug = nvidia_deepstream_sys::NvDsInferLogLevel_NVDSINFER_LOG_DEBUG as _,
 }
 
-crate::wrapper_impl!(Dims, nvidia_deepstream_sys::NvDsInferDims);
+crate::wrapper_impl_ref_type!(Dims, nvidia_deepstream_sys::NvDsInferDims);
 
 impl Dims {
     pub fn d(&self) -> &[u32] {
@@ -96,7 +96,7 @@ impl Dims {
     }
 }
 
-crate::wrapper_impl!(DimsChw, nvidia_deepstream_sys::NvDsInferDimsCHW);
+crate::wrapper_impl_ref_type!(DimsChw, nvidia_deepstream_sys::NvDsInferDimsCHW);
 
 impl DimsChw {
     pub fn c(&self) -> u32 {
@@ -112,7 +112,7 @@ impl DimsChw {
     }
 }
 
-crate::wrapper_impl!(LayerInfo, nvidia_deepstream_sys::NvDsInferLayerInfo);
+crate::wrapper_impl_ref_type!(LayerInfo, nvidia_deepstream_sys::NvDsInferLayerInfo);
 
 impl LayerInfo {
     pub fn data_type(&self) -> DataType {
@@ -140,7 +140,7 @@ impl LayerInfo {
     }
 }
 
-crate::wrapper_impl!(NetworkInfo, nvidia_deepstream_sys::NvDsInferNetworkInfo);
+crate::wrapper_impl_ref_type!(NetworkInfo, nvidia_deepstream_sys::NvDsInferNetworkInfo);
 
 impl NetworkInfo {
     pub fn width(&self) -> u32 {
@@ -156,7 +156,7 @@ impl NetworkInfo {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     ObjectDetectionInfo,
     nvidia_deepstream_sys::NvDsInferObjectDetectionInfo
 );
@@ -187,7 +187,7 @@ impl ObjectDetectionInfo {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     InstanceMaskInfo,
     nvidia_deepstream_sys::NvDsInferInstanceMaskInfo
 );
@@ -235,8 +235,7 @@ impl InstanceMaskInfo {
     }
 }
 
-
-crate::wrapper_impl!(Attribute, nvidia_deepstream_sys::NvDsInferAttribute);
+crate::wrapper_impl_ref_type!(Attribute, nvidia_deepstream_sys::NvDsInferAttribute);
 
 impl Attribute {
     pub fn attribute_index(&self) -> u32 {
@@ -252,9 +251,6 @@ impl Attribute {
     }
 
     pub fn attribute_label(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(self.as_native_type_ref().attributeLabel)
-        }
+        unsafe { CStr::from_ptr(self.as_native_type_ref().attributeLabel) }
     }
 }
-

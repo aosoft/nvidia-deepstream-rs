@@ -1,7 +1,7 @@
-use std::ffi::CStr;
-use std::ptr::NonNull;
 use crate::meta::{BaseMeta, ClassifierMeta, MetaList, UserMeta};
 use crate::WrapperExt;
+use std::ffi::CStr;
+use std::ptr::NonNull;
 
 #[repr(u32)]
 pub enum AudioFormat {
@@ -42,10 +42,10 @@ pub enum AudioFormat {
 pub enum AudioLayout {
     InvalidLayout = nvidia_deepstream_sys::NvBufAudioLayout_NVBUF_AUDIO_INVALID_LAYOUT as _,
     Interleaved = nvidia_deepstream_sys::NvBufAudioLayout_NVBUF_AUDIO_INTERLEAVED as _,
-    NonInterleaved = nvidia_deepstream_sys::NvBufAudioLayout_NVBUF_AUDIO_NON_INTERLEAVED as _
+    NonInterleaved = nvidia_deepstream_sys::NvBufAudioLayout_NVBUF_AUDIO_NON_INTERLEAVED as _,
 }
 
-crate::wrapper_impl!(AudioParams, nvidia_deepstream_sys::NvBufAudioParams);
+crate::wrapper_impl_ref_type!(AudioParams, nvidia_deepstream_sys::NvBufAudioParams);
 
 impl AudioParams {
     pub fn layout(&self) -> AudioLayout {
@@ -72,12 +72,17 @@ impl AudioParams {
         self.as_native_type_ref().dataSize
     }
 
-    pub fn data_ptr(&self) -> *mut ::std::os::raw::c_void  {
+    pub fn data_ptr(&self) -> *mut ::std::os::raw::c_void {
         self.as_native_type_ref().dataPtr
     }
 
     pub fn data<T: Sized>(&self) -> &[T] {
-        unsafe{ std::slice::from_raw_parts(self.data_ptr() as *const T, self.data_size() as usize / std::mem::size_of::<T>()) }
+        unsafe {
+            std::slice::from_raw_parts(
+                self.data_ptr() as *const T,
+                self.data_size() as usize / std::mem::size_of::<T>(),
+            )
+        }
     }
 
     pub fn pad_id(&self) -> u32 {
@@ -101,7 +106,7 @@ impl AudioParams {
     }
 }
 
-crate::wrapper_impl!(AudioFrameMeta, nvidia_deepstream_sys::NvDsAudioFrameMeta);
+crate::wrapper_impl_ref_type!(AudioFrameMeta, nvidia_deepstream_sys::NvDsAudioFrameMeta);
 
 impl AudioFrameMeta {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -173,11 +178,15 @@ impl AudioFrameMeta {
     }
 
     pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {
-        MetaList::<ClassifierMeta>::new(NonNull::new(self.as_native_type_ref().classifier_meta_list).unwrap())
+        MetaList::<ClassifierMeta>::new(
+            NonNull::new(self.as_native_type_ref().classifier_meta_list).unwrap(),
+        )
     }
 
     pub fn frame_user_meta_list(&self) -> MetaList<UserMeta> {
-        MetaList::<UserMeta>::new(NonNull::new(self.as_native_type_ref().frame_user_meta_list).unwrap())
+        MetaList::<UserMeta>::new(
+            NonNull::new(self.as_native_type_ref().frame_user_meta_list).unwrap(),
+        )
     }
 
     pub fn misc_frame_info(&self) -> [i64; 4usize] {
@@ -248,7 +257,7 @@ impl AudioFrameMeta {
     }
 }
 
-crate::wrapper_impl!(AudioBatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
+crate::wrapper_impl_ref_type!(AudioBatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
 
 impl crate::mem::NvdsDrop for AudioBatchMeta {
     fn drop(p: NonNull<Self::NativeType>) {
@@ -269,10 +278,12 @@ impl AudioBatchMeta {
 
     pub fn acquire_frame_meta_from_pool(&self) -> Option<&mut AudioFrameMeta> {
         unsafe {
-            NonNull::new(nvidia_deepstream_sys::nvds_acquire_audio_frame_meta_from_pool(
-                self.as_native_type_ptr(),
-            ))
-                .map(|mut p| AudioFrameMeta::from_native_type_mut(p.as_mut()))
+            NonNull::new(
+                nvidia_deepstream_sys::nvds_acquire_audio_frame_meta_from_pool(
+                    self.as_native_type_ptr(),
+                ),
+            )
+            .map(|mut p| AudioFrameMeta::from_native_type_mut(p.as_mut()))
         }
     }
 
@@ -329,7 +340,6 @@ impl AudioBatchMeta {
             );
         }
     }
-
 }
 
 impl MetaList<'_, AudioFrameMeta> {
@@ -339,7 +349,7 @@ impl MetaList<'_, AudioFrameMeta> {
                 self.list.as_ptr(),
                 index,
             ))
-                .map(|mut p| AudioFrameMeta::from_native_type_ref(p.as_mut()))
+            .map(|mut p| AudioFrameMeta::from_native_type_ref(p.as_mut()))
         }
     }
 

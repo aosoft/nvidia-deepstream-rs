@@ -150,7 +150,7 @@ pub enum DisplayScanFormat {
         nvidia_deepstream_sys::NvBufSurfaceDisplayScanFormat_NVBUF_DISPLAYSCANFORMAT_INTERLACED,
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     PlaneParamsEx,
     nvidia_deepstream_sys::NvBufSurfacePlaneParamsEx
 );
@@ -180,7 +180,7 @@ impl PlaneParamsEx {
     }
 }
 
-crate::wrapper_impl!(PlaneParams, nvidia_deepstream_sys::NvBufSurfacePlaneParams);
+crate::wrapper_impl_ref_type!(PlaneParams, nvidia_deepstream_sys::NvBufSurfacePlaneParams);
 
 pub struct PlaneParam {
     pub width: u32,
@@ -209,7 +209,7 @@ impl PlaneParams {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     ChromaSubsamplingParams,
     nvidia_deepstream_sys::NvBufSurfaceChromaSubsamplingParams
 );
@@ -224,7 +224,7 @@ impl ChromaSubsamplingParams {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     CreateParams,
     nvidia_deepstream_sys::NvBufSurfaceCreateParams
 );
@@ -285,7 +285,7 @@ impl CreateParams {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     AllocateParams,
     nvidia_deepstream_sys::NvBufSurfaceAllocateParams
 );
@@ -323,7 +323,7 @@ impl AllocateParams {
     }
 }
 
-crate::wrapper_impl!(MappedAddr, nvidia_deepstream_sys::NvBufSurfaceMappedAddr);
+crate::wrapper_impl_ref_type!(MappedAddr, nvidia_deepstream_sys::NvBufSurfaceMappedAddr);
 
 impl MappedAddr {
     pub fn addr(&self, index: usize) -> Option<*mut ()> {
@@ -339,7 +339,7 @@ impl MappedAddr {
     }
 }
 
-crate::wrapper_impl!(SurfaceParamsEx, nvidia_deepstream_sys::NvBufSurfaceParamsEx);
+crate::wrapper_impl_ref_type!(SurfaceParamsEx, nvidia_deepstream_sys::NvBufSurfaceParamsEx);
 
 impl SurfaceParamsEx {
     pub fn start_of_valid_data(&self) -> i32 {
@@ -363,7 +363,7 @@ impl SurfaceParamsEx {
     }
 }
 
-crate::wrapper_impl!(SurfaceParams, nvidia_deepstream_sys::NvBufSurfaceParams);
+crate::wrapper_impl_ref_type!(SurfaceParams, nvidia_deepstream_sys::NvBufSurfaceParams);
 
 impl SurfaceParams {
     pub fn width(&self) -> u32 {
@@ -416,7 +416,7 @@ impl SurfaceParams {
     }
 }
 
-crate::wrapper_impl!(Surface, nvidia_deepstream_sys::NvBufSurface);
+crate::wrapper_impl_ref_type!(Surface, nvidia_deepstream_sys::NvBufSurface);
 
 impl crate::mem::NvdsDrop for Surface {
     fn drop(p: NonNull<Self::NativeType>) {
@@ -622,7 +622,7 @@ impl Surface {
         }
     }
 
-    pub fn unmap_egl_image(mut self, index: u32,) -> Result<(), i32> {
+    pub fn unmap_egl_image(mut self, index: u32) -> Result<(), i32> {
         unsafe {
             Self::to_result(nvidia_deepstream_sys::NvBufSurfaceUnMapEglImage(
                 self.as_native_type_mut() as _,

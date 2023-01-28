@@ -12,7 +12,7 @@ use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 
-crate::wrapper_impl!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
+crate::wrapper_impl_ref_type!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
 
 impl RoiMeta {
     pub fn roi(&self) -> &RectParams {
@@ -192,9 +192,9 @@ impl<'a, T: WrapperExt> MetaList<'a, T> {
     }
 }
 
-crate::wrapper_impl!(Meta, nvidia_deepstream_sys::NvDsMeta);
+crate::wrapper_impl_ref_type!(Meta, nvidia_deepstream_sys::NvDsMeta);
 
-crate::wrapper_impl!(MetaPool, nvidia_deepstream_sys::NvDsMetaPool);
+crate::wrapper_impl_ref_type!(MetaPool, nvidia_deepstream_sys::NvDsMetaPool);
 
 impl MetaPool {
     pub fn meta_type(&self) -> MetaType {
@@ -226,7 +226,7 @@ impl MetaPool {
     }
 }
 
-crate::wrapper_impl!(BaseMeta, nvidia_deepstream_sys::NvDsBaseMeta);
+crate::wrapper_impl_ref_type!(BaseMeta, nvidia_deepstream_sys::NvDsBaseMeta);
 
 impl BaseMeta {
     pub fn batch_meta(&self) -> Option<&BatchMeta> {
@@ -248,7 +248,7 @@ impl BaseMeta {
     }
 }
 
-crate::wrapper_impl!(BatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
+crate::wrapper_impl_ref_type!(BatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
 
 pub trait BatchMetaExt {
     fn base_meta<'a>(&'a self) -> &'a BaseMeta;
@@ -479,7 +479,7 @@ impl<T: WrapperExt<NativeType = nvidia_deepstream_sys::NvDsBatchMeta>> BatchMeta
     }
 }
 
-crate::wrapper_impl!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
+crate::wrapper_impl_ref_type!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
 
 impl FrameMeta {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -662,7 +662,7 @@ impl FrameMeta {
     }
 }
 
-crate::wrapper_impl!(ObjectMeta, nvidia_deepstream_sys::NvDsObjectMeta);
+crate::wrapper_impl_ref_type!(ObjectMeta, nvidia_deepstream_sys::NvDsObjectMeta);
 
 impl ObjectMeta {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -723,9 +723,7 @@ impl ObjectMeta {
     }
 
     pub fn obj_label(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(&self.as_native_type_ref().obj_label as _)
-        }
+        unsafe { CStr::from_ptr(&self.as_native_type_ref().obj_label as _) }
     }
 
     pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
@@ -806,7 +804,7 @@ impl ObjectMeta {
     }
 }
 
-crate::wrapper_impl!(ClassifierMeta, nvidia_deepstream_sys::NvDsClassifierMeta);
+crate::wrapper_impl_ref_type!(ClassifierMeta, nvidia_deepstream_sys::NvDsClassifierMeta);
 
 impl ClassifierMeta {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -831,9 +829,7 @@ impl ClassifierMeta {
     }
 
     pub fn classifier_type(&self) -> &CStr {
-        unsafe {
-            CStr::from_ptr(self.as_native_type_ref().classifier_type)
-        }
+        unsafe { CStr::from_ptr(self.as_native_type_ref().classifier_type) }
     }
 
     pub fn add_label_info_meta(&self, meta: &LabelInfo) {
@@ -873,7 +869,7 @@ impl ClassifierMeta {
     }
 }
 
-crate::wrapper_impl!(LabelInfo, nvidia_deepstream_sys::NvDsLabelInfo);
+crate::wrapper_impl_ref_type!(LabelInfo, nvidia_deepstream_sys::NvDsLabelInfo);
 
 impl LabelInfo {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -892,7 +888,7 @@ impl LabelInfo {
         unsafe {
             match NonNull::new(self.as_native_type_ref().pResult_label) {
                 Some(p) => CStr::from_ptr(p.as_ptr()),
-                None => CStr::from_ptr(&self.as_native_type_ref().result_label as _)
+                None => CStr::from_ptr(&self.as_native_type_ref().result_label as _),
             }
         }
     }
@@ -919,7 +915,7 @@ impl LabelInfo {
     }
 }
 
-crate::wrapper_impl!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMeta);
+crate::wrapper_impl_ref_type!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMeta);
 
 impl DisplayMeta {
     pub fn base_meta(&self) -> &BaseMeta {
@@ -1069,7 +1065,7 @@ impl DisplayMeta {
     }
 }
 
-crate::wrapper_impl!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
+crate::wrapper_impl_ref_type!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
 
 impl UserMeta {
     pub fn get_user_meta_type(name: &CStr) -> MetaType {
@@ -1149,7 +1145,10 @@ impl UserMeta {
     }
 }
 
-crate::wrapper_impl!(FaceBoxes, nvidia_deepstream_sys::faceboxes);
+crate::wrapper_impl_value_type!(
+    FaceBoxes,
+    nvidia_deepstream_sys::faceboxes
+);
 
 impl FaceBoxes {
     pub fn new(x: f32, y: f32, width: f32, height: f32) -> FaceBoxes {

@@ -1,5 +1,5 @@
 use gstreamer::glib::IsA;
-use gstreamer::{Element, glib};
+use gstreamer::{glib, Element};
 use std::ffi::{CString, NulError};
 
 #[repr(u32)]
@@ -12,34 +12,24 @@ pub enum YamlParserStatus {
 
 macro_rules! define_element_nvds_yaml_ext_method {
     ($method:ident) => {
-        fn $method(
-            &self,
-            cfg_file_path: &str,
-            group: &str,
-        ) -> Result<YamlParserStatus, NulError>;
-    }
+        fn $method(&self, cfg_file_path: &str, group: &str) -> Result<YamlParserStatus, NulError>;
+    };
 }
 
 macro_rules! impl_element_nvds_yaml_ext_method {
     ($method:ident) => {
-        fn $method(
-            &self,
-            cfg_file_path: &str,
-            group: &str,
-        ) -> Result<YamlParserStatus, NulError> {
+        fn $method(&self, cfg_file_path: &str, group: &str) -> Result<YamlParserStatus, NulError> {
             unsafe {
                 let cfg_file_path = CString::new(cfg_file_path)?;
                 let group = CString::new(group)?;
-                Ok(std::mem::transmute(
-                    nvidia_deepstream_sys::$method(
-                        self.as_ptr() as _,
-                        cfg_file_path.as_ptr() as _,
-                        group.as_ptr() as _,
-                    ),
-                ))
+                Ok(std::mem::transmute(nvidia_deepstream_sys::$method(
+                    self.as_ptr() as _,
+                    cfg_file_path.as_ptr() as _,
+                    group.as_ptr() as _,
+                )))
             }
         }
-    }
+    };
 }
 
 pub trait ElementNvdsYamlExt {
@@ -83,8 +73,12 @@ pub fn nvds_parse_source_list(cfg_file_path: &str, group: &str) -> Result<Vec<St
         let mut src_list: *mut nvidia_deepstream_sys::GList = std::ptr::null_mut();
         let cfg_file_path = CString::new(cfg_file_path)?;
         let group = CString::new(group)?;
-        if nvidia_deepstream_sys::nvds_parse_source_list(&mut src_list, cfg_file_path.as_ptr() as _, group.as_ptr() as _) ==
-            nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS {
+        if nvidia_deepstream_sys::nvds_parse_source_list(
+            &mut src_list,
+            cfg_file_path.as_ptr() as _,
+            group.as_ptr() as _,
+        ) == nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS
+        {
             let src_list = glib::collections::List::<glib::GString>::from_glib_full(src_list as _);
             let mut r = Vec::<String>::new();
             for s in src_list {

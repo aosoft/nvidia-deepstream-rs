@@ -86,7 +86,10 @@ pub enum CompositeFlag {
     CompositeFilter = nvidia_deepstream_sys::NvBufSurfTransform_Composite_Flag_NVBUFSURF_TRANSFORM_COMPOSITE_FILTER as _,
 }
 
-crate::wrapper_impl!(TransformRect, nvidia_deepstream_sys::NvBufSurfTransformRect);
+crate::wrapper_impl_value_type!(
+    TransformRect,
+    nvidia_deepstream_sys::NvBufSurfTransformRect
+);
 
 impl TransformRect {
     pub fn new(left: u32, top: u32, width: u32, height: u32) -> TransformRect {
@@ -115,7 +118,7 @@ impl TransformRect {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_value_type!(
     ConfigParams,
     nvidia_deepstream_sys::NvBufSurfTransformConfigParams
 );
@@ -142,7 +145,7 @@ impl ConfigParams {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     TransformParams,
     nvidia_deepstream_sys::_NvBufSurfaceTransformParams
 );
@@ -229,7 +232,7 @@ impl<'a> CompositeParams<'a> {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_value_type!(
     ColorParams,
     nvidia_deepstream_sys::NvBufSurfTransform_ColorParams
 );
@@ -286,7 +289,7 @@ impl PerformBlendingFlags<'_> {
     }
 }
 
-crate::wrapper_impl_with_lifetime!(
+crate::wrapper_impl_ref_type_with_lifetime!(
     CompositeBlendParams,
     nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParams
 );
@@ -385,7 +388,7 @@ impl<'a> CompositeBlendParamsBuilder<'a> {
     }
 }
 
-crate::wrapper_impl_with_lifetime!(
+crate::wrapper_impl_ref_type_with_lifetime!(
     CompositeBlendParamsEx,
     nvidia_deepstream_sys::NvBufSurfTransformCompositeBlendParamsEx
 );
@@ -630,11 +633,13 @@ pub fn multi_input_buf_compoiste_blend(
     blend_params: &CompositeBlendParamsEx,
 ) -> Result<(), Error> {
     unsafe {
-        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlend(
-            src.as_ptr() as _,
-            dst.as_native_type_ptr(),
-            blend_params.as_native_type_ptr(),
-        ));
+        let e = Error::new(
+            nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlend(
+                src.as_ptr() as _,
+                dst.as_native_type_ptr(),
+                blend_params.as_native_type_ptr(),
+            ),
+        );
         if e == Error::Success {
             Ok(())
         } else {
@@ -650,12 +655,14 @@ pub fn multi_input_buf_compoiste_blend_async(
 ) -> Result<TransformSyncObj, Error> {
     unsafe {
         let mut s: nvidia_deepstream_sys::NvBufSurfTransformSyncObj_t = std::ptr::null_mut();
-        let e = Error::new(nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlendAsync(
-            src.as_ptr() as _,
-            dst.as_native_type_ptr(),
-            blend_params.as_native_type_ptr(),
-            &mut s
-        ));
+        let e = Error::new(
+            nvidia_deepstream_sys::NvBufSurfTransformMultiInputBufCompositeBlendAsync(
+                src.as_ptr() as _,
+                dst.as_native_type_ptr(),
+                blend_params.as_native_type_ptr(),
+                &mut s,
+            ),
+        );
         if e == Error::Success {
             NonNull::new(s)
                 .ok_or(Error::Unsupported)

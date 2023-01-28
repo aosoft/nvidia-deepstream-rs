@@ -28,8 +28,6 @@ pub mod utils;
 #[cfg(feature = "yaml")]
 pub mod yaml;
 
-
-
 pub trait WrapperExt {
     type NativeType;
 
@@ -47,36 +45,36 @@ pub trait WrapperExt {
 #[macro_export(local_inner_macros)]
 macro_rules! wrapper_impl_body {
     () => {
-            #[inline]
-            fn as_native_type(&self) -> Self::NativeType {
-                self.0
-            }
+        #[inline]
+        fn as_native_type(&self) -> Self::NativeType {
+            self.0
+        }
 
-            #[inline]
-            fn from_native_type_ref(n: &Self::NativeType) -> &Self {
-                unsafe { std::mem::transmute(n) }
-            }
+        #[inline]
+        fn from_native_type_ref(n: &Self::NativeType) -> &Self {
+            unsafe { std::mem::transmute(n) }
+        }
 
-            #[inline]
-            fn as_native_type_ref(&self) -> &Self::NativeType {
-                &self.0
-            }
+        #[inline]
+        fn as_native_type_ref(&self) -> &Self::NativeType {
+            &self.0
+        }
 
-            #[inline]
-            fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self {
-                unsafe { std::mem::transmute(n) }
-            }
+        #[inline]
+        fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self {
+            unsafe { std::mem::transmute(n) }
+        }
 
-            #[inline]
-            fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
-                &mut self.0
-            }
+        #[inline]
+        fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
+            &mut self.0
+        }
 
-            #[inline]
-            unsafe fn as_native_type_ptr(&self) -> *mut Self::NativeType {
-                self.as_native_type_ref() as *const _ as *mut _
-            }
-    }
+        #[inline]
+        unsafe fn as_native_type_ptr(&self) -> *mut Self::NativeType {
+            self.as_native_type_ref() as *const _ as *mut _
+        }
+    };
 }
 
 #[macro_export(local_inner_macros)]
@@ -104,7 +102,7 @@ macro_rules! wrapper_impl_base {
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl {
+macro_rules! wrapper_impl_ref_type {
     ($W:ident, $N:ty) => {
         pub struct $W($N);
 
@@ -113,9 +111,9 @@ macro_rules! wrapper_impl {
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl_with_attr {
-    ($W:ident, $N:ty,  $M:meta) => {
-        #[$M]
+macro_rules! wrapper_impl_value_type {
+    ($W:ident, $N:ty) => {
+        #[derive(Clone, Copy, Debug)]
         pub struct $W($N);
 
         wrapper_impl_base!($W, $N);
@@ -139,25 +137,27 @@ macro_rules! wrapper_impl_with_lifetime_base {
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl_with_lifetime {
+macro_rules! wrapper_impl_ref_type_with_lifetime {
     ($W:ident, $N:ty) => {
         pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
 
         wrapper_impl_with_lifetime_base!($W, $N);
-    }
+    };
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl_with_attr_lifetime {
-    ($W:ident, $N:ty,  $M:meta) => {
-        #[$M]
+macro_rules! wrapper_impl_value_type_with_attr_lifetime {
+    ($W:ident, $N:ty) => {
+        #[derive(Clone, Copy, Debug)]
         pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
 
         wrapper_impl_with_lifetime_base!($W, $N);
-    }
+    };
 }
 
-pub(crate) unsafe fn duplicate_glib_string(src: *const nvidia_deepstream_sys::gchar) -> *mut nvidia_deepstream_sys::gchar {
+pub(crate) unsafe fn duplicate_glib_string(
+    src: *const nvidia_deepstream_sys::gchar,
+) -> *mut nvidia_deepstream_sys::gchar {
     if src != std::ptr::null() {
         nvidia_deepstream_sys::g_strdup(src)
     } else {

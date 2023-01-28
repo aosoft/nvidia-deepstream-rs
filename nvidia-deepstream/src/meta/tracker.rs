@@ -1,6 +1,6 @@
-use std::ffi::CStr;
 use crate::WrapperExt;
-crate::wrapper_impl!(PastFrameObj, nvidia_deepstream_sys::NvDsPastFrameObj);
+use std::ffi::CStr;
+crate::wrapper_impl_ref_type!(PastFrameObj, nvidia_deepstream_sys::NvDsPastFrameObj);
 
 impl PastFrameObj {
     pub fn frame_num(&self) -> u32 {
@@ -20,7 +20,7 @@ impl PastFrameObj {
     }
 }
 
-crate::wrapper_impl!(
+crate::wrapper_impl_ref_type!(
     PastFrameObjList,
     nvidia_deepstream_sys::NvDsPastFrameObjList
 );
@@ -44,12 +44,14 @@ impl PastFrameObjList {
     }
 
     pub fn obj_label(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().objLabel.as_ptr())}
+        unsafe { CStr::from_ptr(self.as_native_type_ref().objLabel.as_ptr()) }
     }
 }
 
-
-crate::wrapper_impl!(PastFrameObjStream, nvidia_deepstream_sys::NvDsPastFrameObjStream);
+crate::wrapper_impl_ref_type!(
+    PastFrameObjStream,
+    nvidia_deepstream_sys::NvDsPastFrameObjStream
+);
 
 impl PastFrameObjStream {
     pub fn list(&self) -> &[PastFrameObj] {
@@ -74,7 +76,10 @@ impl PastFrameObjStream {
     }
 }
 
-crate::wrapper_impl!(PastFrameObjBatch, nvidia_deepstream_sys::NvDsPastFrameObjBatch);
+crate::wrapper_impl_ref_type!(
+    PastFrameObjBatch,
+    nvidia_deepstream_sys::NvDsPastFrameObjBatch
+);
 
 impl PastFrameObjBatch {
     pub fn list(&self) -> &[PastFrameObjStream] {
@@ -89,4 +94,3 @@ impl PastFrameObjBatch {
         self.as_native_type_ref().numAllocated
     }
 }
-

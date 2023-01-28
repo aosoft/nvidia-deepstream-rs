@@ -1,19 +1,17 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
-use std::ffi::CStr;
 use nvidia_deepstream::{meta, WrapperExt};
+use std::ffi::CStr;
 
 #[derive(Clone)]
 struct UserMetaData {
-    data: usize
+    data: usize,
 }
 
 impl Drop for UserMetaData {
-    fn drop(&mut self) {
-    }
+    fn drop(&mut self) {}
 }
-
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
@@ -91,7 +89,7 @@ fn main() {
         &streammux, &pgie, &nvvidconv, &nvosd, /*, &transform*/
         &sink,
     ])
-        .unwrap();
+    .unwrap();
 
     let infer_src_pad = pgie.static_pad("src").unwrap();
     infer_src_pad.add_probe(PadProbeType::BUFFER, |_, info| {
@@ -100,8 +98,14 @@ fn main() {
                 if let Some(batch_meta) = buf.get_nvds_batch_meta() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(user_meta) = batch_meta.acquire_user_meta_from_pool() {
-                            user_meta.set_user_meta_data(meta::UserMeta::get_user_meta_type(CStr::from_ptr("NVIDIA.NVINFER.USER_META\0".as_ptr() as _)),
-                            Box::new(UserMetaData { data: user_meta.as_native_type_ref() as *const _ as _} ));
+                            user_meta.set_user_meta_data(
+                                meta::UserMeta::get_user_meta_type(CStr::from_ptr(
+                                    "NVIDIA.NVINFER.USER_META\0".as_ptr() as _,
+                                )),
+                                Box::new(UserMetaData {
+                                    data: user_meta.as_native_type_ref() as *const _ as _,
+                                }),
+                            );
                             frame_meta.add_user_meta(user_meta);
                         }
                     }
@@ -119,7 +123,10 @@ fn main() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(user_meta_list) = frame_meta.frame_user_meta_list() {
                             for user_meta in user_meta_list.iter() {
-                                println!("user_meta_data = {}", user_meta.user_meta_data::<UserMetaData>().unwrap().data)
+                                println!(
+                                    "user_meta_data = {}",
+                                    user_meta.user_meta_data::<UserMetaData>().unwrap().data
+                                )
                             }
                         }
                     }

@@ -1,6 +1,6 @@
 use std::ptr::NonNull;
 
-pub trait NvdsDrop : crate::WrapperExt {
+pub trait NvdsDrop: crate::WrapperExt {
     fn drop(p: NonNull<Self::NativeType>);
 }
 
