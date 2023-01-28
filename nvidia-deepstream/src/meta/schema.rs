@@ -1,5 +1,6 @@
 use crate::WrapperExt;
 use std::ffi::CStr;
+use std::ptr::NonNull;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -383,5 +384,50 @@ impl EventMsgMeta {
                 self.as_native_type_ref().extMsgSize as _,
             )
         }
+    }
+}
+
+crate::wrapper_impl!(Event, nvidia_deepstream_sys::NvDsEvent);
+
+impl Event {
+    pub fn event_type(&self) -> EventType {
+        unsafe { std::mem::transmute(self.as_native_type_ref().eventType) }
+    }
+
+    pub fn metadata(&self) -> Option<&EventMsgMeta> {
+        unsafe {
+            NonNull::new(self.as_native_type_ref().metadata)
+                .map(|p| EventMsgMeta::from_native_type_ref(p.as_ref()))
+        }
+    }
+}
+
+crate::wrapper_impl!(CustomMsgInfo, nvidia_deepstream_sys::NvDsCustomMsgInfo);
+
+impl CustomMsgInfo {
+    pub fn message(&self) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().message as _,
+                self.as_native_type_ref().size as _,
+            )
+        }
+    }
+}
+
+crate::wrapper_impl!(Payload, nvidia_deepstream_sys::NvDsPayload);
+
+impl Payload {
+    pub fn payload(&self) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().payload as _,
+                self.as_native_type_ref().payloadSize as _,
+            )
+        }
+    }
+
+    pub fn component_id(&self) -> u32 {
+        self.as_native_type_ref().componentId
     }
 }
