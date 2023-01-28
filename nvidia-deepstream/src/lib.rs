@@ -82,7 +82,6 @@ macro_rules! wrapper_impl_body {
 #[macro_export(local_inner_macros)]
 macro_rules! wrapper_impl {
     ($W:ident, $N:ty) => {
-        #[derive(Copy, Clone)]
         pub struct $W($N);
 
         impl $W {
@@ -125,7 +124,6 @@ macro_rules! wrapper_impl_with_lifetime_body {
 #[macro_export(local_inner_macros)]
 macro_rules! wrapper_impl_with_lifetime {
     ($W:ident, $N:ty) => {
-        #[derive(Copy, Clone)]
         pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
 
         impl<'a> crate::WrapperExt for $W<'a> {
@@ -138,5 +136,19 @@ macro_rules! wrapper_impl_with_lifetime {
                 unsafe { std::mem::zeroed::<$W<'a>>() }
             }
         }
+    }
+}
+
+pub(crate) unsafe fn duplicate_glib_string(src: *const nvidia_deepstream_sys::gchar) -> *mut nvidia_deepstream_sys::gchar {
+    if src != std::ptr::null() {
+        nvidia_deepstream_sys::g_strdup(src)
+    } else {
+        std::ptr::null_mut()
+    }
+}
+
+pub(crate) unsafe fn glib_free<T>(p: *mut T) {
+    if p != std::ptr::null_mut() {
+        nvidia_deepstream_sys::g_free(p as _);
     }
 }

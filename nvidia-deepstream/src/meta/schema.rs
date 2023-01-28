@@ -1,4 +1,4 @@
-use crate::WrapperExt;
+use crate::{duplicate_glib_string, glib_free, WrapperExt};
 use std::ffi::CStr;
 use std::ptr::NonNull;
 
@@ -138,6 +138,34 @@ impl VehicleObject {
     }
 }
 
+impl Clone for VehicleObject {
+    fn clone(&self) -> Self {
+        unsafe {
+            VehicleObject::from_native_type(nvidia_deepstream_sys::NvDsVehicleObject {
+                type_: duplicate_glib_string(self.as_native_type_ref().type_),
+                make: duplicate_glib_string(self.as_native_type_ref().make),
+                model: duplicate_glib_string(self.as_native_type_ref().model),
+                color: duplicate_glib_string(self.as_native_type_ref().color),
+                region: duplicate_glib_string(self.as_native_type_ref().region),
+                license: duplicate_glib_string(self.as_native_type_ref().license),
+            })
+        }
+    }
+}
+
+impl Drop for VehicleObject {
+    fn drop(&mut self) {
+        unsafe {
+            glib_free(self.as_native_type_ref().type_);
+            glib_free(self.as_native_type_ref().make);
+            glib_free(self.as_native_type_ref().model);
+            glib_free(self.as_native_type_ref().color);
+            glib_free(self.as_native_type_ref().region);
+            glib_free(self.as_native_type_ref().license);
+        }
+    }
+}
+
 crate::wrapper_impl!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
 
 impl PersonObject {
@@ -159,6 +187,31 @@ impl PersonObject {
 
     pub fn age(&self) -> u32 {
         self.as_native_type_ref().age
+    }
+}
+
+impl Clone for PersonObject {
+    fn clone(&self) -> Self {
+        unsafe {
+            PersonObject::from_native_type(nvidia_deepstream_sys::NvDsPersonObject {
+                gender: duplicate_glib_string(self.as_native_type_ref().gender),
+                hair: duplicate_glib_string(self.as_native_type_ref().hair),
+                cap: duplicate_glib_string(self.as_native_type_ref().cap),
+                apparel: duplicate_glib_string(self.as_native_type_ref().apparel),
+                age: self.as_native_type_ref().age,
+            })
+        }
+    }
+}
+
+impl Drop for PersonObject {
+    fn drop(&mut self) {
+        unsafe {
+            glib_free(self.as_native_type_ref().gender);
+            glib_free(self.as_native_type_ref().hair);
+            glib_free(self.as_native_type_ref().cap);
+            glib_free(self.as_native_type_ref().apparel);
+        }
     }
 }
 
@@ -195,6 +248,37 @@ impl FaceObject {
 
     pub fn age(&self) -> u32 {
         self.as_native_type_ref().age
+    }
+}
+
+impl Clone for FaceObject {
+    fn clone(&self) -> Self {
+        unsafe {
+            FaceObject::from_native_type(nvidia_deepstream_sys::NvDsFaceObject {
+                gender: duplicate_glib_string(self.as_native_type_ref().gender),
+                hair: duplicate_glib_string(self.as_native_type_ref().hair),
+                cap: duplicate_glib_string(self.as_native_type_ref().cap),
+                glasses: duplicate_glib_string(self.as_native_type_ref().gender),
+                facialhair: duplicate_glib_string(self.as_native_type_ref().facialhair),
+                name: duplicate_glib_string(self.as_native_type_ref().name),
+                eyecolor: duplicate_glib_string(self.as_native_type_ref().eyecolor),
+                age: self.as_native_type_ref().age,
+            })
+        }
+    }
+}
+
+impl Drop for FaceObject {
+    fn drop(&mut self) {
+        unsafe {
+            glib_free(self.as_native_type_ref().gender);
+            glib_free(self.as_native_type_ref().hair);
+            glib_free(self.as_native_type_ref().cap);
+            glib_free(self.as_native_type_ref().gender);
+            glib_free(self.as_native_type_ref().facialhair);
+            glib_free(self.as_native_type_ref().name);
+            glib_free(self.as_native_type_ref().eyecolor);
+        }
     }
 }
 
