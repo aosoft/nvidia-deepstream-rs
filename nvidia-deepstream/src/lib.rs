@@ -80,10 +80,8 @@ macro_rules! wrapper_impl_body {
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl {
+macro_rules! wrapper_impl_base {
     ($W:ident, $N:ty) => {
-        pub struct $W($N);
-
         impl $W {
             #[inline]
             #[allow(dead_code)]
@@ -106,7 +104,26 @@ macro_rules! wrapper_impl {
 }
 
 #[macro_export(local_inner_macros)]
-macro_rules! wrapper_impl_with_lifetime_body {
+macro_rules! wrapper_impl {
+    ($W:ident, $N:ty) => {
+        pub struct $W($N);
+
+        wrapper_impl_base!($W, $N);
+    };
+}
+
+#[macro_export(local_inner_macros)]
+macro_rules! wrapper_impl_with_attr {
+    ($W:ident, $N:ty,  $M:meta) => {
+        #[$M]
+        pub struct $W($N);
+
+        wrapper_impl_base!($W, $N);
+    };
+}
+
+#[macro_export(local_inner_macros)]
+macro_rules! wrapper_impl_with_lifetime_base {
     ($W:ident, $N:ty) => {
         impl<'a> crate::WrapperExt for $W<'a> {
             type NativeType = $N;
@@ -126,16 +143,17 @@ macro_rules! wrapper_impl_with_lifetime {
     ($W:ident, $N:ty) => {
         pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
 
-        impl<'a> crate::WrapperExt for $W<'a> {
-            type NativeType = $N;
-            crate::wrapper_impl_body!();
-        }
+        wrapper_impl_with_lifetime_base!($W, $N);
+    }
+}
 
-        impl<'a> Default for $W<'a> {
-            fn default() -> Self {
-                unsafe { std::mem::zeroed::<$W<'a>>() }
-            }
-        }
+#[macro_export(local_inner_macros)]
+macro_rules! wrapper_impl_with_attr_lifetime {
+    ($W:ident, $N:ty,  $M:meta) => {
+        #[$M]
+        pub struct $W<'a>($N, core::marker::PhantomData<&'a $N>);
+
+        wrapper_impl_with_lifetime_base!($W, $N);
     }
 }
 

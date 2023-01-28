@@ -176,7 +176,7 @@ pub struct CompositeParams<'a>(
     Option<&'a TransformRect>,
     Option<&'a TransformRect>,
 );
-crate::wrapper_impl_with_lifetime_body!(
+crate::wrapper_impl_with_lifetime_base!(
     CompositeParams,
     nvidia_deepstream_sys::NvBufSurfTransformCompositeParams
 );
