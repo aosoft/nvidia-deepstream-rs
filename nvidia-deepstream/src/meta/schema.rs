@@ -312,8 +312,9 @@ impl VehicleObjectExt {
         unsafe { CStr::from_ptr(self.as_native_type_ref().license) }
     }
 
-    //pub fn mask(&self) -> &nvidia_deepstream_sys::GList {
-    //}
+    pub fn mask(&self) -> *mut nvidia_deepstream_sys::GList {
+        self.as_native_type_ref().mask
+    }
 }
 
 crate::wrapper_impl_ref_type!(PersonObjectExt, nvidia_deepstream_sys::NvDsPersonObjectExt);
@@ -339,8 +340,9 @@ impl PersonObjectExt {
         self.as_native_type_ref().age
     }
 
-    //pub fn mask(&self) -> &nvidia_deepstream_sys::GList {
-    //}
+    pub fn mask(&self) -> *mut nvidia_deepstream_sys::GList {
+        self.as_native_type_ref().mask
+    }
 }
 
 crate::wrapper_impl_ref_type!(FaceObjectExt, nvidia_deepstream_sys::NvDsFaceObjectExt);
@@ -378,8 +380,9 @@ impl FaceObjectExt {
         self.as_native_type_ref().age
     }
 
-    //pub fn mask(&self) -> &nvidia_deepstream_sys::GList {
-    //}
+    pub fn mask(&self) -> *mut nvidia_deepstream_sys::GList {
+        self.as_native_type_ref().mask
+    }
 }
 
 crate::wrapper_impl_ref_type!(EventMsgMeta, nvidia_deepstream_sys::NvDsEventMsgMeta);
