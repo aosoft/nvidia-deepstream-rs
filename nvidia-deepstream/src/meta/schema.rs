@@ -137,7 +137,6 @@ impl VehicleObject {
     }
 }
 
-
 crate::wrapper_impl!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
 
 impl PersonObject {
@@ -161,7 +160,6 @@ impl PersonObject {
         self.as_native_type_ref().age
     }
 }
-
 
 crate::wrapper_impl!(FaceObject, nvidia_deepstream_sys::NvDsFaceObject);
 
@@ -199,8 +197,10 @@ impl FaceObject {
     }
 }
 
-
-crate::wrapper_impl!(VehicleObjectExt, nvidia_deepstream_sys::NvDsVehicleObjectExt);
+crate::wrapper_impl!(
+    VehicleObjectExt,
+    nvidia_deepstream_sys::NvDsVehicleObjectExt
+);
 
 impl VehicleObjectExt {
     pub fn type_(&self) -> &CStr {
@@ -231,7 +231,6 @@ impl VehicleObjectExt {
     //}
 }
 
-
 crate::wrapper_impl!(PersonObjectExt, nvidia_deepstream_sys::NvDsPersonObjectExt);
 
 impl PersonObjectExt {
@@ -258,7 +257,6 @@ impl PersonObjectExt {
     //pub fn mask(&self) -> &nvidia_deepstream_sys::GList {
     //}
 }
-
 
 crate::wrapper_impl!(FaceObjectExt, nvidia_deepstream_sys::NvDsFaceObjectExt);
 
@@ -297,4 +295,93 @@ impl FaceObjectExt {
 
     //pub fn mask(&self) -> &nvidia_deepstream_sys::GList {
     //}
+}
+
+crate::wrapper_impl!(EventMsgMeta, nvidia_deepstream_sys::NvDsEventMsgMeta);
+
+impl EventMsgMeta {
+    pub fn type_(&self) -> EventType {
+        unsafe { std::mem::transmute(self.as_native_type_ref().type_) }
+    }
+
+    pub fn obj_type(&self) -> ObjectType {
+        unsafe { std::mem::transmute(self.as_native_type_ref().objType) }
+    }
+
+    pub fn bbox(&self) -> &Rect {
+        Rect::from_native_type_ref(&self.as_native_type_ref().bbox)
+    }
+
+    pub fn location(&self) -> &GeoLocation {
+        GeoLocation::from_native_type_ref(&self.as_native_type_ref().location)
+    }
+
+    pub fn coordinate(&self) -> &Coordinate {
+        Coordinate::from_native_type_ref(&self.as_native_type_ref().coordinate)
+    }
+
+    pub fn obj_signature(&self) -> &ObjectSignature {
+        ObjectSignature::from_native_type_ref(&self.as_native_type_ref().objSignature)
+    }
+
+    pub fn obj_class_id(&self) -> i32 {
+        self.as_native_type_ref().objClassId
+    }
+
+    pub fn sensor_id(&self) -> i32 {
+        self.as_native_type_ref().sensorId
+    }
+
+    pub fn module_id(&self) -> i32 {
+        self.as_native_type_ref().moduleId
+    }
+
+    pub fn place_id(&self) -> i32 {
+        self.as_native_type_ref().placeId
+    }
+
+    pub fn component_id(&self) -> i32 {
+        self.as_native_type_ref().componentId
+    }
+
+    pub fn frame_id(&self) -> i32 {
+        self.as_native_type_ref().frameId
+    }
+
+    pub fn confidence(&self) -> f64 {
+        self.as_native_type_ref().confidence
+    }
+
+    pub fn tracking_id(&self) -> u64 {
+        self.as_native_type_ref().trackingId
+    }
+
+    pub fn ts(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.as_native_type_ref().ts) }
+    }
+
+    pub fn object_id(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.as_native_type_ref().objectId) }
+    }
+
+    pub fn sensor_str(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.as_native_type_ref().sensorStr) }
+    }
+
+    pub fn other_attrs(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.as_native_type_ref().otherAttrs) }
+    }
+
+    pub fn video_path(&self) -> &CStr {
+        unsafe { CStr::from_ptr(self.as_native_type_ref().videoPath) }
+    }
+
+    pub fn ext_msg(&self) -> &[u8] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().extMsg as _,
+                self.as_native_type_ref().extMsgSize as _,
+            )
+        }
+    }
 }
