@@ -659,26 +659,150 @@ impl EventMsgMeta {
 
 pub struct EventMsgMetaBuilder<'a> {
     type_: Option<EventType>,
-    objType: Option<ObjectType>,
+    obj_type: Option<ObjectType>,
     bbox: Option<Rect>,
     location: Option<GeoLocation>,
     coordinate: Option<Coordinate>,
-    objSignature: Option<ObjectSignature>,
-    objClassId: Option<i32>,
-    sensorId: Option<i32>,
-    moduleId: Option<i32>,
-    placeId: Option<i32>,
-    componentId: Option<i32>,
-    frameId: Option<i32>,
+    obj_signature: Option<ObjectSignature>,
+    obj_class_id: Option<i32>,
+    sensor_id: Option<i32>,
+    module_id: Option<i32>,
+    place_id: Option<i32>,
+    component_id: Option<i32>,
+    frame_id: Option<i32>,
     confidence: Option<f64>,
-    trackingId: Option<u64>,
+    tracking_id: Option<u64>,
     ts: Option<&'a str>,
-    objectId: Option<&'a str>,
-    sensorStr: Option<&'a str>,
-    otherAttrs: Option<&'a str>,
-    videoPath: Option<&'a str>,
-    //extMsg: gpointer,
+    object_id: Option<&'a str>,
+    sensor_str: Option<&'a str>,
+    other_attrs: Option<&'a str>,
+    video_path: Option<&'a str>,
+    ext_msg: Option<Box<dyn std::any::Any>>
+}
 
+impl<'a> EventMsgMetaBuilder<'a> {
+    pub fn type_(mut self, value: EventType) -> Self {
+        self.type_ = Some(value);
+        self
+    }
+
+    pub fn obj_type(mut self, value: ObjectType) -> Self {
+        self.obj_type = Some(value);
+        self
+    }
+
+    pub fn bbox(mut self, value: Rect) -> Self {
+        self.bbox = Some(value);
+        self
+    }
+
+    pub fn location(mut self, value: GeoLocation) -> Self {
+        self.location = Some(value);
+        self
+    }
+
+    pub fn coordinate(mut self, value: Coordinate) -> Self {
+        self.coordinate = Some(value);
+        self
+    }
+
+    pub fn obj_signature(mut self, value: ObjectSignature) -> Self {
+        self.obj_signature = Some(value);
+        self
+    }
+
+    pub fn obj_class_id(mut self, value: i32) -> Self {
+        self.obj_class_id = Some(value);
+        self
+    }
+
+    pub fn sensor_id(mut self, value: i32) -> Self {
+        self.sensor_id = Some(value);
+        self
+    }
+
+    pub fn module_id(mut self, value: i32) -> Self {
+        self.module_id = Some(value);
+        self
+    }
+
+    pub fn place_id(mut self, value: i32) -> Self {
+        self.place_id = Some(value);
+        self
+    }
+
+    pub fn component_id(mut self, value: i32) -> Self {
+        self.component_id = Some(value);
+        self
+    }
+
+    pub fn frame_id(mut self, value: i32) -> Self {
+        self.frame_id = Some(value);
+        self
+    }
+
+    pub fn confidence(mut self, value: f64) -> Self {
+        self.confidence = Some(value);
+        self
+    }
+
+    pub fn tracking_id(mut self, value: u64) -> Self {
+        self.tracking_id = Some(value);
+        self
+    }
+
+    pub fn ts(mut self, value: &'a str) -> Self {
+        self.ts = Some(value);
+        self
+    }
+
+    pub fn object_id(mut self, value: &'a str) -> Self {
+        self.object_id = Some(value);
+        self
+    }
+
+    pub fn sensor_str(mut self, value: &'a str) -> Self {
+        self.sensor_str = Some(value);
+        self
+    }
+
+    pub fn other_attrs(mut self, value: &'a str) -> Self {
+        self.other_attrs = Some(value);
+        self
+    }
+
+    pub fn video_path(mut self, value: &'a str) -> Self {
+        self.video_path = Some(value);
+        self
+    }
+
+    //pub fn ext_msg(mut self, value: Box<dyn std::any::Any>>
+
+    pub fn build(self) -> EventMsgMeta {
+        EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
+            type_: self.type_.unwrap_or_default() as _,
+            objType: self.obj_type.unwrap_or_default() as _,
+            bbox: self.bbox.unwrap_or_default().as_native_type(),
+            location: self.location.unwrap_or_default().as_native_type(),
+            coordinate: self.coordinate.unwrap_or_default().as_native_type(),
+            objSignature: self.obj_signature.unwrap_or_default().as_native_type(),
+            objClassId: self.obj_class_id.unwrap_or_default() as _,
+            sensorId: self.sensor_id.unwrap_or_default() as _,
+            moduleId: self.module_id.unwrap_or_default() as _,
+            placeId: self.place_id.unwrap_or_default() as _,
+            componentId: self.component_id.unwrap_or_default() as _,
+            frameId: self.frame_id.unwrap_or_default() as _,
+            confidence: self.confidence.unwrap_or_default() as _,
+            trackingId: self.tracking_id.unwrap_or_default() as _,
+            ts: self.ts.to_glib_full(),
+            objectId: self.object_id.to_glib_full(),
+            sensorStr: self.sensor_str.to_glib_full(),
+            otherAttrs: self.other_attrs.to_glib_full(),
+            videoPath: self.video_path.to_glib_full(),
+            extMsg: std::ptr::null_mut(),// self.ext_msg.map_or_else(|| std::ptr::null_mut(), |p| p.),
+            extMsgSize: 0,
+        })
+    }
 }
 
 crate::wrapper_impl_ref_type!(Event, nvidia_deepstream_sys::NvDsEvent);
