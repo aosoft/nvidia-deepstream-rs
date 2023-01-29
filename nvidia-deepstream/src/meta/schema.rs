@@ -1,5 +1,6 @@
 use crate::{duplicate_glib_string, glib_free, WrapperExt};
-use std::ffi::CStr;
+use gstreamer::glib::translate::ToGlibPtr;
+use std::ffi::{CStr, NulError};
 use std::ptr::NonNull;
 
 #[repr(u32)]
@@ -48,6 +49,15 @@ pub enum PayloadType {
 crate::wrapper_impl_value_type!(Rect, nvidia_deepstream_sys::NvDsRect);
 
 impl Rect {
+    pub fn new(left: f32, top: f32, width: f32, height: f32) -> Self {
+        Rect::from_native_type(nvidia_deepstream_sys::NvDsRect {
+            top,
+            left,
+            width,
+            height,
+        })
+    }
+
     pub fn top(&self) -> f32 {
         self.as_native_type_ref().top
     }
@@ -68,6 +78,10 @@ impl Rect {
 crate::wrapper_impl_value_type!(GeoLocation, nvidia_deepstream_sys::NvDsGeoLocation);
 
 impl GeoLocation {
+    pub fn new(lat: f64, lon: f64, alt: f64) -> Self {
+        GeoLocation::from_native_type(nvidia_deepstream_sys::NvDsGeoLocation { lat, lon, alt })
+    }
+
     pub fn lat(&self) -> f64 {
         self.as_native_type_ref().lat
     }
@@ -84,6 +98,10 @@ impl GeoLocation {
 crate::wrapper_impl_value_type!(Coordinate, nvidia_deepstream_sys::NvDsCoordinate);
 
 impl Coordinate {
+    pub fn new(x: f64, y: f64, z: f64) -> Self {
+        Coordinate::from_native_type(nvidia_deepstream_sys::NvDsCoordinate { x, y, z })
+    }
+
     pub fn x(&self) -> f64 {
         self.as_native_type_ref().x
     }
@@ -166,6 +184,60 @@ impl Drop for VehicleObject {
     }
 }
 
+pub struct VehicleObjectBuilder<'a> {
+    type_: Option<&'a str>,
+    make: Option<&'a str>,
+    model: Option<&'a str>,
+    color: Option<&'a str>,
+    region: Option<&'a str>,
+    license: Option<&'a str>,
+}
+
+impl<'a> VehicleObjectBuilder<'a> {
+    pub fn type_(mut self, s: &'a str) -> Self {
+        self.type_ = Some(s);
+        self
+    }
+
+    pub fn make(mut self, s: &'a str) -> Self {
+        self.make = Some(s);
+        self
+    }
+
+    pub fn model(mut self, s: &'a str) -> Self {
+        self.model = Some(s);
+        self
+    }
+
+    pub fn color(mut self, s: &'a str) -> Self {
+        self.color = Some(s);
+        self
+    }
+
+    pub fn region(mut self, s: &'a str) -> Self {
+        self.region = Some(s);
+        self
+    }
+
+    pub fn license(mut self, s: &'a str) -> Self {
+        self.license = Some(s);
+        self
+    }
+
+    pub fn build(self) -> Result<VehicleObject, NulError> {
+        Ok(VehicleObject::from_native_type(
+            nvidia_deepstream_sys::NvDsVehicleObject {
+                type_: self.type_.to_glib_full(),
+                make: self.make.to_glib_full(),
+                model: self.model.to_glib_full(),
+                color: self.color.to_glib_full(),
+                region: self.region.to_glib_full(),
+                license: self.license.to_glib_full(),
+            },
+        ))
+    }
+}
+
 crate::wrapper_impl_ref_type!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
 
 impl PersonObject {
@@ -212,6 +284,51 @@ impl Drop for PersonObject {
             glib_free(self.as_native_type_ref().cap);
             glib_free(self.as_native_type_ref().apparel);
         }
+    }
+}
+
+pub struct PersonObjectBuilder<'a> {
+    pub gender: Option<&'a str>,
+    pub hair: Option<&'a str>,
+    pub cap: Option<&'a str>,
+    pub apparel: Option<&'a str>,
+    pub age: Option<u32>,
+}
+
+impl<'a> PersonObjectBuilder<'a> {
+    pub fn gender(mut self, s: &'a str) -> Self {
+        self.gender = Some(s);
+        self
+    }
+
+    pub fn hair(mut self, s: &'a str) -> Self {
+        self.hair = Some(s);
+        self
+    }
+
+    pub fn cap(mut self, s: &'a str) -> Self {
+        self.cap = Some(s);
+        self
+    }
+
+    pub fn apparel(mut self, s: &'a str) -> Self {
+        self.apparel = Some(s);
+        self
+    }
+
+    pub fn age(mut self, s: u32) -> Self {
+        self.age = Some(s);
+        self
+    }
+
+    pub fn build(self) -> PersonObject {
+        PersonObject::from_native_type(nvidia_deepstream_sys::NvDsPersonObject {
+            gender: self.gender.to_glib_full(),
+            hair: self.hair.to_glib_full(),
+            cap: self.cap.to_glib_full(),
+            apparel: self.apparel.to_glib_full(),
+            age: self.age.unwrap_or_default()
+        })
     }
 }
 
