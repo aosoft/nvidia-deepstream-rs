@@ -288,11 +288,11 @@ impl Drop for PersonObject {
 }
 
 pub struct PersonObjectBuilder<'a> {
-    pub gender: Option<&'a str>,
-    pub hair: Option<&'a str>,
-    pub cap: Option<&'a str>,
-    pub apparel: Option<&'a str>,
-    pub age: Option<u32>,
+    gender: Option<&'a str>,
+    hair: Option<&'a str>,
+    cap: Option<&'a str>,
+    apparel: Option<&'a str>,
+    age: Option<u32>,
 }
 
 impl<'a> PersonObjectBuilder<'a> {
@@ -327,7 +327,7 @@ impl<'a> PersonObjectBuilder<'a> {
             hair: self.hair.to_glib_full(),
             cap: self.cap.to_glib_full(),
             apparel: self.apparel.to_glib_full(),
-            age: self.age.unwrap_or_default()
+            age: self.age.unwrap_or_default(),
         })
     }
 }
@@ -396,6 +396,72 @@ impl Drop for FaceObject {
             glib_free(self.as_native_type_ref().name);
             glib_free(self.as_native_type_ref().eyecolor);
         }
+    }
+}
+
+pub struct FaceObjectBuilder<'a> {
+    gender: Option<&'a str>,
+    hair: Option<&'a str>,
+    cap: Option<&'a str>,
+    glasses: Option<&'a str>,
+    facialhair: Option<&'a str>,
+    name: Option<&'a str>,
+    eyecolor: Option<&'a str>,
+    age: Option<u32>,
+}
+
+impl<'a> FaceObjectBuilder<'a> {
+    pub fn gender(mut self, s: &'a str) -> Self {
+        self.gender = Some(s);
+        self
+    }
+
+    pub fn hair(mut self, s: &'a str) -> Self {
+        self.hair = Some(s);
+        self
+    }
+
+    pub fn cap(mut self, s: &'a str) -> Self {
+        self.cap = Some(s);
+        self
+    }
+
+    pub fn glasses(mut self, s: &'a str) -> Self {
+        self.glasses = Some(s);
+        self
+    }
+
+    pub fn facialhair(mut self, s: &'a str) -> Self {
+        self.facialhair = Some(s);
+        self
+    }
+
+    pub fn name(mut self, s: &'a str) -> Self {
+        self.name = Some(s);
+        self
+    }
+
+    pub fn eyecolor(mut self, s: &'a str) -> Self {
+        self.eyecolor = Some(s);
+        self
+    }
+
+    pub fn age(mut self, s: u32) -> Self {
+        self.age = Some(s);
+        self
+    }
+
+    pub fn build(self) -> FaceObject {
+        FaceObject::from_native_type(nvidia_deepstream_sys::NvDsFaceObject {
+            gender: self.gender.to_glib_full(),
+            hair: self.hair.to_glib_full(),
+            cap: self.cap.to_glib_full(),
+            glasses: self.glasses.to_glib_full(),
+            facialhair: self.facialhair.to_glib_full(),
+            name: self.name.to_glib_full(),
+            eyecolor: self.eyecolor.to_glib_full(),
+            age: self.age.unwrap_or_default(),
+        })
     }
 }
 
