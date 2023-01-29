@@ -404,9 +404,9 @@ pub struct FaceObjectBuilder<'a> {
     hair: Option<&'a str>,
     cap: Option<&'a str>,
     glasses: Option<&'a str>,
-    facialhair: Option<&'a str>,
+    facial_hair: Option<&'a str>,
     name: Option<&'a str>,
-    eyecolor: Option<&'a str>,
+    eye_color: Option<&'a str>,
     age: Option<u32>,
 }
 
@@ -431,8 +431,8 @@ impl<'a> FaceObjectBuilder<'a> {
         self
     }
 
-    pub fn facialhair(mut self, s: &'a str) -> Self {
-        self.facialhair = Some(s);
+    pub fn facial_hair(mut self, s: &'a str) -> Self {
+        self.facial_hair = Some(s);
         self
     }
 
@@ -441,8 +441,8 @@ impl<'a> FaceObjectBuilder<'a> {
         self
     }
 
-    pub fn eyecolor(mut self, s: &'a str) -> Self {
-        self.eyecolor = Some(s);
+    pub fn eye_color(mut self, s: &'a str) -> Self {
+        self.eye_color = Some(s);
         self
     }
 
@@ -457,9 +457,9 @@ impl<'a> FaceObjectBuilder<'a> {
             hair: self.hair.to_glib_full(),
             cap: self.cap.to_glib_full(),
             glasses: self.glasses.to_glib_full(),
-            facialhair: self.facialhair.to_glib_full(),
+            facialhair: self.facial_hair.to_glib_full(),
             name: self.name.to_glib_full(),
-            eyecolor: self.eyecolor.to_glib_full(),
+            eyecolor: self.eye_color.to_glib_full(),
             age: self.age.unwrap_or_default(),
         })
     }
@@ -655,6 +655,30 @@ impl EventMsgMeta {
             )
         }
     }
+}
+
+pub struct EventMsgMetaBuilder<'a> {
+    type_: Option<EventType>,
+    objType: Option<ObjectType>,
+    bbox: Option<Rect>,
+    location: Option<GeoLocation>,
+    coordinate: Option<Coordinate>,
+    objSignature: Option<ObjectSignature>,
+    objClassId: Option<i32>,
+    sensorId: Option<i32>,
+    moduleId: Option<i32>,
+    placeId: Option<i32>,
+    componentId: Option<i32>,
+    frameId: Option<i32>,
+    confidence: Option<f64>,
+    trackingId: Option<u64>,
+    ts: Option<&'a str>,
+    objectId: Option<&'a str>,
+    sensorStr: Option<&'a str>,
+    otherAttrs: Option<&'a str>,
+    videoPath: Option<&'a str>,
+    //extMsg: gpointer,
+
 }
 
 crate::wrapper_impl_ref_type!(Event, nvidia_deepstream_sys::NvDsEvent);
