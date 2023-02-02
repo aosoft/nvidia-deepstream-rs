@@ -656,8 +656,53 @@ impl EventMsgMeta {
         }
     }
 }
+/*
+impl<T: Clone + Drop> Clone for EventMsgMeta<T> {
+    fn clone(&self) -> Self {
+        unsafe {
+            let x = Box::from_raw(self.as_native_type_ref().extMsg as *mut T);
+            EventMsgMeta::<T>::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta{
+                type_: self.as_native_type_ref().type_,
+                objType: self.as_native_type_ref().objType,
+                bbox: self.as_native_type_ref().bbox,
+                location: self.as_native_type_ref().location,
+                coordinate: self.as_native_type_ref().coordinate,
+                objSignature: self.as_native_type_ref().objSignature,
+                objClassId: self.as_native_type_ref().objClassId,
+                sensorId: self.as_native_type_ref().sensorId,
+                moduleId: self.as_native_type_ref().moduleId,
+                placeId: self.as_native_type_ref().placeId,
+                componentId: self.as_native_type_ref().componentId,
+                frameId: self.as_native_type_ref().frameId,
+                confidence: self.as_native_type_ref().confidence,
+                trackingId: self.as_native_type_ref().trackingId,
+                ts: nvidia_deepstream_sys::strdup(self.as_native_type_ref().ts),
+                objectId: nvidia_deepstream_sys::strdup(self.as_native_type_ref().objectId),
+                sensorStr: nvidia_deepstream_sys::strdup(self.as_native_type_ref().sensorStr),
+                otherAttrs: nvidia_deepstream_sys::strdup(self.as_native_type_ref().otherAttrs),
+                videoPath: nvidia_deepstream_sys::strdup(self.as_native_type_ref().videoPath),
+                extMsg: Box::into_raw(x),
+                extMsgSize: self.as_native_type_ref().extMsgSize,
+            })
+        }
+    }
+}
 
-pub struct EventMsgMetaBuilder<'a> {
+impl<T: Clone + Drop> Drop for EventMsgMeta<T> {
+    fn drop(&mut self) {
+        unsafe {
+            let x = Box::from_raw(self.as_native_type_ref().extMsg as *mut T);
+            nvidia_deepstream_sys::g_free(self.as_native_type_ref().ts as _);
+            nvidia_deepstream_sys::g_free(self.as_native_type_ref().objectId as _);
+            nvidia_deepstream_sys::g_free(self.as_native_type_ref().sensorStr as _);
+            nvidia_deepstream_sys::g_free(self.as_native_type_ref().otherAttrs as _);
+            nvidia_deepstream_sys::g_free(self.as_native_type_ref().videoPath as _);
+            drop(x);
+        }
+    }
+}
+*/
+pub struct EventMsgMetaBuilder<'a, T: Clone + Drop> {
     type_: Option<EventType>,
     obj_type: Option<ObjectType>,
     bbox: Option<Rect>,
@@ -677,10 +722,10 @@ pub struct EventMsgMetaBuilder<'a> {
     sensor_str: Option<&'a str>,
     other_attrs: Option<&'a str>,
     video_path: Option<&'a str>,
-    ext_msg: Option<Box<dyn std::any::Any>>
+    ext_msg: Option<Box<T>>,
 }
 
-impl<'a> EventMsgMetaBuilder<'a> {
+impl<'a, T: Clone + Drop> EventMsgMetaBuilder<'a, T> {
     pub fn type_(mut self, value: EventType) -> Self {
         self.type_ = Some(value);
         self
@@ -776,9 +821,16 @@ impl<'a> EventMsgMetaBuilder<'a> {
         self
     }
 
-    //pub fn ext_msg(mut self, value: Box<dyn std::any::Any>>
+    pub fn ext_msg(mut self, value: Box<T>) -> Self {
+        self.ext_msg = Some(value);
+        self
+    }
 
     pub fn build(self) -> EventMsgMeta {
+        let (ext_msg, ext_msg_size) = self.ext_msg.map_or_else(
+            || (std::ptr::null_mut(), 0),
+            |x| (Box::into_raw(x), std::mem::size_of::<T>()),
+        );
         EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
             type_: self.type_.unwrap_or_default() as _,
             objType: self.obj_type.unwrap_or_default() as _,
@@ -799,8 +851,8 @@ impl<'a> EventMsgMetaBuilder<'a> {
             sensorStr: self.sensor_str.to_glib_full(),
             otherAttrs: self.other_attrs.to_glib_full(),
             videoPath: self.video_path.to_glib_full(),
-            extMsg: std::ptr::null_mut(),// self.ext_msg.map_or_else(|| std::ptr::null_mut(), |p| p.),
-            extMsgSize: 0,
+            extMsg: ext_msg as _,
+            extMsgSize: ext_msg_size as _,
         })
     }
 }

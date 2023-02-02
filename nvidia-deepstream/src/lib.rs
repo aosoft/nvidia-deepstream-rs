@@ -95,7 +95,7 @@ macro_rules! wrapper_impl_base {
 
         impl Default for $W {
             fn default() -> Self {
-                unsafe { std::mem::zeroed::<$W>() }
+                unsafe { std::mem::zeroed::<Self>() }
             }
         }
     };
@@ -130,7 +130,7 @@ macro_rules! wrapper_impl_with_lifetime_base {
 
         impl<'a> Default for $W<'a> {
             fn default() -> Self {
-                unsafe { std::mem::zeroed::<$W<'a>>() }
+                unsafe { std::mem::zeroed::<Self>() }
             }
         }
     };
