@@ -840,34 +840,39 @@ impl<'a, T: Clone + Drop> EventMsgMetaBuilder<'a, T> {
         self
     }
 
-    pub fn build(self) -> EventMsgMeta {
+    pub fn build(self) -> EventMsgMetaExplicit<T> {
         let (ext_msg, ext_msg_size) = self.ext_msg.map_or_else(
             || (std::ptr::null_mut(), 0),
             |x| (Box::into_raw(x), std::mem::size_of::<T>()),
         );
-        EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
-            type_: self.type_.unwrap_or_default() as _,
-            objType: self.obj_type.unwrap_or_default() as _,
-            bbox: self.bbox.unwrap_or_default().as_native_type(),
-            location: self.location.unwrap_or_default().as_native_type(),
-            coordinate: self.coordinate.unwrap_or_default().as_native_type(),
-            objSignature: self.obj_signature.unwrap_or_default().as_native_type(),
-            objClassId: self.obj_class_id.unwrap_or_default() as _,
-            sensorId: self.sensor_id.unwrap_or_default() as _,
-            moduleId: self.module_id.unwrap_or_default() as _,
-            placeId: self.place_id.unwrap_or_default() as _,
-            componentId: self.component_id.unwrap_or_default() as _,
-            frameId: self.frame_id.unwrap_or_default() as _,
-            confidence: self.confidence.unwrap_or_default() as _,
-            trackingId: self.tracking_id.unwrap_or_default() as _,
-            ts: self.ts.to_glib_full(),
-            objectId: self.object_id.to_glib_full(),
-            sensorStr: self.sensor_str.to_glib_full(),
-            otherAttrs: self.other_attrs.to_glib_full(),
-            videoPath: self.video_path.to_glib_full(),
-            extMsg: ext_msg as _,
-            extMsgSize: ext_msg_size as _,
-        })
+        EventMsgMetaExplicit::<T>(
+            Box::new(EventMsgMeta::from_native_type(
+                nvidia_deepstream_sys::NvDsEventMsgMeta {
+                    type_: self.type_.unwrap_or_default() as _,
+                    objType: self.obj_type.unwrap_or_default() as _,
+                    bbox: self.bbox.unwrap_or_default().as_native_type(),
+                    location: self.location.unwrap_or_default().as_native_type(),
+                    coordinate: self.coordinate.unwrap_or_default().as_native_type(),
+                    objSignature: self.obj_signature.unwrap_or_default().as_native_type(),
+                    objClassId: self.obj_class_id.unwrap_or_default() as _,
+                    sensorId: self.sensor_id.unwrap_or_default() as _,
+                    moduleId: self.module_id.unwrap_or_default() as _,
+                    placeId: self.place_id.unwrap_or_default() as _,
+                    componentId: self.component_id.unwrap_or_default() as _,
+                    frameId: self.frame_id.unwrap_or_default() as _,
+                    confidence: self.confidence.unwrap_or_default() as _,
+                    trackingId: self.tracking_id.unwrap_or_default() as _,
+                    ts: self.ts.to_glib_full(),
+                    objectId: self.object_id.to_glib_full(),
+                    sensorStr: self.sensor_str.to_glib_full(),
+                    otherAttrs: self.other_attrs.to_glib_full(),
+                    videoPath: self.video_path.to_glib_full(),
+                    extMsg: ext_msg as _,
+                    extMsgSize: ext_msg_size as _,
+                },
+            )),
+            core::marker::PhantomData,
+        )
     }
 }
 
