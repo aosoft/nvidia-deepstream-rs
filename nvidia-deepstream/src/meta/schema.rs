@@ -657,52 +657,74 @@ impl EventMsgMeta {
     }
 }
 
-pub struct EventMsgMetaExplicit<T: Clone + Drop>(Box<EventMsgMeta>, core::marker::PhantomData<T>);
+pub struct EventMsgMetaExplicit<T: Clone>(EventMsgMeta, core::marker::PhantomData<T>);
 
-impl<T: Clone + Drop> Clone for EventMsgMetaExplicit<T> {
+impl<T: Clone> EventMsgMetaExplicit<T> {
+    pub extern "C" fn base_meta_copy_func(
+        data: nvidia_deepstream_sys::gpointer,
+        _: nvidia_deepstream_sys::gpointer,
+    ) -> nvidia_deepstream_sys::gpointer {
+        unsafe {
+            let event_msg_meta = data as *mut EventMsgMetaExplicit<T>;
+            if event_msg_meta == std::ptr::null_mut() {
+                return std::ptr::null_mut();
+            }
+            let boxed = Box::new((*event_msg_meta).clone());
+            Box::into_raw(boxed) as _
+        }
+    }
+
+    pub extern "C" fn base_meta_release_func(
+        data: nvidia_deepstream_sys::gpointer,
+        _: nvidia_deepstream_sys::gpointer,
+    ) {
+        unsafe {
+            let event_msg_meta = data as *mut EventMsgMetaExplicit<T>;
+            if event_msg_meta == std::ptr::null_mut() {
+                return;
+            }
+            let boxed = Box::from_raw(event_msg_meta);
+            drop(boxed);
+        }
+    }
+}
+
+impl<T: Clone> Clone for EventMsgMetaExplicit<T> {
     fn clone(&self) -> Self {
         unsafe {
             EventMsgMetaExplicit::<T>(
-                Box::new(EventMsgMeta::from_native_type(
-                    nvidia_deepstream_sys::NvDsEventMsgMeta {
-                        type_: self.0.as_native_type_ref().type_,
-                        objType: self.0.as_native_type_ref().objType,
-                        bbox: self.0.as_native_type_ref().bbox,
-                        location: self.0.as_native_type_ref().location,
-                        coordinate: self.0.as_native_type_ref().coordinate,
-                        objSignature: self.0.as_native_type_ref().objSignature,
-                        objClassId: self.0.as_native_type_ref().objClassId,
-                        sensorId: self.0.as_native_type_ref().sensorId,
-                        moduleId: self.0.as_native_type_ref().moduleId,
-                        placeId: self.0.as_native_type_ref().placeId,
-                        componentId: self.0.as_native_type_ref().componentId,
-                        frameId: self.0.as_native_type_ref().frameId,
-                        confidence: self.0.as_native_type_ref().confidence,
-                        trackingId: self.0.as_native_type_ref().trackingId,
-                        ts: nvidia_deepstream_sys::strdup(self.0.as_native_type_ref().ts),
-                        objectId: nvidia_deepstream_sys::strdup(
-                            self.0.as_native_type_ref().objectId,
-                        ),
-                        sensorStr: nvidia_deepstream_sys::strdup(
-                            self.0.as_native_type_ref().sensorStr,
-                        ),
-                        otherAttrs: nvidia_deepstream_sys::strdup(
-                            self.0.as_native_type_ref().otherAttrs,
-                        ),
-                        videoPath: nvidia_deepstream_sys::strdup(
-                            self.0.as_native_type_ref().videoPath,
-                        ),
-                        extMsg: std::ptr::null_mut(), // Box::into_raw(x),
-                        extMsgSize: self.0.as_native_type_ref().extMsgSize,
-                    },
-                )),
+                EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
+                    type_: self.0.as_native_type_ref().type_,
+                    objType: self.0.as_native_type_ref().objType,
+                    bbox: self.0.as_native_type_ref().bbox,
+                    location: self.0.as_native_type_ref().location,
+                    coordinate: self.0.as_native_type_ref().coordinate,
+                    objSignature: self.0.as_native_type_ref().objSignature,
+                    objClassId: self.0.as_native_type_ref().objClassId,
+                    sensorId: self.0.as_native_type_ref().sensorId,
+                    moduleId: self.0.as_native_type_ref().moduleId,
+                    placeId: self.0.as_native_type_ref().placeId,
+                    componentId: self.0.as_native_type_ref().componentId,
+                    frameId: self.0.as_native_type_ref().frameId,
+                    confidence: self.0.as_native_type_ref().confidence,
+                    trackingId: self.0.as_native_type_ref().trackingId,
+                    ts: nvidia_deepstream_sys::strdup(self.0.as_native_type_ref().ts),
+                    objectId: nvidia_deepstream_sys::strdup(self.0.as_native_type_ref().objectId),
+                    sensorStr: nvidia_deepstream_sys::strdup(self.0.as_native_type_ref().sensorStr),
+                    otherAttrs: nvidia_deepstream_sys::strdup(
+                        self.0.as_native_type_ref().otherAttrs,
+                    ),
+                    videoPath: nvidia_deepstream_sys::strdup(self.0.as_native_type_ref().videoPath),
+                    extMsg: std::ptr::null_mut(), // Box::into_raw(x),
+                    extMsgSize: self.0.as_native_type_ref().extMsgSize,
+                }),
                 core::marker::PhantomData,
             )
         }
     }
 }
 
-impl<T: Clone + Drop> Drop for EventMsgMetaExplicit<T> {
+impl<T: Clone> Drop for EventMsgMetaExplicit<T> {
     fn drop(&mut self) {
         unsafe {
             let x = Box::from_raw(self.0.as_native_type_ref().extMsg as *mut T);
@@ -716,7 +738,7 @@ impl<T: Clone + Drop> Drop for EventMsgMetaExplicit<T> {
     }
 }
 
-pub struct EventMsgMetaBuilder<'a, T: Clone + Drop> {
+pub struct EventMsgMetaBuilder<'a, T: Clone> {
     type_: Option<EventType>,
     obj_type: Option<ObjectType>,
     bbox: Option<Rect>,
@@ -739,7 +761,7 @@ pub struct EventMsgMetaBuilder<'a, T: Clone + Drop> {
     ext_msg: Option<Box<T>>,
 }
 
-impl<'a, T: Clone + Drop> EventMsgMetaBuilder<'a, T> {
+impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
     pub fn type_(mut self, value: EventType) -> Self {
         self.type_ = Some(value);
         self
@@ -840,39 +862,37 @@ impl<'a, T: Clone + Drop> EventMsgMetaBuilder<'a, T> {
         self
     }
 
-    pub fn build(self) -> EventMsgMetaExplicit<T> {
+    pub fn build(self) -> Box<EventMsgMetaExplicit<T>> {
         let (ext_msg, ext_msg_size) = self.ext_msg.map_or_else(
             || (std::ptr::null_mut(), 0),
             |x| (Box::into_raw(x), std::mem::size_of::<T>()),
         );
-        EventMsgMetaExplicit::<T>(
-            Box::new(EventMsgMeta::from_native_type(
-                nvidia_deepstream_sys::NvDsEventMsgMeta {
-                    type_: self.type_.unwrap_or_default() as _,
-                    objType: self.obj_type.unwrap_or_default() as _,
-                    bbox: self.bbox.unwrap_or_default().as_native_type(),
-                    location: self.location.unwrap_or_default().as_native_type(),
-                    coordinate: self.coordinate.unwrap_or_default().as_native_type(),
-                    objSignature: self.obj_signature.unwrap_or_default().as_native_type(),
-                    objClassId: self.obj_class_id.unwrap_or_default() as _,
-                    sensorId: self.sensor_id.unwrap_or_default() as _,
-                    moduleId: self.module_id.unwrap_or_default() as _,
-                    placeId: self.place_id.unwrap_or_default() as _,
-                    componentId: self.component_id.unwrap_or_default() as _,
-                    frameId: self.frame_id.unwrap_or_default() as _,
-                    confidence: self.confidence.unwrap_or_default() as _,
-                    trackingId: self.tracking_id.unwrap_or_default() as _,
-                    ts: self.ts.to_glib_full(),
-                    objectId: self.object_id.to_glib_full(),
-                    sensorStr: self.sensor_str.to_glib_full(),
-                    otherAttrs: self.other_attrs.to_glib_full(),
-                    videoPath: self.video_path.to_glib_full(),
-                    extMsg: ext_msg as _,
-                    extMsgSize: ext_msg_size as _,
-                },
-            )),
+        Box::new(EventMsgMetaExplicit::<T>(
+            EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
+                type_: self.type_.unwrap_or_default() as _,
+                objType: self.obj_type.unwrap_or_default() as _,
+                bbox: self.bbox.unwrap_or_default().as_native_type(),
+                location: self.location.unwrap_or_default().as_native_type(),
+                coordinate: self.coordinate.unwrap_or_default().as_native_type(),
+                objSignature: self.obj_signature.unwrap_or_default().as_native_type(),
+                objClassId: self.obj_class_id.unwrap_or_default() as _,
+                sensorId: self.sensor_id.unwrap_or_default() as _,
+                moduleId: self.module_id.unwrap_or_default() as _,
+                placeId: self.place_id.unwrap_or_default() as _,
+                componentId: self.component_id.unwrap_or_default() as _,
+                frameId: self.frame_id.unwrap_or_default() as _,
+                confidence: self.confidence.unwrap_or_default() as _,
+                trackingId: self.tracking_id.unwrap_or_default() as _,
+                ts: self.ts.to_glib_full(),
+                objectId: self.object_id.to_glib_full(),
+                sensorStr: self.sensor_str.to_glib_full(),
+                otherAttrs: self.other_attrs.to_glib_full(),
+                videoPath: self.video_path.to_glib_full(),
+                extMsg: ext_msg as _,
+                extMsgSize: ext_msg_size as _,
+            }),
             core::marker::PhantomData,
-        )
+        ))
     }
 }
 
