@@ -1092,22 +1092,23 @@ impl UserMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
-    }
-
-    pub unsafe fn user_meta_data<T>(&self) -> Option<&T> {
+    pub unsafe fn user_meta_data<T: Clone>(&self) -> Option<&T> {
         NonNull::new(self.as_native_type_ref().user_meta_data as *mut T).map(|p| p.as_ref())
     }
 
-    pub fn set_user_meta_data<T: Clone + Drop>(&mut self, meta_type: MetaType, meta_data: Box<T>) {
-        self.as_native_type_mut().base_meta.meta_type = meta_type.to_native_meta_type();
-        self.as_native_type_mut().base_meta.copy_func = Some(Self::base_meta_copy_func::<T>);
-        self.as_native_type_mut().base_meta.release_func = Some(Self::base_meta_release_func::<T>);
-        self.as_native_type_mut().user_meta_data = Box::into_raw(meta_data) as _;
+    pub fn new<T: Clone, BM: BatchMetaExt>(user_meta_pool_batch_meta: &BM, meta_type: MetaType, meta_data: Box<T>) -> Option<&UserMeta> {
+        user_meta_pool_batch_meta.acquire_user_meta_from_pool().map(|user_meta| {
+            unsafe {
+                user_meta.as_native_type_mut().base_meta.meta_type = meta_type.to_native_meta_type();
+                user_meta.as_native_type_mut().base_meta.copy_func = Some(Self::base_meta_copy_func::<T>);
+                user_meta.as_native_type_mut().base_meta.release_func = Some(Self::base_meta_release_func::<T>);
+                user_meta.as_native_type_mut().user_meta_data = Box::into_raw(meta_data) as _;
+                std::mem::transmute(user_meta)
+            }
+        })
     }
 
-    extern "C" fn base_meta_copy_func<T: Clone + Drop>(
+    extern "C" fn base_meta_copy_func<T: Clone>(
         data: nvidia_deepstream_sys::gpointer,
         _: nvidia_deepstream_sys::gpointer,
     ) -> nvidia_deepstream_sys::gpointer {
@@ -1126,7 +1127,7 @@ impl UserMeta {
         }
     }
 
-    extern "C" fn base_meta_release_func<T: Clone + Drop>(
+    extern "C" fn base_meta_release_func<T: Clone>(
         data: nvidia_deepstream_sys::gpointer,
         _: nvidia_deepstream_sys::gpointer,
     ) {

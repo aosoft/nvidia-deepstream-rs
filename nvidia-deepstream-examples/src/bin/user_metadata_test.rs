@@ -1,7 +1,7 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
-use nvidia_deepstream::{meta, WrapperExt};
+use nvidia_deepstream::{meta};
 use std::ffi::CStr;
 
 #[derive(Clone)]
@@ -97,15 +97,16 @@ fn main() {
             unsafe {
                 if let Some(batch_meta) = buf.get_nvds_batch_meta() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
-                        if let Some(user_meta) = batch_meta.acquire_user_meta_from_pool() {
-                            user_meta.set_user_meta_data(
-                                meta::UserMeta::get_user_meta_type(CStr::from_ptr(
-                                    "NVIDIA.NVINFER.USER_META\0".as_ptr() as _,
-                                )),
-                                Box::new(UserMetaData {
-                                    data: user_meta.as_native_type_ref() as *const _ as _,
-                                }),
-                            );
+                        let user_meta = meta::UserMeta::new(
+                            batch_meta,
+                            meta::UserMeta::get_user_meta_type(CStr::from_ptr(
+                                "NVIDIA.NVINFER.USER_META\0".as_ptr() as _,
+                            )),
+                            Box::new(UserMetaData {
+                                data: 100,
+                            }),
+                        );
+                        if let Some(user_meta) = user_meta {
                             frame_meta.add_user_meta(user_meta);
                         }
                     }

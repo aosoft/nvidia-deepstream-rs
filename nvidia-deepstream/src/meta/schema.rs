@@ -651,7 +651,7 @@ impl<T: Clone> EventMsgMeta<T> {
 
     pub unsafe fn ext_msg(&self) -> Option<&T> {
         if self.0.as_native_type_ref().extMsgSize as usize == std::mem::size_of::<T>() {
-            Some(&*(self.0.as_native_type_ref().extMsg as *const T))
+            NonNull::new(self.0.as_native_type_ref().extMsg as *mut T).map(|p| p.as_ref())
         } else {
             None
         }
@@ -900,10 +900,10 @@ impl Event {
         unsafe { std::mem::transmute(self.as_native_type_ref().eventType) }
     }
 
-    pub fn metadata(&self) -> Option<&EventMsgMetaBase> {
+    pub fn metadata<T: Clone>(&self) -> Option<&EventMsgMeta<T>> {
         unsafe {
             NonNull::new(self.as_native_type_ref().metadata)
-                .map(|p| EventMsgMetaBase::from_native_type_ref(p.as_ref()))
+                .map(|p| std::mem::transmute(p.as_ref()))
         }
     }
 }
