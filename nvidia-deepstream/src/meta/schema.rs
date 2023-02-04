@@ -568,104 +568,101 @@ impl FaceObjectExt {
     }
 }
 
-crate::wrapper_impl_ref_type!(EventMsgMeta, nvidia_deepstream_sys::NvDsEventMsgMeta);
+crate::wrapper_impl_ref_type!(EventMsgMetaBase, nvidia_deepstream_sys::NvDsEventMsgMeta);
 
-impl EventMsgMeta {
+pub struct EventMsgMeta<T: Clone>(EventMsgMetaBase, core::marker::PhantomData<T>);
+
+impl<T: Clone> EventMsgMeta<T> {
     pub fn type_(&self) -> EventType {
-        unsafe { std::mem::transmute(self.as_native_type_ref().type_) }
+        unsafe { std::mem::transmute(self.0.as_native_type_ref().type_) }
     }
 
     pub fn obj_type(&self) -> ObjectType {
-        unsafe { std::mem::transmute(self.as_native_type_ref().objType) }
+        unsafe { std::mem::transmute(self.0.as_native_type_ref().objType) }
     }
 
     pub fn bbox(&self) -> &Rect {
-        Rect::from_native_type_ref(&self.as_native_type_ref().bbox)
+        Rect::from_native_type_ref(&self.0.as_native_type_ref().bbox)
     }
 
     pub fn location(&self) -> &GeoLocation {
-        GeoLocation::from_native_type_ref(&self.as_native_type_ref().location)
+        GeoLocation::from_native_type_ref(&self.0.as_native_type_ref().location)
     }
 
     pub fn coordinate(&self) -> &Coordinate {
-        Coordinate::from_native_type_ref(&self.as_native_type_ref().coordinate)
+        Coordinate::from_native_type_ref(&self.0.as_native_type_ref().coordinate)
     }
 
     pub fn obj_signature(&self) -> &ObjectSignature {
-        ObjectSignature::from_native_type_ref(&self.as_native_type_ref().objSignature)
+        ObjectSignature::from_native_type_ref(&self.0.as_native_type_ref().objSignature)
     }
 
     pub fn obj_class_id(&self) -> i32 {
-        self.as_native_type_ref().objClassId
+        self.0.as_native_type_ref().objClassId
     }
 
     pub fn sensor_id(&self) -> i32 {
-        self.as_native_type_ref().sensorId
+        self.0.as_native_type_ref().sensorId
     }
 
     pub fn module_id(&self) -> i32 {
-        self.as_native_type_ref().moduleId
+        self.0.as_native_type_ref().moduleId
     }
 
     pub fn place_id(&self) -> i32 {
-        self.as_native_type_ref().placeId
+        self.0.as_native_type_ref().placeId
     }
 
     pub fn component_id(&self) -> i32 {
-        self.as_native_type_ref().componentId
+        self.0.as_native_type_ref().componentId
     }
 
     pub fn frame_id(&self) -> i32 {
-        self.as_native_type_ref().frameId
+        self.0.as_native_type_ref().frameId
     }
 
     pub fn confidence(&self) -> f64 {
-        self.as_native_type_ref().confidence
+        self.0.as_native_type_ref().confidence
     }
 
     pub fn tracking_id(&self) -> u64 {
-        self.as_native_type_ref().trackingId
+        self.0.as_native_type_ref().trackingId
     }
 
     pub fn ts(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().ts) }
+        unsafe { CStr::from_ptr(self.0.as_native_type_ref().ts) }
     }
 
     pub fn object_id(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().objectId) }
+        unsafe { CStr::from_ptr(self.0.as_native_type_ref().objectId) }
     }
 
     pub fn sensor_str(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().sensorStr) }
+        unsafe { CStr::from_ptr(self.0.as_native_type_ref().sensorStr) }
     }
 
     pub fn other_attrs(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().otherAttrs) }
+        unsafe { CStr::from_ptr(self.0.as_native_type_ref().otherAttrs) }
     }
 
     pub fn video_path(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().videoPath) }
+        unsafe { CStr::from_ptr(self.0.as_native_type_ref().videoPath) }
     }
 
-    pub fn ext_msg(&self) -> &[u8] {
-        unsafe {
-            std::slice::from_raw_parts(
-                self.as_native_type_ref().extMsg as _,
-                self.as_native_type_ref().extMsgSize as _,
-            )
+    pub unsafe fn ext_msg(&self) -> Option<&T> {
+        if self.0.as_native_type_ref().extMsgSize as usize == std::mem::size_of::<T>() {
+            Some(&*(self.0.as_native_type_ref().extMsg as *const T))
+        } else {
+            None
         }
     }
-}
 
-pub struct EventMsgMetaExplicit<T: Clone>(EventMsgMeta, core::marker::PhantomData<T>);
-
-impl<T: Clone> EventMsgMetaExplicit<T> {
     pub extern "C" fn base_meta_copy_func(
         data: nvidia_deepstream_sys::gpointer,
         _: nvidia_deepstream_sys::gpointer,
     ) -> nvidia_deepstream_sys::gpointer {
         unsafe {
-            let event_msg_meta = data as *mut EventMsgMetaExplicit<T>;
+            let event_msg_meta = data as *mut EventMsgMeta<T>;
             if event_msg_meta == std::ptr::null_mut() {
                 return std::ptr::null_mut();
             }
@@ -679,7 +676,7 @@ impl<T: Clone> EventMsgMetaExplicit<T> {
         _: nvidia_deepstream_sys::gpointer,
     ) {
         unsafe {
-            let event_msg_meta = data as *mut EventMsgMetaExplicit<T>;
+            let event_msg_meta = data as *mut EventMsgMeta<T>;
             if event_msg_meta == std::ptr::null_mut() {
                 return;
             }
@@ -689,11 +686,11 @@ impl<T: Clone> EventMsgMetaExplicit<T> {
     }
 }
 
-impl<T: Clone> Clone for EventMsgMetaExplicit<T> {
+impl<T: Clone> Clone for EventMsgMeta<T> {
     fn clone(&self) -> Self {
         unsafe {
-            EventMsgMetaExplicit::<T>(
-                EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
+            EventMsgMeta::<T>(
+                EventMsgMetaBase::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
                     type_: self.0.as_native_type_ref().type_,
                     objType: self.0.as_native_type_ref().objType,
                     bbox: self.0.as_native_type_ref().bbox,
@@ -724,7 +721,7 @@ impl<T: Clone> Clone for EventMsgMetaExplicit<T> {
     }
 }
 
-impl<T: Clone> Drop for EventMsgMetaExplicit<T> {
+impl<T: Clone> Drop for EventMsgMeta<T> {
     fn drop(&mut self) {
         unsafe {
             let x = Box::from_raw(self.0.as_native_type_ref().extMsg as *mut T);
@@ -862,13 +859,13 @@ impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
         self
     }
 
-    pub fn build(self) -> Box<EventMsgMetaExplicit<T>> {
+    pub fn build(self) -> Box<EventMsgMeta<T>> {
         let (ext_msg, ext_msg_size) = self.ext_msg.map_or_else(
             || (std::ptr::null_mut(), 0),
             |x| (Box::into_raw(x), std::mem::size_of::<T>()),
         );
-        Box::new(EventMsgMetaExplicit::<T>(
-            EventMsgMeta::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
+        Box::new(EventMsgMeta::<T>(
+            EventMsgMetaBase::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
                 type_: self.type_.unwrap_or_default() as _,
                 objType: self.obj_type.unwrap_or_default() as _,
                 bbox: self.bbox.unwrap_or_default().as_native_type(),
@@ -903,10 +900,10 @@ impl Event {
         unsafe { std::mem::transmute(self.as_native_type_ref().eventType) }
     }
 
-    pub fn metadata(&self) -> Option<&EventMsgMeta> {
+    pub fn metadata(&self) -> Option<&EventMsgMetaBase> {
         unsafe {
             NonNull::new(self.as_native_type_ref().metadata)
-                .map(|p| EventMsgMeta::from_native_type_ref(p.as_ref()))
+                .map(|p| EventMsgMetaBase::from_native_type_ref(p.as_ref()))
         }
     }
 }

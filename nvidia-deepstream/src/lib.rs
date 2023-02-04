@@ -39,6 +39,7 @@ pub trait WrapperExt {
     fn from_native_type_mut(n: &mut Self::NativeType) -> &mut Self;
     fn as_native_type_mut(&mut self) -> &mut Self::NativeType;
 
+    unsafe fn from_native_type_ptr(n: *mut Self::NativeType) -> *mut Self;
     unsafe fn as_native_type_ptr(&self) -> *mut Self::NativeType;
 }
 
@@ -68,6 +69,11 @@ macro_rules! wrapper_impl_body {
         #[inline]
         fn as_native_type_mut(&mut self) -> &mut Self::NativeType {
             &mut self.0
+        }
+
+        #[inline]
+        unsafe fn from_native_type_ptr(n: *mut Self::NativeType) -> *mut Self {
+            unsafe { std::mem::transmute(n) }
         }
 
         #[inline]
