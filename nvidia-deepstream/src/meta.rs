@@ -251,7 +251,6 @@ crate::wrapper_impl_ref_type!(BatchMeta, nvidia_deepstream_sys::NvDsBatchMeta);
 
 pub trait BatchMetaExt {
     fn base_meta<'a>(&'a self) -> &'a BaseMeta;
-    fn base_meta_mut(&mut self) -> &mut BaseMeta;
     fn max_frames_in_batch(&self) -> u32;
     fn num_frames_in_batch(&self) -> u32;
     fn frame_meta_pool(&self) -> &MetaPool;
@@ -356,10 +355,6 @@ impl BatchMeta {
 impl<T: WrapperExt<NativeType = nvidia_deepstream_sys::NvDsBatchMeta>> BatchMetaExt for T {
     fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
-    }
-
-    fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     fn max_frames_in_batch(&self) -> u32 {
@@ -483,10 +478,6 @@ crate::wrapper_impl_ref_type!(FrameMeta, nvidia_deepstream_sys::NvDsFrameMeta);
 impl FrameMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
-    }
-
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn pad_index(&self) -> u32 {
@@ -668,10 +659,6 @@ impl ObjectMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
-    }
-
     pub fn parent(&self) -> Option<&ObjectMeta> {
         NonNull::new(self.as_native_type_ref().parent)
             .map(|p| ObjectMeta::from_native_type_ref(unsafe { p.as_ref() }))
@@ -810,10 +797,6 @@ impl ClassifierMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
-    }
-
     pub fn num_labels(&self) -> u32 {
         self.as_native_type_ref().num_labels
     }
@@ -875,10 +858,6 @@ impl LabelInfo {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
     }
 
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
-    }
-
     pub fn num_classes(&self) -> u32 {
         self.as_native_type_ref().num_classes
     }
@@ -919,10 +898,6 @@ crate::wrapper_impl_ref_type!(DisplayMeta, nvidia_deepstream_sys::NvDsDisplayMet
 impl DisplayMeta {
     pub fn base_meta(&self) -> &BaseMeta {
         BaseMeta::from_native_type_ref(&self.as_native_type_ref().base_meta)
-    }
-
-    pub fn base_meta_mut(&mut self) -> &mut BaseMeta {
-        BaseMeta::from_native_type_mut(&mut self.as_native_type_mut().base_meta)
     }
 
     pub fn num_rects(&self) -> u32 {
