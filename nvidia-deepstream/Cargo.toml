@@ -1,9 +1,19 @@
 [package]
 name = "nvidia-deepstream"
 version = "0.1.0"
+authors = ["Yasuhiro Taniuchi"]
+license = "MIT"
+description = "NVIDIA DeepStream SDK for Rust"
+homepage = "https://github.com/aosoft/nvidia-deepstream-rs"
+repository = "https://github.com/aosoft/nvidia-deepstream-rs"
+readme = "../README.md"
+categories = ["api-bindings"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "../LICENSE"
+]
 
 [features]
 
