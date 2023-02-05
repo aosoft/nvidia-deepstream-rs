@@ -7,7 +7,6 @@ pub mod schema;
 pub mod tracker;
 
 use crate::WrapperExt;
-use osd::RectParams;
 use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
@@ -15,8 +14,8 @@ use std::ptr::NonNull;
 crate::wrapper_impl_ref_type!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
 
 impl RoiMeta {
-    pub fn roi(&self) -> &RectParams {
-        RectParams::from_native_type_ref(&self.as_native_type_ref().roi)
+    pub fn roi(&self) -> &osd::RectParams {
+        osd::RectParams::from_native_type_ref(&self.as_native_type_ref().roi)
     }
 
     pub fn roi_polygon(&self, index: usize) -> Option<(u32, u32)> {
@@ -946,108 +945,48 @@ impl DisplayMeta {
         self.as_native_type_ref().num_rects
     }
 
-    pub fn get_rect_params(&self, index: usize) -> Option<&osd::RectParams> {
-        if index < self.as_native_type_ref().num_rects as usize
-            && index < self.as_native_type_ref().rect_params.len()
-        {
-            Some(osd::RectParams::from_native_type_ref(
-                &self.as_native_type_ref().rect_params[index],
-            ))
-        } else {
-            None
+    pub fn rect_params(&self) -> &[osd::RectParams] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().rect_params.as_ptr() as _,
+                self.as_native_type_ref().num_rects as usize,
+            )
         }
     }
 
-    pub fn set_rect_params(&mut self, params: &[osd::RectParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().rect_params.len(), params.len());
-
-        self.as_native_type_mut().num_rects = len as _;
-        for i in 0..len {
-            self.as_native_type_mut().rect_params[i] = *params[i].as_native_type_ref();
+    pub fn text_params(&self) -> &[osd::TextParams] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().text_params.as_ptr() as _,
+                self.as_native_type_ref().num_labels as usize,
+            )
         }
     }
 
-    pub fn get_text_params(&self, index: usize) -> Option<&osd::TextParams> {
-        if index < self.as_native_type_ref().num_labels as usize
-            && index < self.as_native_type_ref().text_params.len()
-        {
-            Some(osd::TextParams::from_native_type_ref(
-                &self.as_native_type_ref().text_params[index],
-            ))
-        } else {
-            None
+    pub fn line_params(&self) -> &[osd::LineParams] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().line_params.as_ptr() as _,
+                self.as_native_type_ref().num_lines as usize,
+            )
         }
     }
 
-    pub fn set_text_params(&mut self, params: &[osd::TextParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().text_params.len(), params.len());
-
-        self.as_native_type_mut().num_labels = len as _;
-        for i in 0..len {
-            self.as_native_type_mut().text_params[i] = *params[i].as_native_type_ref();
+    pub fn arrow_params(&self) -> &[osd::ArrowParams] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().arrow_params.as_ptr() as _,
+                self.as_native_type_ref().num_arrows as usize,
+            )
         }
     }
 
-    pub fn get_line_params(&self, index: usize) -> Option<&osd::LineParams> {
-        if index < self.as_native_type_ref().num_lines as usize
-            && index < self.as_native_type_ref().line_params.len()
-        {
-            Some(osd::LineParams::from_native_type_ref(
-                &self.as_native_type_ref().line_params[index],
-            ))
-        } else {
-            None
-        }
-    }
-
-    pub fn set_line_params(&mut self, params: &[osd::LineParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().line_params.len(), params.len());
-
-        self.as_native_type_mut().num_lines = len as _;
-        for i in 0..len {
-            self.as_native_type_mut().line_params[i] = *params[i].as_native_type_ref();
-        }
-    }
-
-    pub fn get_arrow_params(&self, index: usize) -> Option<&osd::ArrowParams> {
-        if index < self.as_native_type_ref().num_arrows as usize
-            && index < self.as_native_type_ref().arrow_params.len()
-        {
-            Some(osd::ArrowParams::from_native_type_ref(
-                &self.as_native_type_ref().arrow_params[index],
-            ))
-        } else {
-            None
-        }
-    }
-
-    pub fn set_arrow_params(&mut self, params: &[osd::ArrowParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().arrow_params.len(), params.len());
-
-        self.as_native_type_mut().num_arrows = len as _;
-        for i in 0..len {
-            self.as_native_type_mut().arrow_params[i] = *params[i].as_native_type_ref();
-        }
-    }
-
-    pub fn get_circle_params(&self, index: usize) -> Option<&osd::CircleParams> {
-        if index < self.as_native_type_ref().num_circles as usize
-            && index < self.as_native_type_ref().circle_params.len()
-        {
-            Some(osd::CircleParams::from_native_type_ref(
-                &self.as_native_type_ref().circle_params[index],
-            ))
-        } else {
-            None
-        }
-    }
-
-    pub fn set_circle_params(&mut self, params: &[osd::CircleParams]) {
-        let len = std::cmp::min(self.as_native_type_ref().circle_params.len(), params.len());
-
-        self.as_native_type_mut().num_circles = len as _;
-        for i in 0..len {
-            self.as_native_type_mut().circle_params[i] = *params[i].as_native_type_ref();
+    pub fn circle_params(&self) -> &[osd::CircleParams] {
+        unsafe {
+            std::slice::from_raw_parts(
+                self.as_native_type_ref().circle_params.as_ptr() as _,
+                self.as_native_type_ref().num_circles as usize,
+            )
         }
     }
 
@@ -1062,6 +1001,145 @@ impl DisplayMeta {
                 dst_display_meta.as_native_type_mut() as _,
             )
         }
+    }
+}
+
+pub struct DisplayMetaBuilder<'a> {
+    rect_params: Option<&'a [osd::RectParams]>,
+    text_params: Option<&'a [osd::TextParams]>,
+    line_params: Option<&'a [osd::LineParams]>,
+    arrow_params: Option<&'a [osd::ArrowParams]>,
+    circle_params: Option<&'a [osd::CircleParams]>,
+    misc_osd_data: Option<&'a [i64]>,
+}
+
+impl<'a> DisplayMetaBuilder<'a> {
+    pub fn new() -> DisplayMetaBuilder<'a> {
+        DisplayMetaBuilder {
+            rect_params: None,
+            text_params: None,
+            line_params: None,
+            arrow_params: None,
+            circle_params: None,
+            misc_osd_data: None,
+        }
+    }
+
+    pub fn rect_params(mut self, value: &'a [osd::RectParams]) -> Self {
+        self.rect_params = Some(value);
+        self
+    }
+
+    pub fn text_params(mut self, value: &'a [osd::TextParams]) -> Self {
+        self.text_params = Some(value);
+        self
+    }
+
+    pub fn line_params(mut self, value: &'a [osd::LineParams]) -> Self {
+        self.line_params = Some(value);
+        self
+    }
+
+    pub fn arrow_params(mut self, value: &'a [osd::ArrowParams]) -> Self {
+        self.arrow_params = Some(value);
+        self
+    }
+
+    pub fn circle_params(mut self, value: &'a [osd::CircleParams]) -> Self {
+        self.circle_params = Some(value);
+        self
+    }
+
+    pub fn misc_osd_data(mut self, value: &'a [i64]) -> Self {
+        self.misc_osd_data = Some(value);
+        self
+    }
+
+    pub fn build<BM: BatchMetaExt>(
+        self,
+        display_meta_pool_batch_meta: &BM,
+    ) -> Option<&DisplayMeta> {
+        display_meta_pool_batch_meta
+            .acquire_display_meta_from_pool()
+            .map(|display_meta| {
+                if let Some(params) = self.rect_params {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().rect_params.len(),
+                        params.len(),
+                    );
+
+                    display_meta.as_native_type_mut().num_rects = len as _;
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().rect_params[i] =
+                            *params[i].as_native_type_ref();
+                    }
+                }
+
+                if let Some(params) = self.text_params {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().text_params.len(),
+                        params.len(),
+                    );
+
+                    display_meta.as_native_type_mut().num_labels = len as _;
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().text_params[i] =
+                            *params[i].as_native_type_ref();
+                    }
+                }
+
+                if let Some(params) = self.line_params {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().line_params.len(),
+                        params.len(),
+                    );
+
+                    display_meta.as_native_type_mut().num_lines = len as _;
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().line_params[i] =
+                            *params[i].as_native_type_ref();
+                    }
+                }
+
+                if let Some(params) = self.arrow_params {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().arrow_params.len(),
+                        params.len(),
+                    );
+
+                    display_meta.as_native_type_mut().num_arrows = len as _;
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().arrow_params[i] =
+                            *params[i].as_native_type_ref();
+                    }
+                }
+
+                if let Some(params) = self.circle_params {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().circle_params.len(),
+                        params.len(),
+                    );
+
+                    display_meta.as_native_type_mut().num_circles = len as _;
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().circle_params[i] =
+                            *params[i].as_native_type_ref();
+                    }
+                }
+
+                if let Some(params) = self.misc_osd_data {
+                    let len = std::cmp::min(
+                        display_meta.as_native_type_ref().misc_osd_data.len(),
+                        params.len(),
+                    );
+
+                    for i in 0..len {
+                        display_meta.as_native_type_mut().misc_osd_data[i] = params[i];
+                    }
+                }
+
+                display_meta as _
+            })
     }
 }
 
@@ -1096,16 +1174,23 @@ impl UserMeta {
         NonNull::new(self.as_native_type_ref().user_meta_data as *mut T).map(|p| p.as_ref())
     }
 
-    pub fn new<T: Clone, BM: BatchMetaExt>(user_meta_pool_batch_meta: &BM, meta_type: MetaType, meta_data: Box<T>) -> Option<&UserMeta> {
-        user_meta_pool_batch_meta.acquire_user_meta_from_pool().map(|user_meta| {
-            unsafe {
-                user_meta.as_native_type_mut().base_meta.meta_type = meta_type.to_native_meta_type();
-                user_meta.as_native_type_mut().base_meta.copy_func = Some(Self::base_meta_copy_func::<T>);
-                user_meta.as_native_type_mut().base_meta.release_func = Some(Self::base_meta_release_func::<T>);
+    pub fn new<T: Clone, BM: BatchMetaExt>(
+        user_meta_pool_batch_meta: &BM,
+        meta_type: MetaType,
+        meta_data: Box<T>,
+    ) -> Option<&UserMeta> {
+        user_meta_pool_batch_meta
+            .acquire_user_meta_from_pool()
+            .map(|user_meta| unsafe {
+                user_meta.as_native_type_mut().base_meta.meta_type =
+                    meta_type.to_native_meta_type();
+                user_meta.as_native_type_mut().base_meta.copy_func =
+                    Some(Self::base_meta_copy_func::<T>);
+                user_meta.as_native_type_mut().base_meta.release_func =
+                    Some(Self::base_meta_release_func::<T>);
                 user_meta.as_native_type_mut().user_meta_data = Box::into_raw(meta_data) as _;
                 std::mem::transmute(user_meta)
-            }
-        })
+            })
     }
 
     extern "C" fn base_meta_copy_func<T: Clone>(
@@ -1146,10 +1231,7 @@ impl UserMeta {
     }
 }
 
-crate::wrapper_impl_value_type!(
-    FaceBoxes,
-    nvidia_deepstream_sys::faceboxes
-);
+crate::wrapper_impl_value_type!(FaceBoxes, nvidia_deepstream_sys::faceboxes);
 
 impl FaceBoxes {
     pub fn new(x: f32, y: f32, width: f32, height: f32) -> FaceBoxes {
