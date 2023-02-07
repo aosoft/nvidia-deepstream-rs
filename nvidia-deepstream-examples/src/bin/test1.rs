@@ -3,7 +3,7 @@ use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt, DisplayMetaBuilder};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 
 static CONFIG_YML: &str = "dstest1_config.yml";
 
@@ -108,10 +108,10 @@ fn main() {
 
                             if let Some(display_meta) = DisplayMetaBuilder::new()
                                 .text_params(&[TextParamsBuilder::new()
-                                    .display_text(format!(
+                                    .display_text(CString::new(format!(
                                         "Person = {}, Vehicle = {}",
                                         person_count, vehicle_count
-                                    ))
+                                    )).unwrap().as_ref())
                                     .x_offset(10)
                                     .y_offset(12)
                                     .font_params(

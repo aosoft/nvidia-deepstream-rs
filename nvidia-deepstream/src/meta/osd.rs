@@ -148,20 +148,18 @@ impl TextParams {
     }
 }
 
-pub struct TextParamsBuilder {
-    display_text: Option<String>,
-    display_text_ref: Option<&'static str>,
+pub struct TextParamsBuilder<'a> {
+    display_text: Option<&'a CStr>,
     x_offset: Option<u32>,
     y_offset: Option<u32>,
     font_params: Option<FontParams>,
     text_bg_clr: Option<ColorParams>,
 }
 
-impl TextParamsBuilder {
+impl<'a> TextParamsBuilder<'a> {
     pub fn new() -> Self {
         TextParamsBuilder {
             display_text: None,
-            display_text_ref: None,
             x_offset: None,
             y_offset: None,
             font_params: None,
@@ -169,15 +167,8 @@ impl TextParamsBuilder {
         }
     }
 
-    pub fn display_text(mut self, text: String) -> Self {
+    pub fn display_text(mut self, text: &'a CStr) -> Self {
         self.display_text = Some(text);
-        self.display_text_ref = None;
-        self
-    }
-
-    pub fn display_text_ref(mut self, text: &'static str) -> Self {
-        self.display_text = None;
-        self.display_text_ref = Some(text);
         self
     }
 
@@ -209,16 +200,10 @@ impl TextParamsBuilder {
     /// If you register it with add_display_meta, it will be removed after use.
     /// Failure to register it will cause memory leaks.
     pub unsafe fn build(self) -> TextParams {
-        let (p, len) = if let Some(text) = &self.display_text {
-            (text.as_ptr(), text.len())
-        } else if let Some(text) = self.display_text_ref {
-            (text.as_ptr(), text.len())
-        } else {
-            (std::ptr::null(), 0)
-        };
-        let display_text = if p != std::ptr::null() {
+        let display_text = if let Some(text) = self.display_text {
+            let len = text.to_bytes().len();
             let r = glib::ffi::g_malloc0(len + 1);
-            r.copy_from(p as _, len);
+            r.copy_from(text.as_ptr() as _, len);
             r
         } else {
             std::ptr::null_mut()
