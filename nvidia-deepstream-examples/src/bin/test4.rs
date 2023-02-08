@@ -1,9 +1,10 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
+use nvidia_deepstream::meta::schema::EventMsgMetaBuilder;
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt, DisplayMetaBuilder};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
-use std::ffi::CStr;
+use std::ffi::{CStr, CString};
 
 static CONFIG_YML: &str = "dstest4_config.yml";
 static MSCONV_CONFIG_FILE: &str = "dstest4_msgconv_config.txt";
@@ -29,7 +30,7 @@ fn main() {
         .name("nvv4l2-decoder")
         .build()
         .unwrap();
-    let streammux = gstreamer::ElementFactory::make("nvstreammux")
+    let nvstreammux = gstreamer::ElementFactory::make("nvstreammux")
         .name("stream-muxer")
         .build()
         .unwrap();
@@ -77,14 +78,14 @@ fn main() {
         .unwrap();
 
     source.nvds_parse_file_source(CONFIG_YML, "source").unwrap();
-    streammux
+    nvstreammux
         .nvds_parse_streammux(CONFIG_YML, "streammux")
         .unwrap();
     pgie.set_property("config-file-path", "dstest4_pgie_config.yml");
     msgconv.set_property("config", "dstest4_msgconv_config.yml");
-    msgconv.nvds_parse_msgconv("msgconv").unwrap();
-    msgbroker.nvds_parse_msgbroker("msgbroker").unwrap();
-    sink.nvds_parse_egl_sink("sink");
+    msgconv.nvds_parse_msgconv(CONFIG_YML, "msgconv").unwrap();
+    msgbroker.nvds_parse_msgbroker(CONFIG_YML, "msgbroker").unwrap();
+    sink.nvds_parse_egl_sink(CONFIG_YML, "sink");
 
     pipeline
         .add_many(&[
@@ -104,7 +105,7 @@ fn main() {
         ])
         .unwrap();
 
-    let sinkpad = streammux.request_pad_simple("sink_0").unwrap();
+    let sinkpad = nvstreammux.request_pad_simple("sink_0").unwrap();
     let srcpad = decoder.static_pad("src").unwrap();
     srcpad.link(&sinkpad).unwrap();
 
@@ -129,6 +130,7 @@ fn main() {
                 let mut person_count: u32 = 0;
                 let mut num_rects: u32 = 0;
                 if let Some(batch_meta) = buf.get_nvds_batch_meta() {
+                    let mut is_first_object = true;
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(obj_meta_list) = frame_meta.obj_meta_list() {
                             for obj_meta in obj_meta_list.iter() {
@@ -144,10 +146,14 @@ fn main() {
 
                             if let Some(display_meta) = DisplayMetaBuilder::new()
                                 .text_params(&[TextParamsBuilder::new()
-                                    .display_text(format!(
-                                        "Person = {}, Vehicle = {}",
-                                        person_count, vehicle_count
-                                    ))
+                                    .display_text(
+                                        CString::new(format!(
+                                            "Person = {}, Vehicle = {}",
+                                            person_count, vehicle_count
+                                        ))
+                                        .unwrap()
+                                        .as_ref(),
+                                    )
                                     .x_offset(10)
                                     .y_offset(12)
                                     .font_params(
@@ -162,6 +168,14 @@ fn main() {
                                 .build(batch_meta)
                             {
                                 frame_meta.add_display_meta(display_meta);
+                            }
+                            if is_first_object {
+                                let msg_meta = EventMsgMetaBuilder::<
+                                    nvidia_deepstream::meta::schema::VehicleObject,
+                                >::new()
+                                .build();
+
+                                is_first_object = false;
                             }
                         }
                     }
