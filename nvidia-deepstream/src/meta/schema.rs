@@ -759,6 +759,31 @@ pub struct EventMsgMetaBuilder<'a, T: Clone> {
 }
 
 impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
+    pub fn new() -> EventMsgMetaBuilder<'a, T> {
+        EventMsgMetaBuilder {
+            type_: None,
+            obj_type: None,
+            bbox: None,
+            location: None,
+            coordinate: None,
+            obj_signature: None,
+            obj_class_id: None,
+            sensor_id: None,
+            module_id: None,
+            place_id: None,
+            component_id: None,
+            frame_id: None,
+            confidence: None,
+            tracking_id: None,
+            ts: None,
+            object_id: None,
+            sensor_str: None,
+            other_attrs: None,
+            video_path: None,
+            ext_msg: None,
+        }
+    }
+
     pub fn type_(mut self, value: EventType) -> Self {
         self.type_ = Some(value);
         self
