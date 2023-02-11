@@ -85,7 +85,7 @@ fn main() {
     msgconv.set_property("config", "dstest4_msgconv_config.yml");
     msgconv.nvds_parse_msgconv(CONFIG_YML, "msgconv").unwrap();
     msgbroker.nvds_parse_msgbroker(CONFIG_YML, "msgbroker").unwrap();
-    sink.nvds_parse_egl_sink(CONFIG_YML, "sink");
+    sink.nvds_parse_egl_sink(CONFIG_YML, "sink").unwrap();
 
     pipeline
         .add_many(&[
@@ -151,8 +151,8 @@ fn main() {
                                             "Person = {}, Vehicle = {}",
                                             person_count, vehicle_count
                                         ))
-                                        .unwrap()
-                                        .as_ref(),
+                                            .unwrap()
+                                            .as_ref(),
                                     )
                                     .x_offset(10)
                                     .y_offset(12)
@@ -170,10 +170,15 @@ fn main() {
                                 frame_meta.add_display_meta(display_meta);
                             }
                             if is_first_object {
-                                let msg_meta = EventMsgMetaBuilder::<
-                                    nvidia_deepstream::meta::schema::VehicleObject,
-                                >::new()
-                                .build();
+                                let msg_meta = EventMsgMetaBuilder::new()
+                                    .build_with_ext_msg(Box::new(nvidia_deepstream::meta::schema::VehicleObjectBuilder::new()
+                                        .type_("sedan")
+                                        .color("blue")
+                                        .make("Bugatti")
+                                        .model("M")
+                                        .license("XX1234")
+                                        .region("CA")
+                                        .build()));
 
                                 is_first_object = false;
                             }

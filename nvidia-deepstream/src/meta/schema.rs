@@ -769,7 +769,7 @@ impl<T: Clone> Drop for EventMsgMeta<T> {
     }
 }
 
-pub struct EventMsgMetaBuilder<'a, T: Clone> {
+pub struct EventMsgMetaBuilder<'a> {
     type_: Option<EventType>,
     obj_type: Option<ObjectType>,
     bbox: Option<Rect>,
@@ -789,11 +789,10 @@ pub struct EventMsgMetaBuilder<'a, T: Clone> {
     sensor_str: Option<&'a str>,
     other_attrs: Option<&'a str>,
     video_path: Option<&'a str>,
-    ext_msg: Option<Box<T>>,
 }
 
-impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
-    pub fn new() -> EventMsgMetaBuilder<'a, T> {
+impl<'a> EventMsgMetaBuilder<'a> {
+    pub fn new() -> EventMsgMetaBuilder<'a> {
         EventMsgMetaBuilder {
             type_: None,
             obj_type: None,
@@ -814,7 +813,6 @@ impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
             sensor_str: None,
             other_attrs: None,
             video_path: None,
-            ext_msg: None,
         }
     }
 
@@ -913,16 +911,7 @@ impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
         self
     }
 
-    pub fn ext_msg(mut self, value: Box<T>) -> Self {
-        self.ext_msg = Some(value);
-        self
-    }
-
-    pub fn build(self) -> Box<EventMsgMeta<T>> {
-        let (ext_msg, ext_msg_size) = self.ext_msg.map_or_else(
-            || (std::ptr::null_mut(), 0),
-            |x| (Box::into_raw(x), std::mem::size_of::<T>()),
-        );
+    pub fn build_with_ext_msg<T: Clone>(self, value: Box<T>) -> Box<EventMsgMeta<T>> {
         Box::new(EventMsgMeta::<T>(
             EventMsgMetaBase::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
                 type_: self.type_.unwrap_or_default() as _,
@@ -944,8 +933,8 @@ impl<'a, T: Clone> EventMsgMetaBuilder<'a, T> {
                 sensorStr: self.sensor_str.to_glib_full(),
                 otherAttrs: self.other_attrs.to_glib_full(),
                 videoPath: self.video_path.to_glib_full(),
-                extMsg: ext_msg as _,
-                extMsgSize: ext_msg_size as _,
+                extMsg: Box::into_raw(value) as _,
+                extMsgSize: std::mem::size_of::<T>() as _,
             }),
             core::marker::PhantomData,
         ))
