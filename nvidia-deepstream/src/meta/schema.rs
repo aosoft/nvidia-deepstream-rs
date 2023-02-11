@@ -1,6 +1,6 @@
 use crate::{duplicate_glib_string, glib_free, WrapperExt};
 use gstreamer::glib::translate::ToGlibPtr;
-use std::ffi::{CStr, NulError};
+use std::ffi::CStr;
 use std::ptr::NonNull;
 
 #[repr(u32)]
@@ -194,6 +194,17 @@ pub struct VehicleObjectBuilder<'a> {
 }
 
 impl<'a> VehicleObjectBuilder<'a> {
+    pub fn new() -> VehicleObjectBuilder<'a> {
+        VehicleObjectBuilder {
+            type_: None,
+            make: None,
+            model: None,
+            color: None,
+            region: None,
+            license: None,
+        }
+    }
+    
     pub fn type_(mut self, s: &'a str) -> Self {
         self.type_ = Some(s);
         self
@@ -224,8 +235,8 @@ impl<'a> VehicleObjectBuilder<'a> {
         self
     }
 
-    pub fn build(self) -> Result<VehicleObject, NulError> {
-        Ok(VehicleObject::from_native_type(
+    pub fn build(self) -> VehicleObject {
+        VehicleObject::from_native_type(
             nvidia_deepstream_sys::NvDsVehicleObject {
                 type_: self.type_.to_glib_full(),
                 make: self.make.to_glib_full(),
@@ -234,7 +245,7 @@ impl<'a> VehicleObjectBuilder<'a> {
                 region: self.region.to_glib_full(),
                 license: self.license.to_glib_full(),
             },
-        ))
+        )
     }
 }
 
@@ -296,6 +307,16 @@ pub struct PersonObjectBuilder<'a> {
 }
 
 impl<'a> PersonObjectBuilder<'a> {
+    pub fn new() -> PersonObjectBuilder<'a> {
+        PersonObjectBuilder {
+            gender: None,
+            hair: None,
+            cap: None,
+            apparel: None,
+            age: None,
+        }
+    }
+    
     pub fn gender(mut self, s: &'a str) -> Self {
         self.gender = Some(s);
         self
@@ -411,6 +432,19 @@ pub struct FaceObjectBuilder<'a> {
 }
 
 impl<'a> FaceObjectBuilder<'a> {
+    pub fn new() -> FaceObjectBuilder<'a> {
+        FaceObjectBuilder {
+            gender: None,
+            hair: None,
+            cap: None,
+            glasses: None,
+            facial_hair: None,
+            name: None,
+            eye_color: None,
+            age: None,
+        }
+    }
+    
     pub fn gender(mut self, s: &'a str) -> Self {
         self.gender = Some(s);
         self
