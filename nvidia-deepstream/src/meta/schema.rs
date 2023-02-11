@@ -911,7 +911,7 @@ impl<'a> EventMsgMetaBuilder<'a> {
         self
     }
 
-    pub fn build(self, value: Box<()>) -> Box<EventMsgMeta<()>> {
+    pub fn build(self) -> Box<EventMsgMeta<()>> {
         self.internal_build(None)
     }
 

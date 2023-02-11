@@ -2,15 +2,15 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::meta::schema::EventMsgMetaBuilder;
-use nvidia_deepstream::meta::{BatchMetaExt, BufferExt, DisplayMetaBuilder};
+use nvidia_deepstream::meta::{BaseMetaType, BatchMetaExt, BufferExt, DisplayMetaBuilder, MetaType, UserMeta};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 use std::ffi::{CStr, CString};
 
 static CONFIG_YML: &str = "dstest4_config.yml";
 static MSCONV_CONFIG_FILE: &str = "dstest4_msgconv_config.txt";
 
-static PGIE_CLASS_ID_VEHICLE: i32 = 0;
-static PGIE_CLASS_ID_PERSON: i32 = 2;
+const PGIE_CLASS_ID_VEHICLE: i32 = 0;
+const PGIE_CLASS_ID_PERSON: i32 = 2;
 
 fn main() {
     gstreamer::init().unwrap();
@@ -128,19 +128,58 @@ fn main() {
             unsafe {
                 let mut vehicle_count: u32 = 0;
                 let mut person_count: u32 = 0;
-                let mut num_rects: u32 = 0;
                 if let Some(batch_meta) = buf.get_nvds_batch_meta() {
                     let mut is_first_object = true;
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         if let Some(obj_meta_list) = frame_meta.obj_meta_list() {
                             for obj_meta in obj_meta_list.iter() {
-                                if obj_meta.class_id() == PGIE_CLASS_ID_VEHICLE {
-                                    vehicle_count += 1;
-                                    num_rects += 1;
-                                }
-                                if obj_meta.class_id() == PGIE_CLASS_ID_PERSON {
-                                    person_count += 1;
-                                    num_rects += 1;
+                                match obj_meta.class_id() {
+                                    PGIE_CLASS_ID_VEHICLE => vehicle_count += 1,
+                                    PGIE_CLASS_ID_PERSON => person_count += 1,
+                                    _ => {}
+                                };
+                                if is_first_object {
+                                    let object_id = obj_meta.object_id().to_string();
+                                    let ts = chrono::Local::now().format("%+").to_string();
+                                    let msg_meta = EventMsgMetaBuilder::new()
+                                        .sensor_id(0)
+                                        .place_id(0)
+                                        .module_id(0)
+                                        .sensor_str("sensor-0")
+                                        .object_id(object_id.as_str())
+                                        .ts(ts.as_str());
+
+                                    let user_event_meta =
+                                        match obj_meta.class_id() {
+                                            PGIE_CLASS_ID_VEHICLE =>
+                                                UserMeta::new(batch_meta, MetaType::Base(BaseMetaType::EventMsgMeta),
+                                                              msg_meta
+                                                                  .build_with_ext_msg(Box::new(nvidia_deepstream::meta::schema::VehicleObjectBuilder::new()
+                                                                      .type_("sedan")
+                                                                      .color("blue")
+                                                                      .make("Bugatti")
+                                                                      .model("M")
+                                                                      .license("XX1234")
+                                                                      .region("CA")
+                                                                      .build()))),
+                                            PGIE_CLASS_ID_PERSON =>
+                                                UserMeta::new(batch_meta, MetaType::Base(BaseMetaType::EventMsgMeta),
+                                                              msg_meta
+                                                                  .build_with_ext_msg(Box::new(nvidia_deepstream::meta::schema::PersonObjectBuilder::new()
+                                                                      .age(45)
+                                                                      .cap("none")
+                                                                      .hair("black")
+                                                                      .gender("male")
+                                                                      .apparel("formal")
+                                                                      .build()))),
+                                            _ =>
+                                                UserMeta::new(batch_meta, MetaType::Base(BaseMetaType::EventMsgMeta),
+                                                              msg_meta.build()),
+                                        };
+                                    if let Some(user_event_meta) = user_event_meta {
+                                        frame_meta.add_user_meta(user_event_meta);
+                                    }
+                                    is_first_object = false;
                                 }
                             }
 
@@ -169,28 +208,10 @@ fn main() {
                             {
                                 frame_meta.add_display_meta(display_meta);
                             }
-                            if is_first_object {
-                                let msg_meta = EventMsgMetaBuilder::new();
-
-                                msg_meta
-                                    .build_with_ext_msg(Box::new(nvidia_deepstream::meta::schema::VehicleObjectBuilder::new()
-                                        .type_("sedan")
-                                        .color("blue")
-                                        .make("Bugatti")
-                                        .model("M")
-                                        .license("XX1234")
-                                        .region("CA")
-                                        .build()));
-
-                                is_first_object = false;
-                            }
                         }
                     }
                 }
-                println!(
-                    "Number of objects = {} Vehicle Count = {} Person Count = {}",
-                    num_rects, vehicle_count, person_count
-                );
+                println!("Vehicle Count = {} Person Count = {}", vehicle_count, person_count);
             }
         }
         PadProbeReturn::Ok
