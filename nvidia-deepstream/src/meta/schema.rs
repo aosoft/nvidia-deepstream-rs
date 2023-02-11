@@ -204,7 +204,7 @@ impl<'a> VehicleObjectBuilder<'a> {
             license: None,
         }
     }
-    
+
     pub fn type_(mut self, s: &'a str) -> Self {
         self.type_ = Some(s);
         self
@@ -316,7 +316,7 @@ impl<'a> PersonObjectBuilder<'a> {
             age: None,
         }
     }
-    
+
     pub fn gender(mut self, s: &'a str) -> Self {
         self.gender = Some(s);
         self
@@ -444,7 +444,7 @@ impl<'a> FaceObjectBuilder<'a> {
             age: None,
         }
     }
-    
+
     pub fn gender(mut self, s: &'a str) -> Self {
         self.gender = Some(s);
         self
@@ -911,7 +911,19 @@ impl<'a> EventMsgMetaBuilder<'a> {
         self
     }
 
+    pub fn build(self, value: Box<()>) -> Box<EventMsgMeta<()>> {
+        self.internal_build(None)
+    }
+
     pub fn build_with_ext_msg<T: Clone>(self, value: Box<T>) -> Box<EventMsgMeta<T>> {
+        self.internal_build(Some(value))
+    }
+
+    fn internal_build<T: Clone>(self, value: Option<Box<T>>) -> Box<EventMsgMeta<T>> {
+        let (ext_msg, ext_msg_size) = value.map_or_else(
+            || (std::ptr::null_mut(), 0),
+            |x| (Box::into_raw(x), std::mem::size_of::<T>()),
+        );
         Box::new(EventMsgMeta::<T>(
             EventMsgMetaBase::from_native_type(nvidia_deepstream_sys::NvDsEventMsgMeta {
                 type_: self.type_.unwrap_or_default() as _,
@@ -933,8 +945,8 @@ impl<'a> EventMsgMetaBuilder<'a> {
                 sensorStr: self.sensor_str.to_glib_full(),
                 otherAttrs: self.other_attrs.to_glib_full(),
                 videoPath: self.video_path.to_glib_full(),
-                extMsg: Box::into_raw(value) as _,
-                extMsgSize: std::mem::size_of::<T>() as _,
+                extMsg: ext_msg as _,
+                extMsgSize: ext_msg_size as _,
             }),
             core::marker::PhantomData,
         ))

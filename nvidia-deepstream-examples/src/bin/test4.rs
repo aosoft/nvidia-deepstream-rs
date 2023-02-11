@@ -170,7 +170,9 @@ fn main() {
                                 frame_meta.add_display_meta(display_meta);
                             }
                             if is_first_object {
-                                let msg_meta = EventMsgMetaBuilder::new()
+                                let msg_meta = EventMsgMetaBuilder::new();
+
+                                msg_meta
                                     .build_with_ext_msg(Box::new(nvidia_deepstream::meta::schema::VehicleObjectBuilder::new()
                                         .type_("sedan")
                                         .color("blue")
