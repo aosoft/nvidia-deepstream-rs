@@ -7,7 +7,6 @@ use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 use std::ffi::{CStr, CString};
 
 static CONFIG_YML: &str = "dstest4_config.yml";
-static MSCONV_CONFIG_FILE: &str = "dstest4_msgconv_config.txt";
 
 const PGIE_CLASS_ID_VEHICLE: i32 = 0;
 const PGIE_CLASS_ID_PERSON: i32 = 2;
