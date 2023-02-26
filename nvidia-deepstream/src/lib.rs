@@ -176,3 +176,27 @@ pub(crate) unsafe fn glib_free<T>(p: *mut T) {
         nvidia_deepstream_sys::g_free(p as _);
     }
 }
+
+pub struct Version {
+    major: u32,
+    minor: u32,
+    micro: u32,
+}
+
+impl Version {
+    pub fn new(major: u32, minor: u32, micro: u32) -> Version {
+        Version {
+            major,
+            minor,
+            micro,
+        }
+    }
+
+    pub fn current_sdk_version() -> Version {
+        Self::new(
+            nvidia_deepstream_sys::NVDS_VERSION_MAJOR,
+            nvidia_deepstream_sys::NVDS_VERSION_MINOR,
+            nvidia_deepstream_sys::NVDS_VERSION_MICRO,
+        )
+    }
+}
