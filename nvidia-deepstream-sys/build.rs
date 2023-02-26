@@ -3,8 +3,6 @@ extern crate bindgen;
 use std::env;
 use std::path::PathBuf;
 
-static NVDS_VER: &str = "6.1";
-
 fn main() {
     let pk = pkg_config::Config::new().probe("gstreamer-1.0").unwrap();
     for path in &pk.link_paths {
@@ -13,10 +11,7 @@ fn main() {
 
     let mut bindings = bindgen::Builder::default()
         .header("wrapper.h")
-        .clang_arg(format!(
-            "-I/opt/nvidia/deepstream/deepstream-{}/sources/includes/",
-            NVDS_VER
-        ));
+        .clang_arg("-I/opt/nvidia/deepstream/deepstream/sources/includes/");
     for path in &pk.include_paths {
         bindings = bindings.clang_arg(format!("-I{}", path.to_str().unwrap()).as_str());
     }
