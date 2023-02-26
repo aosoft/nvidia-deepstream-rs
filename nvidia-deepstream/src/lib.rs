@@ -1,3 +1,5 @@
+use std::fmt::{Formatter, Pointer};
+
 pub mod bounding_box;
 pub mod mem;
 
@@ -177,6 +179,7 @@ pub(crate) unsafe fn glib_free<T>(p: *mut T) {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
 pub struct Version {
     major: u32,
     minor: u32,
@@ -198,5 +201,11 @@ impl Version {
             nvidia_deepstream_sys::NVDS_VERSION_MINOR,
             nvidia_deepstream_sys::NVDS_VERSION_MICRO,
         )
+    }
+}
+
+impl std::fmt::Display for Version {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}.{}.{}", self.major, self.micro, self.micro)
     }
 }
