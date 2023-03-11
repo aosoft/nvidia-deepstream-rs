@@ -1,4 +1,4 @@
-use std::fmt::{Formatter, Pointer};
+use std::fmt::Formatter;
 
 pub mod bounding_box;
 pub mod mem;

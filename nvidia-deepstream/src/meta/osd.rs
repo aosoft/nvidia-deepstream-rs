@@ -1,6 +1,7 @@
 use crate::WrapperExt;
 use gstreamer::glib;
 use std::ffi::CStr;
+use gstreamer::glib::translate::ToGlibPtr;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -148,6 +149,14 @@ impl TextParams {
     }
 }
 
+impl Drop for TextParams {
+    fn drop(&mut self) {
+        unsafe {
+            glib::ffi::g_free(self.as_native_type_ref().display_text as _);
+        }
+    }
+}
+
 pub struct TextParamsBuilder<'a> {
     display_text: Option<&'a CStr>,
     x_offset: Option<u32>,
@@ -193,18 +202,9 @@ impl<'a> TextParamsBuilder<'a> {
     }
 
     /// Build TextParams.
-    ///
-    /// # description
-    ///
-    /// This method is unsafe because allocate text buffer with g_malloc0.
-    /// If you register it with add_display_meta, it will be removed after use.
-    /// Failure to register it will cause memory leaks.
-    pub unsafe fn build(self) -> TextParams {
+    pub fn build(self) -> TextParams {
         let display_text = if let Some(text) = self.display_text {
-            let len = text.to_bytes().len();
-            let r = glib::ffi::g_malloc0(len + 1);
-            r.copy_from(text.as_ptr() as _, len);
-            r
+            glib::GString::from(text).to_glib_full()
         } else {
             std::ptr::null_mut()
         };
