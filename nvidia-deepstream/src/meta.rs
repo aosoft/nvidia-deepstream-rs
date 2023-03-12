@@ -980,11 +980,11 @@ impl DisplayMeta {
 }
 
 pub struct DisplayMetaBuilder<'a> {
-    rect_params: Option<&'a [osd::RectParams]>,
+    rect_params: Option<&'a mut [osd::RectParamsBuilder]>,
     text_params: Option<&'a mut [osd::TextParamsBuilder<'a>]>,
-    line_params: Option<&'a [osd::LineParams]>,
-    arrow_params: Option<&'a [osd::ArrowParams]>,
-    circle_params: Option<&'a [osd::CircleParams]>,
+    line_params: Option<&'a mut [osd::LineParamsBuilder]>,
+    arrow_params: Option<&'a mut [osd::ArrowParamsBuilder]>,
+    circle_params: Option<&'a mut [osd::CircleParamsBuilder]>,
     misc_osd_data: Option<&'a [i64]>,
 }
 
@@ -1000,7 +1000,7 @@ impl<'a> DisplayMetaBuilder<'a> {
         }
     }
 
-    pub fn rect_params(mut self, value: &'a [osd::RectParams]) -> Self {
+    pub fn rect_params(mut self, value: &'a mut [osd::RectParamsBuilder]) -> Self {
         self.rect_params = Some(value);
         self
     }
@@ -1010,17 +1010,17 @@ impl<'a> DisplayMetaBuilder<'a> {
         self
     }
 
-    pub fn line_params(mut self, value: &'a [osd::LineParams]) -> Self {
+    pub fn line_params(mut self, value: &'a mut [osd::LineParamsBuilder]) -> Self {
         self.line_params = Some(value);
         self
     }
 
-    pub fn arrow_params(mut self, value: &'a [osd::ArrowParams]) -> Self {
+    pub fn arrow_params(mut self, value: &'a mut [osd::ArrowParamsBuilder]) -> Self {
         self.arrow_params = Some(value);
         self
     }
 
-    pub fn circle_params(mut self, value: &'a [osd::CircleParams]) -> Self {
+    pub fn circle_params(mut self, value: &'a mut [osd::CircleParamsBuilder]) -> Self {
         self.circle_params = Some(value);
         self
     }
@@ -1045,8 +1045,10 @@ impl<'a> DisplayMetaBuilder<'a> {
 
                     display_meta.as_native_type_mut().num_rects = len as _;
                     for i in 0..len {
+                        let mut builder = osd::RectParamsBuilder::new();
+                        std::mem::swap(&mut params[i], &mut builder);
                         display_meta.as_native_type_mut().rect_params[i] =
-                            *params[i].as_native_type_ref();
+                            *builder.build().as_native_type_ref();
                     }
                 }
 
@@ -1076,8 +1078,10 @@ impl<'a> DisplayMetaBuilder<'a> {
 
                     display_meta.as_native_type_mut().num_lines = len as _;
                     for i in 0..len {
+                        let mut builder = osd::LineParamsBuilder::new();
+                        std::mem::swap(&mut params[i], &mut builder);
                         display_meta.as_native_type_mut().line_params[i] =
-                            *params[i].as_native_type_ref();
+                            *builder.build().as_native_type_ref();
                     }
                 }
 
@@ -1089,8 +1093,10 @@ impl<'a> DisplayMetaBuilder<'a> {
 
                     display_meta.as_native_type_mut().num_arrows = len as _;
                     for i in 0..len {
+                        let mut builder = osd::ArrowParamsBuilder::new();
+                        std::mem::swap(&mut params[i], &mut builder);
                         display_meta.as_native_type_mut().arrow_params[i] =
-                            *params[i].as_native_type_ref();
+                            *builder.build().as_native_type_ref();
                     }
                 }
 
@@ -1102,8 +1108,10 @@ impl<'a> DisplayMetaBuilder<'a> {
 
                     display_meta.as_native_type_mut().num_circles = len as _;
                     for i in 0..len {
+                        let mut builder = osd::CircleParamsBuilder::new();
+                        std::mem::swap(&mut params[i], &mut builder);
                         display_meta.as_native_type_mut().circle_params[i] =
-                            *params[i].as_native_type_ref();
+                            *builder.build().as_native_type_ref();
                     }
                 }
 
