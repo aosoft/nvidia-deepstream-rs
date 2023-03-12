@@ -107,7 +107,7 @@ fn main() {
                             }
 
                             if let Some(display_meta) = DisplayMetaBuilder::new()
-                                .text_params(&[TextParamsBuilder::new()
+                                .text_params(&mut [TextParamsBuilder::new()
                                     .display_text(CString::new(format!(
                                         "Person = {}, Vehicle = {}",
                                         person_count, vehicle_count
@@ -121,8 +121,7 @@ fn main() {
                                             .font_color(ColorParams::white())
                                             .build(),
                                     )
-                                    .text_bg_clr(ColorParams::black())
-                                    .build()])
+                                    .text_bg_clr(ColorParams::black())])
                                 .build(batch_meta)
                             {
                                 frame_meta.add_display_meta(display_meta);

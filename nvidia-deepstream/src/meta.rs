@@ -981,7 +981,7 @@ impl DisplayMeta {
 
 pub struct DisplayMetaBuilder<'a> {
     rect_params: Option<&'a [osd::RectParams]>,
-    text_params: Option<&'a [osd::TextParams]>,
+    text_params: Option<&'a mut [osd::TextParamsBuilder<'a>]>,
     line_params: Option<&'a [osd::LineParams]>,
     arrow_params: Option<&'a [osd::ArrowParams]>,
     circle_params: Option<&'a [osd::CircleParams]>,
@@ -1005,7 +1005,7 @@ impl<'a> DisplayMetaBuilder<'a> {
         self
     }
 
-    pub fn text_params(mut self, value: &'a [osd::TextParams]) -> Self {
+    pub fn text_params(mut self, value: &'a mut [osd::TextParamsBuilder<'a>]) -> Self {
         self.text_params = Some(value);
         self
     }
@@ -1058,8 +1058,13 @@ impl<'a> DisplayMetaBuilder<'a> {
 
                     display_meta.as_native_type_mut().num_labels = len as _;
                     for i in 0..len {
+                        let mut builder = osd::TextParamsBuilder::new();
+                        std::mem::swap(&mut params[i], &mut builder);
+                        drop(osd::TextParams::from_native_type_mut(
+                            &mut display_meta.as_native_type_mut().text_params[i],
+                        ));
                         display_meta.as_native_type_mut().text_params[i] =
-                            *params[i].as_native_type_ref();
+                            builder.build().to_glib_full();
                     }
                 }
 

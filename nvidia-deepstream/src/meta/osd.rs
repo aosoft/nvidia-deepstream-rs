@@ -1,7 +1,8 @@
 use crate::WrapperExt;
 use gstreamer::glib;
-use std::ffi::CStr;
 use gstreamer::glib::translate::ToGlibPtr;
+use std::ffi::CStr;
+use std::ptr::null_mut;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -21,10 +22,7 @@ pub enum ArrowHeadDirection {
     Both = nvidia_deepstream_sys::NvOSD_Arrow_Head_Direction_BOTH_HEAD as _,
 }
 
-crate::wrapper_impl_value_type!(
-    ColorParams,
-    nvidia_deepstream_sys::NvOSD_ColorParams
-);
+crate::wrapper_impl_value_type!(ColorParams, nvidia_deepstream_sys::NvOSD_ColorParams);
 
 impl ColorParams {
     pub fn new(red: f64, green: f64, blue: f64, alpha: f64) -> ColorParams {
@@ -147,6 +145,12 @@ impl TextParams {
             None
         }
     }
+
+    pub fn to_glib_full(mut self) -> nvidia_deepstream_sys::NvOSD_TextParams {
+        let ret = *self.as_native_type_ref();
+        self.as_native_type_mut().display_text = null_mut();
+        ret
+    }
 }
 
 impl Drop for TextParams {
@@ -203,13 +207,12 @@ impl<'a> TextParamsBuilder<'a> {
 
     /// Build TextParams.
     pub fn build(self) -> TextParams {
-        let display_text = if let Some(text) = self.display_text {
-            glib::GString::from(text).to_glib_full()
-        } else {
-            std::ptr::null_mut()
-        };
         TextParams::from_native_type(nvidia_deepstream_sys::NvOSD_TextParams {
-            display_text: display_text as _,
+            display_text: if let Some(text) = self.display_text {
+                glib::GString::from(text).to_glib_full()
+            } else {
+                std::ptr::null_mut()
+            } as _,
             x_offset: self.x_offset.unwrap_or_default(),
             y_offset: self.y_offset.unwrap_or_default(),
             font_params: self.font_params.unwrap_or_default().as_native_type(),
@@ -219,10 +222,7 @@ impl<'a> TextParamsBuilder<'a> {
     }
 }
 
-crate::wrapper_impl_value_type!(
-    ColorInfo,
-    nvidia_deepstream_sys::NvOSD_Color_info
-);
+crate::wrapper_impl_value_type!(ColorInfo, nvidia_deepstream_sys::NvOSD_Color_info);
 
 impl ColorInfo {
     pub fn new(id: i32, color: ColorParams) -> ColorInfo {
