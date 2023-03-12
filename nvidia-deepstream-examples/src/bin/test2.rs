@@ -1,7 +1,7 @@
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
-use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
+use nvidia_deepstream::meta::{BatchMetaExt, BufferExt, DisplayMetaBuilder};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 use std::ffi::{CStr, CString};
 
@@ -128,13 +128,16 @@ fn main() {
                                 }
                             }
 
-                            if let Some(display_meta) = batch_meta.acquire_display_meta_from_pool()
-                            {
-                                display_meta.set_text_params(&[TextParamsBuilder::new()
-                                    .display_text(CString::new(format!(
-                                        "Person = {}, Vehicle = {}",
-                                        person_count, vehicle_count
-                                    )).unwrap().as_ref())
+                            if let Some(display_meta) = DisplayMetaBuilder::new()
+                                .text_params(&mut [TextParamsBuilder::new()
+                                    .display_text(
+                                        CString::new(format!(
+                                            "Person = {}, Vehicle = {}",
+                                            person_count, vehicle_count
+                                        ))
+                                        .unwrap()
+                                        .as_ref(),
+                                    )
                                     .x_offset(10)
                                     .y_offset(12)
                                     .font_params(
@@ -144,8 +147,9 @@ fn main() {
                                             .font_color(ColorParams::white())
                                             .build(),
                                     )
-                                    .text_bg_clr(ColorParams::black())
-                                    .build()]);
+                                    .text_bg_clr(ColorParams::black())])
+                                .build(batch_meta)
+                            {
                                 frame_meta.add_display_meta(display_meta);
                             }
                         }

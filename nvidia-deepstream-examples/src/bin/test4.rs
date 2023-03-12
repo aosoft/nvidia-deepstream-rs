@@ -2,7 +2,9 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
 use nvidia_deepstream::meta::schema::EventMsgMetaBuilder;
-use nvidia_deepstream::meta::{BaseMetaType, BatchMetaExt, BufferExt, DisplayMetaBuilder, MetaType, UserMeta};
+use nvidia_deepstream::meta::{
+    BaseMetaType, BatchMetaExt, BufferExt, DisplayMetaBuilder, MetaType, UserMeta,
+};
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
 use std::ffi::{CStr, CString};
 
@@ -83,7 +85,9 @@ fn main() {
     pgie.set_property("config-file-path", "dstest4_pgie_config.yml");
     msgconv.set_property("config", "dstest4_msgconv_config.yml");
     msgconv.nvds_parse_msgconv(CONFIG_YML, "msgconv").unwrap();
-    msgbroker.nvds_parse_msgbroker(CONFIG_YML, "msgbroker").unwrap();
+    msgbroker
+        .nvds_parse_msgbroker(CONFIG_YML, "msgbroker")
+        .unwrap();
     sink.nvds_parse_egl_sink(CONFIG_YML, "sink").unwrap();
 
     pipeline
@@ -183,7 +187,7 @@ fn main() {
                             }
 
                             if let Some(display_meta) = DisplayMetaBuilder::new()
-                                .text_params(&[TextParamsBuilder::new()
+                                .text_params(&mut [TextParamsBuilder::new()
                                     .display_text(
                                         CString::new(format!(
                                             "Person = {}, Vehicle = {}",
@@ -201,8 +205,7 @@ fn main() {
                                             .font_color(ColorParams::white())
                                             .build(),
                                     )
-                                    .text_bg_clr(ColorParams::black())
-                                    .build()])
+                                    .text_bg_clr(ColorParams::black())])
                                 .build(batch_meta)
                             {
                                 frame_meta.add_display_meta(display_meta);
