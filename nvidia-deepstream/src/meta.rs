@@ -1062,9 +1062,10 @@ impl<'a> DisplayMetaBuilder<'a> {
                     for i in 0..len {
                         let mut builder = osd::TextParamsBuilder::new();
                         std::mem::swap(&mut params[i], &mut builder);
-                        drop(osd::TextParams::from_native_type_mut(
+                        osd::TextParams::from_native_type_mut(
                             &mut display_meta.as_native_type_mut().text_params[i],
-                        ));
+                        )
+                        .drop_ref();
                         display_meta.as_native_type_mut().text_params[i] =
                             builder.build().to_glib_full();
                     }

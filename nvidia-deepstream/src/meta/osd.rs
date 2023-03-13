@@ -151,13 +151,17 @@ impl TextParams {
         self.as_native_type_mut().display_text = null_mut();
         ret
     }
+
+    pub(crate) fn drop_ref(&mut self) {
+        unsafe {
+            glib::ffi::g_free(self.as_native_type_ref().display_text as _);
+        }
+    }
 }
 
 impl Drop for TextParams {
     fn drop(&mut self) {
-        unsafe {
-            glib::ffi::g_free(self.as_native_type_ref().display_text as _);
-        }
+        self.drop_ref();
     }
 }
 
