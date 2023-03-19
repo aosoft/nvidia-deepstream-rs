@@ -1,7 +1,7 @@
 use crate::meta::{BaseMeta, ClassifierMeta, MetaList, UserMeta};
 use crate::WrapperExt;
-use std::ffi::CStr;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 
 #[repr(u32)]
 pub enum AudioFormat {
@@ -173,8 +173,8 @@ impl AudioFrameMeta {
         self.as_native_type_ref().confidence
     }
 
-    pub fn class_label(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().class_label.as_ptr()) }
+    pub fn class_label(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().class_label.as_ptr()) }
     }
 
     pub fn classifier_meta_list(&self) -> MetaList<ClassifierMeta> {

@@ -1,6 +1,6 @@
 use crate::WrapperExt;
-use std::ffi::CStr;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 crate::wrapper_impl_ref_type!(ObjEncUsrArgs, nvidia_deepstream_sys::NvDsObjEncUsrArgs);
 
 impl ObjEncUsrArgs {
@@ -24,8 +24,8 @@ impl ObjEncUsrArgs {
         self.as_native_type_ref().scaledHeight
     }
 
-    pub fn file_name_image(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().fileNameImg.as_ptr()) }
+    pub fn file_name_image(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().fileNameImg.as_ptr()) }
     }
 
     pub fn obj_num(&self) -> i32 {
@@ -43,7 +43,7 @@ pub struct ObjEncUsrArgsBuilder<'a> {
     scale_image: Option<bool>,
     scaled_width: Option<i32>,
     scaled_height: Option<i32>,
-    file_name_image: Option<&'a CStr>,
+    file_name_image: Option<&'a GStr>,
     obj_num: Option<i32>,
     quality: Option<i32>,
 }
@@ -87,7 +87,7 @@ impl<'a> ObjEncUsrArgsBuilder<'a> {
         self
     }
 
-    pub fn file_name_image(mut self, file_name_image: &'a CStr) -> Self {
+    pub fn file_name_image(mut self, file_name_image: &'a GStr) -> Self {
         self.file_name_image = Some(file_name_image);
         self
     }

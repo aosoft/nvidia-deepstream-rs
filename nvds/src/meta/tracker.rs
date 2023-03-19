@@ -1,5 +1,5 @@
+use gstreamer::glib::GStr;
 use crate::WrapperExt;
-use std::ffi::CStr;
 crate::wrapper_impl_ref_type!(PastFrameObj, nvidia_deepstream_sys::NvDsPastFrameObj);
 
 impl PastFrameObj {
@@ -43,8 +43,8 @@ impl PastFrameObjList {
         self.as_native_type_ref().classId
     }
 
-    pub fn obj_label(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().objLabel.as_ptr()) }
+    pub fn obj_label(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().objLabel.as_ptr()) }
     }
 }
 

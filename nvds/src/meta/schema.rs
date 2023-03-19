@@ -1,7 +1,7 @@
 use crate::{duplicate_glib_string, glib_free, WrapperExt};
 use gstreamer::glib::translate::ToGlibPtr;
-use std::ffi::CStr;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -131,28 +131,28 @@ impl ObjectSignature {
 crate::wrapper_impl_ref_type!(VehicleObject, nvidia_deepstream_sys::NvDsVehicleObject);
 
 impl VehicleObject {
-    pub fn type_(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().type_) }
+    pub fn type_(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().type_) }
     }
 
-    pub fn make(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().make) }
+    pub fn make(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().make) }
     }
 
-    pub fn model(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().model) }
+    pub fn model(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().model) }
     }
 
-    pub fn color(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().color) }
+    pub fn color(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().color) }
     }
 
-    pub fn region(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().region) }
+    pub fn region(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().region) }
     }
 
-    pub fn license(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().license) }
+    pub fn license(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().license) }
     }
 }
 
@@ -252,20 +252,20 @@ impl<'a> VehicleObjectBuilder<'a> {
 crate::wrapper_impl_ref_type!(PersonObject, nvidia_deepstream_sys::NvDsPersonObject);
 
 impl PersonObject {
-    pub fn gender(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().gender) }
+    pub fn gender(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().gender) }
     }
 
-    pub fn hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().hair) }
+    pub fn hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().hair) }
     }
 
-    pub fn cap(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().cap) }
+    pub fn cap(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().cap) }
     }
 
-    pub fn apparel(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().apparel) }
+    pub fn apparel(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().apparel) }
     }
 
     pub fn age(&self) -> u32 {
@@ -356,32 +356,32 @@ impl<'a> PersonObjectBuilder<'a> {
 crate::wrapper_impl_ref_type!(FaceObject, nvidia_deepstream_sys::NvDsFaceObject);
 
 impl FaceObject {
-    pub fn gender(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().gender) }
+    pub fn gender(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().gender) }
     }
 
-    pub fn hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().hair) }
+    pub fn hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().hair) }
     }
 
-    pub fn cap(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().cap) }
+    pub fn cap(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().cap) }
     }
 
-    pub fn glasses(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().glasses) }
+    pub fn glasses(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().glasses) }
     }
 
-    pub fn facial_hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().facialhair) }
+    pub fn facial_hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().facialhair) }
     }
 
-    pub fn name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().name) }
+    pub fn name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().name) }
     }
 
-    pub fn eye_color(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().eyecolor) }
+    pub fn eye_color(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().eyecolor) }
     }
 
     pub fn age(&self) -> u32 {
@@ -505,28 +505,28 @@ crate::wrapper_impl_ref_type!(
 );
 
 impl VehicleObjectExt {
-    pub fn type_(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().type_) }
+    pub fn type_(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().type_) }
     }
 
-    pub fn make(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().make) }
+    pub fn make(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().make) }
     }
 
-    pub fn model(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().model) }
+    pub fn model(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().model) }
     }
 
-    pub fn color(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().color) }
+    pub fn color(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().color) }
     }
 
-    pub fn region(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().region) }
+    pub fn region(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().region) }
     }
 
-    pub fn license(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().license) }
+    pub fn license(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().license) }
     }
 
     pub fn mask(&self) -> *mut nvidia_deepstream_sys::GList {
@@ -537,20 +537,20 @@ impl VehicleObjectExt {
 crate::wrapper_impl_ref_type!(PersonObjectExt, nvidia_deepstream_sys::NvDsPersonObjectExt);
 
 impl PersonObjectExt {
-    pub fn gender(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().gender) }
+    pub fn gender(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().gender) }
     }
 
-    pub fn hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().hair) }
+    pub fn hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().hair) }
     }
 
-    pub fn cap(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().cap) }
+    pub fn cap(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().cap) }
     }
 
-    pub fn apparel(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().apparel) }
+    pub fn apparel(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().apparel) }
     }
 
     pub fn age(&self) -> u32 {
@@ -565,32 +565,32 @@ impl PersonObjectExt {
 crate::wrapper_impl_ref_type!(FaceObjectExt, nvidia_deepstream_sys::NvDsFaceObjectExt);
 
 impl FaceObjectExt {
-    pub fn gender(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().gender) }
+    pub fn gender(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().gender) }
     }
 
-    pub fn hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().hair) }
+    pub fn hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().hair) }
     }
 
-    pub fn cap(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().cap) }
+    pub fn cap(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().cap) }
     }
 
-    pub fn glasses(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().glasses) }
+    pub fn glasses(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().glasses) }
     }
 
-    pub fn facial_hair(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().facialhair) }
+    pub fn facial_hair(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().facialhair) }
     }
 
-    pub fn name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().name) }
+    pub fn name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().name) }
     }
 
-    pub fn eye_color(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().eyecolor) }
+    pub fn eye_color(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().eyecolor) }
     }
 
     pub fn age(&self) -> u32 {
@@ -663,24 +663,24 @@ impl<T: Clone> EventMsgMeta<T> {
         self.0.as_native_type_ref().trackingId
     }
 
-    pub fn ts(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.0.as_native_type_ref().ts) }
+    pub fn ts(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.0.as_native_type_ref().ts) }
     }
 
-    pub fn object_id(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.0.as_native_type_ref().objectId) }
+    pub fn object_id(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.0.as_native_type_ref().objectId) }
     }
 
-    pub fn sensor_str(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.0.as_native_type_ref().sensorStr) }
+    pub fn sensor_str(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.0.as_native_type_ref().sensorStr) }
     }
 
-    pub fn other_attrs(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.0.as_native_type_ref().otherAttrs) }
+    pub fn other_attrs(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.0.as_native_type_ref().otherAttrs) }
     }
 
-    pub fn video_path(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.0.as_native_type_ref().videoPath) }
+    pub fn video_path(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.0.as_native_type_ref().videoPath) }
     }
 
     pub unsafe fn ext_msg(&self) -> Option<&T> {

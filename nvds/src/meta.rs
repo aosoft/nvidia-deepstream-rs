@@ -7,9 +7,9 @@ pub mod schema;
 pub mod tracker;
 
 use crate::WrapperExt;
-use std::ffi::CStr;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 
 crate::wrapper_impl_ref_type!(RoiMeta, nvidia_deepstream_sys::NvDsRoiMeta);
 
@@ -708,8 +708,8 @@ impl ObjectMeta {
         osd::TextParams::from_native_type_ref(&self.as_native_type_ref().text_params)
     }
 
-    pub fn obj_label(&self) -> &CStr {
-        unsafe { CStr::from_ptr(&self.as_native_type_ref().obj_label as _) }
+    pub fn obj_label(&self) -> &GStr {
+        unsafe { GStr::from_ptr(&self.as_native_type_ref().obj_label as _) }
     }
 
     pub fn classifier_meta_list(&self) -> Option<MetaList<ClassifierMeta>> {
@@ -810,8 +810,8 @@ impl ClassifierMeta {
             .map(|v| MetaList::<LabelInfo>::new(v))
     }
 
-    pub fn classifier_type(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().classifier_type) }
+    pub fn classifier_type(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().classifier_type) }
     }
 
     pub fn add_label_info_meta(&self, meta: &LabelInfo) {
@@ -862,11 +862,11 @@ impl LabelInfo {
         self.as_native_type_ref().num_classes
     }
 
-    pub fn result_label(&self) -> &CStr {
+    pub fn result_label(&self) -> &GStr {
         unsafe {
             match NonNull::new(self.as_native_type_ref().pResult_label) {
-                Some(p) => CStr::from_ptr(p.as_ptr()),
-                None => CStr::from_ptr(&self.as_native_type_ref().result_label as _),
+                Some(p) => GStr::from_ptr(p.as_ptr()),
+                None => GStr::from_ptr(&self.as_native_type_ref().result_label as _),
             }
         }
     }
@@ -1135,7 +1135,7 @@ impl<'a> DisplayMetaBuilder<'a> {
 crate::wrapper_impl_ref_type!(UserMeta, nvidia_deepstream_sys::NvDsUserMeta);
 
 impl UserMeta {
-    pub fn get_user_meta_type(name: &CStr) -> MetaType {
+    pub fn get_user_meta_type(name: &GStr) -> MetaType {
         unsafe {
             MetaType::from(nvidia_deepstream_sys::nvds_get_user_meta_type(
                 name.as_ptr() as _,
@@ -1145,13 +1145,13 @@ impl UserMeta {
 
     pub fn user_custom_meta_type() -> MetaType {
         unsafe {
-            Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.USER.CUSTOM_META\0".as_ptr() as _))
+            Self::get_user_meta_type(GStr::from_ptr(b"NVIDIA.USER.CUSTOM_META\0".as_ptr() as _))
         }
     }
 
     pub fn dummy_bbox_meta_type() -> MetaType {
         unsafe {
-            Self::get_user_meta_type(CStr::from_ptr(b"NVIDIA.DUMMY.BBOX.META\0".as_ptr() as _))
+            Self::get_user_meta_type(GStr::from_ptr(b"NVIDIA.DUMMY.BBOX.META\0".as_ptr() as _))
         }
     }
 

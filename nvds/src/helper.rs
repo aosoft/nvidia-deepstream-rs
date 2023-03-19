@@ -1,7 +1,5 @@
 use gstreamer::glib::translate::{FromGlibPtrFull, ToGlibPtr};
-use gstreamer::glib::IsA;
-use gstreamer::Query;
-use std::ffi::CStr;
+use gstreamer::glib::{GStr, IsA};
 use std::ptr::NonNull;
 
 pub trait ElementHelperExt {
@@ -10,7 +8,7 @@ pub trait ElementHelperExt {
     fn gst_nvevent_parse_pad_deleted(&self) -> u32;
     fn gst_nvevent_parse_stream_eos(&self) -> u32;
     fn gst_nvevent_parse_stream_reset(&self) -> u32;
-    fn gst_nvevent_new_stream_start(&self, stream_id: &CStr) -> Option<gstreamer::Event>;
+    fn gst_nvevent_new_stream_start(&self, stream_id: &GStr) -> Option<gstreamer::Event>;
 }
 
 impl<O: IsA<gstreamer::Element>> ElementHelperExt for O {
@@ -50,7 +48,7 @@ impl<O: IsA<gstreamer::Element>> ElementHelperExt for O {
         }
     }
 
-    fn gst_nvevent_new_stream_start(&self, stream_id: &CStr) -> Option<gstreamer::Event> {
+    fn gst_nvevent_new_stream_start(&self, stream_id: &GStr) -> Option<gstreamer::Event> {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::gst_nvevent_new_stream_start(
                 self.as_ptr() as _,
@@ -63,7 +61,7 @@ impl<O: IsA<gstreamer::Element>> ElementHelperExt for O {
 
 pub trait EventHelperExt {
     fn gst_nvevent_parse_stream_segment(&self) -> (u32, Option<gstreamer::Segment>);
-    fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&CStr>);
+    fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&GStr>);
 }
 
 impl EventHelperExt for gstreamer::Event {
@@ -83,7 +81,7 @@ impl EventHelperExt for gstreamer::Event {
         }
     }
 
-    fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&CStr>) {
+    fn gst_nvevent_parse_stream_start(&self) -> (u32, Option<&GStr>) {
         unsafe {
             let mut source_id: u32 = 0;
             let mut stream_id: *mut nvidia_deepstream_sys::gchar = std::ptr::null_mut();
@@ -94,7 +92,7 @@ impl EventHelperExt for gstreamer::Event {
             );
             (
                 source_id,
-                NonNull::new(stream_id).map(|p| CStr::from_ptr(p.as_ptr() as _)),
+                NonNull::new(stream_id).map(|p| GStr::from_ptr(p.as_ptr() as _)),
             )
         }
     }
@@ -200,7 +198,7 @@ pub trait QueryHelper {
 }
 
 impl QueryHelper for gstreamer::Query {
-    fn gst_nvquery_batch_size_new() -> Option<Query> {
+    fn gst_nvquery_batch_size_new() -> Option<gstreamer::Query> {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::gst_nvquery_batch_size_new())
                 .map(|p| gstreamer::Query::from_glib_full(p.as_ptr() as _))
@@ -230,7 +228,7 @@ impl QueryHelper for gstreamer::Query {
         }
     }
 
-    fn gst_nvquery_num_streams_size_new() -> Option<Query> {
+    fn gst_nvquery_num_streams_size_new() -> Option<gstreamer::Query> {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::gst_nvquery_numStreams_size_new())
                 .map(|p| gstreamer::Query::from_glib_full(p.as_ptr() as _))

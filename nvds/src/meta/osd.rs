@@ -1,8 +1,8 @@
 use crate::WrapperExt;
 use gstreamer::glib;
 use gstreamer::glib::translate::ToGlibPtr;
-use std::ffi::CStr;
 use std::ptr::null_mut;
+use gstreamer::glib::GStr;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -62,8 +62,8 @@ impl ColorParams {
 crate::wrapper_impl_ref_type!(FontParams, nvidia_deepstream_sys::NvOSD_FontParams);
 
 impl FontParams {
-    pub fn font_name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().font_name) }
+    pub fn font_name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().font_name) }
     }
 
     pub fn font_size(&self) -> u32 {
@@ -76,7 +76,7 @@ impl FontParams {
 }
 
 pub struct FontParamsBuilder<'a> {
-    font_name: Option<&'a CStr>,
+    font_name: Option<&'a GStr>,
     font_size: Option<u32>,
     font_color: Option<ColorParams>,
 }
@@ -90,7 +90,7 @@ impl<'a> FontParamsBuilder<'a> {
         }
     }
 
-    pub fn font_name(mut self, name: &'a CStr) -> Self {
+    pub fn font_name(mut self, name: &'a GStr) -> Self {
         self.font_name = Some(name);
         self
     }
@@ -120,8 +120,8 @@ impl<'a> FontParamsBuilder<'a> {
 crate::wrapper_impl_ref_type!(TextParams, nvidia_deepstream_sys::NvOSD_TextParams);
 
 impl TextParams {
-    pub fn display_text(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().display_text) }
+    pub fn display_text(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().display_text) }
     }
 
     pub fn x_offset(&self) -> u32 {
@@ -166,7 +166,7 @@ impl Drop for TextParams {
 }
 
 pub struct TextParamsBuilder<'a> {
-    display_text: Option<&'a CStr>,
+    display_text: Option<&'a GStr>,
     x_offset: Option<u32>,
     y_offset: Option<u32>,
     font_params: Option<FontParams>,
@@ -184,7 +184,7 @@ impl<'a> TextParamsBuilder<'a> {
         }
     }
 
-    pub fn display_text(mut self, text: &'a CStr) -> Self {
+    pub fn display_text(mut self, text: &'a GStr) -> Self {
         self.display_text = Some(text);
         self
     }

@@ -1,7 +1,7 @@
 use crate::meta::UserMeta;
 use crate::WrapperExt;
-use std::ffi::CStr;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 
 crate::wrapper_impl_ref_type!(
     MetaSubCompLatency,
@@ -9,8 +9,8 @@ crate::wrapper_impl_ref_type!(
 );
 
 impl MetaSubCompLatency {
-    pub fn sub_comp_name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().sub_comp_name.as_ptr()) }
+    pub fn sub_comp_name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().sub_comp_name.as_ptr()) }
     }
 
     pub fn in_system_timestamp(&self) -> f64 {
@@ -25,8 +25,8 @@ impl MetaSubCompLatency {
 crate::wrapper_impl_ref_type!(MetaCompLatency, nvidia_deepstream_sys::NvDsMetaCompLatency);
 
 impl MetaCompLatency {
-    pub fn component_name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().component_name.as_ptr()) }
+    pub fn component_name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().component_name.as_ptr()) }
     }
 
     pub fn in_system_timestamp(&self) -> f64 {
@@ -88,14 +88,14 @@ impl FrameLatencyInfo {
 }
 
 pub trait BufferExt {
-    fn set_input_system_timestamp(&self, element_name: &CStr) -> Option<&UserMeta>;
-    fn set_output_system_timestamp(&self, element_name: &CStr) -> Result<(), bool>;
+    fn set_input_system_timestamp(&self, element_name: &GStr) -> Option<&UserMeta>;
+    fn set_output_system_timestamp(&self, element_name: &GStr) -> Result<(), bool>;
     fn measure_buffer_latency(&self, latency_info: &FrameLatencyInfo) -> u32;
-    fn add_reference_timestamp_meta(&self, element_name: &CStr, frame_id: u32);
+    fn add_reference_timestamp_meta(&self, element_name: &GStr, frame_id: u32);
 }
 
 impl BufferExt for gstreamer::Buffer {
-    fn set_input_system_timestamp(&self, element_name: &CStr) -> Option<&UserMeta> {
+    fn set_input_system_timestamp(&self, element_name: &GStr) -> Option<&UserMeta> {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::nvds_set_input_system_timestamp(
                 self.as_ptr() as _,
@@ -105,7 +105,7 @@ impl BufferExt for gstreamer::Buffer {
         }
     }
 
-    fn set_output_system_timestamp(&self, element_name: &CStr) -> Result<(), bool> {
+    fn set_output_system_timestamp(&self, element_name: &GStr) -> Result<(), bool> {
         unsafe {
             if nvidia_deepstream_sys::nvds_set_output_system_timestamp(
                 self.as_ptr() as _,
@@ -128,7 +128,7 @@ impl BufferExt for gstreamer::Buffer {
         }
     }
 
-    fn add_reference_timestamp_meta(&self, element_name: &CStr, frame_id: u32) {
+    fn add_reference_timestamp_meta(&self, element_name: &GStr, frame_id: u32) {
         unsafe {
             nvidia_deepstream_sys::nvds_add_reference_timestamp_meta(
                 self.as_ptr() as _,

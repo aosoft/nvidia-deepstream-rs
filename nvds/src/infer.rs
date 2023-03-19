@@ -1,6 +1,6 @@
 use crate::WrapperExt;
-use std::ffi::CStr;
 use std::ptr::NonNull;
+use gstreamer::glib::GStr;
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -30,10 +30,10 @@ pub enum Status {
 }
 
 impl Status {
-    pub fn to_str(&self) -> &CStr {
+    pub fn to_str(&self) -> &GStr {
         unsafe {
             NonNull::new(nvidia_deepstream_sys::NvDsInferStatus2Str(*self as _) as _)
-                .map(|x| CStr::from_ptr(x.as_ptr()))
+                .map(|x| GStr::from_ptr(x.as_ptr()))
                 .unwrap_or_default()
         }
     }
@@ -127,8 +127,8 @@ impl LayerInfo {
         self.as_native_type_ref().bindingIndex
     }
 
-    pub fn layer_name(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().layerName) }
+    pub fn layer_name(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().layerName) }
     }
 
     pub unsafe fn buffer(&self) -> *mut () {
@@ -250,7 +250,7 @@ impl Attribute {
         self.as_native_type_ref().attributeConfidence
     }
 
-    pub fn attribute_label(&self) -> &CStr {
-        unsafe { CStr::from_ptr(self.as_native_type_ref().attributeLabel) }
+    pub fn attribute_label(&self) -> &GStr {
+        unsafe { GStr::from_ptr(self.as_native_type_ref().attributeLabel) }
     }
 }
