@@ -1,5 +1,6 @@
 use gstreamer::prelude::*;
 use gstreamer::{ChildProxy, Element, PadProbeData, PadProbeReturn, PadProbeType};
+use gstreamer::glib::GStr;
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::yaml;
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
@@ -23,7 +24,7 @@ fn main() {
     let src_list = yaml::nvds_parse_source_list(CONFIG_YML, "source-list").unwrap();
 
     let mut index = 0;
-    for src in &src_list {
+    for src in src_list {
         let source_bin = create_source_bin(index, src.as_str());
         pipeline.add(&source_bin).unwrap();
         let sinkpad = streammux
@@ -81,8 +82,7 @@ fn main() {
         .build()
         .unwrap();
     streammux
-        .nvds_parse_streammux(CONFIG_YML, "streammux")
-        .unwrap();
+        .nvds_parse_streammux(CONFIG_YML, "streammux");
     pgie.set_property("config-file-path", "dstest3_pgie_config.yml");
 
     let pgie_batch_size = pgie.property::<u32>("batch-size");
