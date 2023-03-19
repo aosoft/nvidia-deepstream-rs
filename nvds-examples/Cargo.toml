@@ -1,5 +1,5 @@
 [package]
-name = "nvidia-deepstream-examples"
+name = "nvds-examples"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,5 +8,5 @@ edition = "2021"
 [dependencies]
 
 gstreamer = "0.19.4"
-nvidia-deepstream = { version = "0.1.0", path = "../nvidia-deepstream", features = ["all"] }
+nvidia-deepstream = { version = "0.1.0", path = "../nvds", features = ["all"] }
 chrono = "0.4.23"

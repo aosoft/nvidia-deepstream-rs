@@ -33,4 +33,4 @@ yaml = []
 [dependencies]
 
 gstreamer = "0.19.4"
-nvidia-deepstream-sys = { version = "0.1.0", path = "../nvidia-deepstream-sys" }
+nvidia-deepstream-sys = { version = "0.1.0", path = "../nvds-sys" }

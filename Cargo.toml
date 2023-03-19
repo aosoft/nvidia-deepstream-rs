@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "nvidia-deepstream-sys",
-    "nvidia-deepstream",
-    "nvidia-deepstream-examples",
+    "nvds-sys",
+    "nvds",
+    "nvds-examples",
 ]

@@ -2,7 +2,7 @@ NVIDIA DeepStream SDK for Rust
 =====
 
 [LICENSE (MIT)](LICENSE)
-
+~~~~
 ## Notice
 
 * WIP
@@ -15,5 +15,5 @@ NVIDIA DeepStream SDK for Rust
 ```toml
 [dependencies]
 
-nvidia-deepstream = { version = "*", features = ["all"] }
+nvds = { version = "*", features = ["all"] }
 ```
