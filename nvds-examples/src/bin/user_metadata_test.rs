@@ -2,7 +2,7 @@ use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::{meta};
-use std::ffi::CStr;
+use gstreamer::glib::GStr;
 
 #[derive(Clone)]
 struct UserMetaData {
@@ -99,7 +99,7 @@ fn main() {
                     for frame_meta in batch_meta.frame_meta_list().iter() {
                         let user_meta = meta::UserMeta::new(
                             batch_meta,
-                            meta::UserMeta::get_user_meta_type(CStr::from_ptr(
+                            meta::UserMeta::get_user_meta_type(GStr::from_ptr(
                                 "NVIDIA.NVINFER.USER_META\0".as_ptr() as _,
                             )),
                             Box::new(UserMetaData {
