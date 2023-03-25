@@ -981,7 +981,7 @@ impl DisplayMeta {
 
 pub struct DisplayMetaBuilder<'a> {
     rect_params: Option<&'a mut [osd::RectParamsBuilder]>,
-    text_params: Option<&'a mut [osd::TextParamsBuilder<'a>]>,
+    text_params: Option<&'a mut [osd::TextParamsBuilder]>,
     line_params: Option<&'a mut [osd::LineParamsBuilder]>,
     arrow_params: Option<&'a mut [osd::ArrowParamsBuilder]>,
     circle_params: Option<&'a mut [osd::CircleParamsBuilder]>,
@@ -1005,7 +1005,7 @@ impl<'a> DisplayMetaBuilder<'a> {
         self
     }
 
-    pub fn text_params(mut self, value: &'a mut [osd::TextParamsBuilder<'a>]) -> Self {
+    pub fn text_params(mut self, value: &'a mut [osd::TextParamsBuilder]) -> Self {
         self.text_params = Some(value);
         self
     }

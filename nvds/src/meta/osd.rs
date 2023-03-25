@@ -2,7 +2,7 @@ use crate::WrapperExt;
 use gstreamer::glib;
 use gstreamer::glib::translate::ToGlibPtr;
 use std::ptr::null_mut;
-use gstreamer::glib::GStr;
+use gstreamer::glib::{GStr, GString};
 
 #[repr(u32)]
 #[derive(Default, Clone, Copy, PartialEq, Debug)]
@@ -165,15 +165,15 @@ impl Drop for TextParams {
     }
 }
 
-pub struct TextParamsBuilder<'a> {
-    display_text: Option<&'a GStr>,
+pub struct TextParamsBuilder {
+    display_text: Option<GString>,
     x_offset: Option<u32>,
     y_offset: Option<u32>,
     font_params: Option<FontParams>,
     text_bg_clr: Option<ColorParams>,
 }
 
-impl<'a> TextParamsBuilder<'a> {
+impl TextParamsBuilder {
     pub fn new() -> Self {
         TextParamsBuilder {
             display_text: None,
@@ -184,7 +184,7 @@ impl<'a> TextParamsBuilder<'a> {
         }
     }
 
-    pub fn display_text(mut self, text: &'a GStr) -> Self {
+    pub fn display_text(mut self, text: GString) -> Self {
         self.display_text = Some(text);
         self
     }
@@ -213,7 +213,7 @@ impl<'a> TextParamsBuilder<'a> {
     pub fn build(self) -> TextParams {
         TextParams::from_native_type(nvidia_deepstream_sys::NvOSD_TextParams {
             display_text: if let Some(text) = self.display_text {
-                glib::GString::from(text).to_glib_full()
+                text.to_glib_full()
             } else {
                 std::ptr::null_mut()
             } as _,

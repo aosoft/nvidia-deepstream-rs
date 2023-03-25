@@ -110,8 +110,7 @@ fn main() {
                                         GString::from(format!(
                                             "Person = {}, Vehicle = {}",
                                             person_count, vehicle_count
-                                        ))
-                                        .as_ref(),
+                                        )),
                                     )
                                     .x_offset(10)
                                     .y_offset(12)
