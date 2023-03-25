@@ -1,3 +1,4 @@
+use gstreamer::glib::{GStr, GString};
 use gstreamer::prelude::*;
 use gstreamer::{PadProbeData, PadProbeReturn, PadProbeType};
 use nvidia_deepstream::meta::osd::{ColorParams, FontParamsBuilder, TextParamsBuilder};
@@ -6,7 +7,6 @@ use nvidia_deepstream::meta::{
     BaseMetaType, BatchMetaExt, BufferExt, DisplayMetaBuilder, MetaType, UserMeta,
 };
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
-use std::ffi::{CStr, CString};
 
 static CONFIG_YML: &str = "dstest4_config.yml";
 
@@ -78,17 +78,13 @@ fn main() {
         .build()
         .unwrap();
 
-    source.nvds_parse_file_source(CONFIG_YML, "source").unwrap();
-    nvstreammux
-        .nvds_parse_streammux(CONFIG_YML, "streammux")
-        .unwrap();
+    source.nvds_parse_file_source(CONFIG_YML, "source");
+    nvstreammux.nvds_parse_streammux(CONFIG_YML, "streammux");
     pgie.set_property("config-file-path", "dstest4_pgie_config.yml");
     msgconv.set_property("config", "dstest4_msgconv_config.yml");
-    msgconv.nvds_parse_msgconv(CONFIG_YML, "msgconv").unwrap();
-    msgbroker
-        .nvds_parse_msgbroker(CONFIG_YML, "msgbroker")
-        .unwrap();
-    sink.nvds_parse_egl_sink(CONFIG_YML, "sink").unwrap();
+    msgconv.nvds_parse_msgconv(CONFIG_YML, "msgconv");
+    msgbroker.nvds_parse_msgbroker(CONFIG_YML, "msgbroker");
+    sink.nvds_parse_egl_sink(CONFIG_YML, "sink");
 
     pipeline
         .add_many(&[
@@ -189,18 +185,17 @@ fn main() {
                             if let Some(display_meta) = DisplayMetaBuilder::new()
                                 .text_params(&mut [TextParamsBuilder::new()
                                     .display_text(
-                                        CString::new(format!(
+                                        GString::from(format!(
                                             "Person = {}, Vehicle = {}",
                                             person_count, vehicle_count
                                         ))
-                                            .unwrap()
                                             .as_ref(),
                                     )
                                     .x_offset(10)
                                     .y_offset(12)
                                     .font_params(
                                         FontParamsBuilder::new()
-                                            .font_name(CStr::from_ptr("Serif\0".as_ptr() as _))
+                                            .font_name(GStr::from_ptr("Serif\0".as_ptr() as _))
                                             .font_size(10)
                                             .font_color(ColorParams::white())
                                             .build(),
