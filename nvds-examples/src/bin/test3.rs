@@ -1,6 +1,5 @@
 use gstreamer::prelude::*;
 use gstreamer::{ChildProxy, Element, PadProbeData, PadProbeReturn, PadProbeType};
-use gstreamer::glib::GStr;
 use nvidia_deepstream::meta::{BatchMetaExt, BufferExt};
 use nvidia_deepstream::yaml;
 use nvidia_deepstream::yaml::ElementNvdsYamlExt;
@@ -21,10 +20,14 @@ fn main() {
         .build()
         .unwrap();
     pipeline.add(&streammux).unwrap();
-    let src_list = yaml::nvds_parse_source_list(CONFIG_YML, "source-list").unwrap();
+    let src_list = yaml::nvds_parse_source_list(CONFIG_YML, "source-list")
+        .unwrap()
+        .iter()
+        .cloned()
+        .collect::<Vec<_>>();
 
     let mut index = 0;
-    for src in src_list {
+    for src in &src_list {
         let source_bin = create_source_bin(index, src.as_str());
         pipeline.add(&source_bin).unwrap();
         let sinkpad = streammux
@@ -81,23 +84,22 @@ fn main() {
         .name("nvvideo-renderer")
         .build()
         .unwrap();
-    streammux
-        .nvds_parse_streammux(CONFIG_YML, "streammux");
+    streammux.nvds_parse_streammux(CONFIG_YML, "streammux");
     pgie.set_property("config-file-path", "dstest3_pgie_config.yml");
 
     let pgie_batch_size = pgie.property::<u32>("batch-size");
     if src_list.len() != pgie_batch_size as _ {
         pgie.set_property::<u32>("batch-size", src_list.len() as _);
     }
-    nvosd.nvds_parse_osd(CONFIG_YML, "osd").unwrap();
+    nvosd.nvds_parse_osd(CONFIG_YML, "osd");
 
     let tiler_rows = f64::sqrt(src_list.len() as _) as u32;
     let tiler_columns = f64::ceil(1.0 * src_list.len() as f64 / tiler_rows as f64) as u32;
     tiler.set_property("rows", tiler_rows);
     tiler.set_property("columns", tiler_columns);
 
-    tiler.nvds_parse_tiler(CONFIG_YML, "tiler").unwrap();
-    sink.nvds_parse_egl_sink(CONFIG_YML, "sink").unwrap();
+    tiler.nvds_parse_tiler(CONFIG_YML, "tiler");
+    sink.nvds_parse_egl_sink(CONFIG_YML, "sink");
 
     pipeline
         .add_many(&[
