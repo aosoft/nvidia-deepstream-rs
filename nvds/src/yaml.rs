@@ -70,7 +70,7 @@ impl<O: IsA<Element>> ElementNvdsYamlExt for O {
 pub fn nvds_parse_source_list(
     cfg_file_path: &str,
     group: &str,
-) -> Result<glib::collections::List<GString>, YamlParserStatus> {
+) -> Result<Vec<GString>, YamlParserStatus> {
     unsafe {
         let mut src_list: *mut nvidia_deepstream_sys::GList = std::ptr::null_mut();
         let cfg_file_path = GString::from(cfg_file_path);
@@ -81,9 +81,15 @@ pub fn nvds_parse_source_list(
             group.as_ptr() as _,
         );
         match r {
-            nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS => Ok(
-                glib::collections::List::<GString>::from_glib_full(src_list as _),
-            ),
+            nvidia_deepstream_sys::NvDsYamlParserStatus_NVDS_YAML_PARSER_SUCCESS => Ok({
+                let src_list =
+                    glib::collections::List::<glib::GString>::from_glib_full(src_list as _);
+                let mut r = Vec::<GString>::new();
+                for s in src_list {
+                    r.push(s);
+                }
+                r
+            }),
             _ => Err(std::mem::transmute(r)),
         }
     }
