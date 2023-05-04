@@ -6,7 +6,7 @@ NVIDIA DeepStream SDK for Rust
 ## Notice
 
 * WIP
-* Currently Target SDK Version is 6.1.1
+* Currently, Target SDK Version is 6.1.1
 
 ## How to use
 
