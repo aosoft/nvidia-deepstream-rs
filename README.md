@@ -15,7 +15,7 @@ NVIDIA DeepStream SDK for Rust
 ```toml
 [dependencies]
 
-nvds = { version = "*", features = ["all"] }
+nvds = { git="https://github.com/aosoft/nvidia-deepstream-rs", features = ["all"] }
 ```
 
 ### features
