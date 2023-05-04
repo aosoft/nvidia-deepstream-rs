@@ -2,7 +2,7 @@ NVIDIA DeepStream SDK for Rust
 =====
 
 [LICENSE (MIT)](LICENSE)
-~~~~
+
 ## Notice
 
 * WIP
@@ -17,3 +17,15 @@ NVIDIA DeepStream SDK for Rust
 
 nvds = { version = "*", features = ["all"] }
 ```
+
+### features
+
+| feature name      | linking dylib           |
+|-------------------|-------------------------|
+| logger            | nvds_logger             |
+| meta              | nvdsgst_meta, nvds_meta |
+| obj_encode        | nvds_batch_jpegenc      |
+| surface           | nvbufsurface            |
+| surface_transform | nvbufsurftransform      |
+| utils             | nvds_utils              |
+| yaml              | nvds_yml_parser         |
